@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/registro.css">
+</head>
+
+<body class="h-screen flex items-center justify-center bg-gray-900">
+
+    <div class="w-full max-w-4xl flex shadow-lg rounded-lg overflow-hidden" id="formulario-login">
+        <!-- Sección de la imagen -->
+        <div class="w-1/2 hidden md:block" id="imagenformulario">
+            <img src="Imagenes/og-s2-line-up-1920x1080-1114b1e89809.webp" alt="Imagen de fondo"
+                class="w-full h-full object-cover">
+        </div>
+
+        <!-- Sección del formulario -->
+        <div class="w-full md:w-1/2 bg-gray-800 p-8 flex flex-col justify-center ">
+            <div class="w-full max-w-md bg-gray-800   p-6">
+                <h2 class="text-2xl font-bold text-gray-200 mb-4">Registro</h2>
+                <form class="flex flex-col">
+                    <input id="email" placeholder="Correo"
+                        class="bg-gray-700 text-gray-200 border-0 rounded-md p-2 mb-4 focus:bg-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
+                        type="email">
+                    <input id="password" placeholder="Clave"
+                        class="bg-gray-700 text-gray-200 border-0 rounded-md p-2 mb-4 focus:bg-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
+                        type="password">
+                    <div class="flex items-center justify-between flex-wrap">
+                    </div>
+
+                    <!-- Check Box +18 -->
+                    <div>
+
+                        <label class="checkbox-wrapper">
+                            <input type="checkbox" id="acceptTerms" />
+                            <div class="checkmark">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path d="M20 6L9 17L4 12" stroke-width="3" stroke-linecap="round"
+                                        stroke-linejoin="round"></path>
+                                </svg>
+                            </div>
+                            <span class="label">Soy mayor de 18 años.</span>
+                        </label>
+
+                    </div>
+
+                    <button
+                        class="bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-bold py-2 px-4 rounded-md mt-4 hover:bg-indigo-600 hover:to-blue-600 transition ease-in-out duration-150"
+                        type="submit" onclick="registrar()"">Registrarme</button>
+
+                <button id="btn-google"
+                        class="bg-white text-gray-800 font-bold py-2 px-4 rounded-md mt-4 hover:bg-gray-200 transition ease-in-out duration-150 flex items-center justify-center border border-gray-300 shadow-md">
+                        <img src="https://img.icons8.com/?size=100&id=V5cGWnc9R4xj&format=png&color=000000" alt="Google"
+                            class="w-5 h-5 mr-2">
+                        Registro con Google
+                    </button>
+                    <a href="login.html" style="color: white; margin-top: 10px;">Ya tengo una cuenta</a>
+
+
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="spinner" id="loader" style="display: none;">
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+    </div>
+
+</body>
+<script type="module" src="js/registro.js"></script>
+
+</html>
