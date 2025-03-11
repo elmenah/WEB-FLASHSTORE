@@ -1,9 +1,20 @@
 import { defineConfig } from 'vite';
+import { resolve } from 'path';
 
-// Aquí definimos la configuración básica de Vite.
 export default defineConfig({
   build: {
-    outDir: 'dist', // Asegura que los archivos de salida vayan a la carpeta correcta
+    outDir: 'dist', // Carpeta de salida
+    rollupOptions: {
+      input: {
+        index: resolve(__dirname, 'src/index.html'),
+        login: resolve(__dirname, 'src/login.html'),
+        shop: resolve(__dirname, 'src/shop.html'),
+        registro: resolve(__dirname, 'src/registro.html'),
+        detalleproducto: resolve(__dirname, 'src/detalleproducto.html'),
+        club: resolve(__dirname, 'src/club.html'),
+        // Agrega aquí cualquier otro HTML que tengas
+      }
+    }
   },
   define: {
     'process.env': {
@@ -15,5 +26,5 @@ export default defineConfig({
       FIREBASE_APP_ID: process.env.VITE_FIREBASE_APP_ID,
       FIREBASE_MEASUREMENT_ID: process.env.VITE_FIREBASE_MEASUREMENT_ID,
     }
-  },
+  }
 });

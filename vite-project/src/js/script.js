@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 function btnvertienda() {
-  window.location.href = 'shop.html';
+  window.location.href = '../src/shop.html';
 }
 
 
