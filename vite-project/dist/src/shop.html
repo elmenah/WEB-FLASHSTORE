@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tienda Fortnite</title>
+    <!-- Enlace a Tailwind CSS desde CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Añadimos Font Awesome para los iconos -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+  <link rel="stylesheet" crossorigin href="/assets/shop-Cmk6wpBc.css">
+</head>
+
+<body class="flex flex-col min-h-screen bg-gray-900 text-gray-50 ">
+    
+    <!-- NAVBAR -->
+    <header
+        class="fixed top-0 left-0 w-full z-40 bg-gray-900 bg-opacity-50 backdrop-blur-sm h-14 flex items-center px-6 border-b border-gray-900">
+        <!-- Contenedor principal para distribuir los elementos -->
+        <div class="w-full flex items-center justify-between">
+            <!-- Menú hamburguesa + Logo -->
+            <div class="flex items-center gap-4 lg:gap-8">
+                <!-- Menú hamburguesa (solo en móviles) -->
+                <span class="hamburger-menu material-symbols-outlined lg:hidden text-2xl cursor-pointer"
+                    id="hamburguer-menu">
+                    menu
+                </span>
+
+                <!-- Logo (centrado en móviles, alineado a la izquierda en PC) -->
+                <div class="absolute left-1/2 transform -translate-x-1/2 lg:static lg:translate-x-0">
+                    <span class="logo text-xl font-bold text-gray-800">
+                        <img src="/assets/PNGLogo01-dvkTcYgp.png" alt="" width="50px" height="50px">
+                    </span>
+                </div>
+            </div>
+
+            <!-- Menú de navegación en PC -->
+            <ul class="hidden lg:flex space-x-8 ml-4">
+                <li class="nav-link hover:text-blue-600"><a href="/index.html">Inicio</a></li>
+                <li class="nav-link hover:text-blue-600"><a href="/club.html">Club Fortnite</a></li>
+                <li class="nav-link hover:text-blue-600"><a href="/shop.html">Tienda</a></li>
+            </ul>
+
+            <!-- Carrito y Login en PC -->
+            <nav class="hidden lg:flex gap-8 ml-auto">
+                <ul class="flex space-x-4">
+                    <li class="icon" id="cart-desktop">
+                        <a href="#" class="hover:text-blue-600">Carrito</a>
+                    </li>
+                    <li class="nav-link hover:text-blue-600"><a href="/login.html">Login</a></li>
+                </ul>
+            </nav>
+
+            <!-- Carrito en móviles -->
+            <div class="lg:hidden flex items-center">
+                <span class="material-symbols-outlined text-2xl cursor-pointer" id="cart-mobile">shopping_cart</span>
+            </div>
+        </div>
+    </header>
+
+
+
+    <!-- Menú hamburguesa (visible solo en dispositivos móviles) -->
+    <div class="lg:hidden fixed inset-0 bg-gray-800 bg-opacity-70 z-40 hidden" id="hamburguer-menu-list">
+        <div class="bg-gray-800 p-6 w-3/4 max-w-xs h-full">
+            <span class="material-symbols-outlined text-2xl cursor-pointer" id="close-menu">close</span>
+            <ul class="mt-6 space-y-4">
+                <li><a href="/index.html" class="text-white hover:text-blue-600">Inicio</a></li>
+                <li><a href="/shop.html" class="text-white hover:text-blue-600">Tienda</a></li>
+                <li><a href="/club.html" class="text-white hover:text-blue-600">Club Fortnite</a></li>
+                <li><a href="about.html" class="text-white hover:text-blue-600">Acerca de nosotros</a></li>
+                <li><a href="/login.html" class="text-white hover:text-blue-600">Login</a></li>
+            </ul>
+        </div>
+    </div>
+
+
+
+    <!-- NOTIFICACION AÑADIR AL CARRITO -->
+<div id="notificacion-carrito" class="hidden fixed top-20 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg transition-opacity duration-500">
+    Producto agregado al carrito
+</div>
+
+    <main>
+
+        <div id="tituloyhoratienda" class="text-center mt-8">
+            <h1 class="text-4xl font-bold ">Tienda de Fortnite</h1>
+            <p id="fecha-actual" class="text-lg text-gray-400 mt-2"></p>
+        </div>
+
+
+        <section id="productos">
+            <!-- Los productos se cargarán dinámicamente desde la API -->
+        </section>
+
+    </main>
+
+    <!-- Carrito Popup -->
+    <div id="carrito-popup">
+        <div class="carrito-header">
+            <h2>Mi Carrito</h2>
+            <span class="cerrar-carrito" id="cerrar-carrito">✖</span>
+        </div>
+        <div class="carrito-contenido" id="carrito-contenido">
+            <!-- Aquí se cargarán los productos del carrito -->
+        </div>
+        <button id="vaciar-carrito" class="vaciar-btn">Vaciar carrito</button>
+        <div class="total" id="total_vaciar_carrito">
+            <p>Total: <span id="total-precio">0</span> CLP</p>
+            <button style="margin-bottom: 30px;">Ir al checkout</button>
+        </div>
+    </div>
+
+    <script src="../src/js/shop.js"></script>
+</body>
+
+</html>

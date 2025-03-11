@@ -6,7 +6,7 @@ export default defineConfig({
     outDir: 'dist', // Carpeta de salida
     rollupOptions: {
       input: {
-        index: resolve(__dirname, 'src/index.html'),
+        index: resolve(__dirname, 'index.html'),
         login: resolve(__dirname, 'src/login.html'),
         shop: resolve(__dirname, 'src/shop.html'),
         registro: resolve(__dirname, 'src/registro.html'),
