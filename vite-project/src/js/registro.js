@@ -6,18 +6,15 @@ import {signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/fire
 
 const provider = new GoogleAuthProvider();
 // Configuración de Firebase
-// Cargar las variables de entorno desde el archivo .env
-require('dotenv').config();
-
 const firebaseConfig = {
-    apiKey: process.env.FIREBASE_API_KEY,
-    authDomain: process.env.FIREBASE_AUTH_DOMAIN,
-    projectId: process.env.FIREBASE_PROJECT_ID,
-    storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
-    appId: process.env.FIREBASE_APP_ID,
-    measurementId: process.env.FIREBASE_MEASUREMENT_ID
-};
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID,
+    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
+  };
 
 // Inicializar Firebase
 const app = initializeApp(firebaseConfig);
@@ -26,9 +23,18 @@ const analytics = getAnalytics(app);
 
 // Función para registrar usuarios
 window.registrar = () => {
+    // Obtener los valores de los campos
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
+    const acceptTerms = document.getElementById("acceptTerms").checked; // Verificar si el checkbox está marcado
 
+    // Validar si el checkbox está marcado
+    if (!acceptTerms) {
+        alert("Debes aceptar los términos y condiciones para registrarte.");
+        return; // Si el checkbox no está marcado, no continuar con el registro
+    }
+
+    // Si el checkbox está marcado, proceder con el registro
     createUserWithEmailAndPassword(auth, email, password)
         .then(userCredential => {
             alert("Usuario registrado correctamente");
@@ -39,32 +45,18 @@ window.registrar = () => {
         });
 };
 
-document.getElementById("btn-login").addEventListener("click", (event) => {
-    event.preventDefault(); // Evita que el formulario se recargue
-
-    // Ocultar formulario y mostrar loader
-    document.getElementById("formulario-login").style.display = "none";
-    document.getElementById("loader").style.display = "block";
-
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-
-    signInWithEmailAndPassword(auth, email, password)
-        .then(userCredential => {
-            document.getElementById("loader").style.display = "none";
-            
-            window.location.href = "index.html"; // Redirige al usuario
-        })
-        .catch(error => {
-            console.error("Error en login:", error.message);
-            alert(error.message);
-            window.location.href = "login.html"; // Redirige al usuario
-        });
-});
-
 
 document.getElementById("btn-google").addEventListener("click", (event) => {
     event.preventDefault(); // Evita recargar la página
+    const acceptTerms = document.getElementById("acceptTerms").checked; // Verificar si el checkbox está marcado
+
+    // Validar si el checkbox está marcado
+    if (!acceptTerms) {
+        alert("Debes aceptar los términos y condiciones para registrarte.");
+        return; // Si el checkbox no está marcado, no continuar con el registro
+    }
+
+    
 
     // Ocultar formulario y mostrar loader
     document.getElementById("formulario-login").style.display = "none";
@@ -72,6 +64,7 @@ document.getElementById("btn-google").addEventListener("click", (event) => {
 
     signInWithPopup(auth, provider)
         .then((result) => {
+            // Ocultar loader y mostrar mensaje de bienvenida
             document.getElementById("loader").style.display = "none";
             alert(`Bienvenido, ${result.user.displayName}`);
             window.location.href = "index.html"; // Redirigir después del login
