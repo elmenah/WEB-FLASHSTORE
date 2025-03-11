@@ -3,7 +3,7 @@ import { defineConfig } from 'vite';
 // Aquí definimos la configuración básica de Vite.
 export default defineConfig({
   build: {
-    outDir: 'vite-project/dist', // Asegura que los archivos de salida vayan a la carpeta correcta
+    outDir: 'dist', // Asegura que los archivos de salida vayan a la carpeta correcta
   },
   define: {
     'process.env': {
