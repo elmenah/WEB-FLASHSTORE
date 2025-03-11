@@ -2,7 +2,9 @@ import { defineConfig } from 'vite';
 
 // Aquí definimos la configuración básica de Vite.
 export default defineConfig({
-  // Configuración para variables de entorno
+  build: {
+    outDir: 'vite-project/dist', // Asegura que los archivos de salida vayan a la carpeta correcta
+  },
   define: {
     'process.env': {
       FIREBASE_API_KEY: process.env.VITE_FIREBASE_API_KEY,
@@ -14,5 +16,4 @@ export default defineConfig({
       FIREBASE_MEASUREMENT_ID: process.env.VITE_FIREBASE_MEASUREMENT_ID,
     }
   },
-  // Otras configuraciones opcionales como proxy, etc.
 });
