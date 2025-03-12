@@ -13,7 +13,7 @@ export default defineConfig({
         registro: resolve(__dirname, 'src/registro.html'),
         detalleproducto: resolve(__dirname, 'src/detalleproducto.html'),
         club: resolve(__dirname, 'src/club.html'),
-        checkout: resolve(__dirname, 'src/checkout.html'),
+        checkout: resolve(__dirname, 'src/checkout.html')
       }
     }
   }
