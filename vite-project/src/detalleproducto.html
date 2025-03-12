@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detalle Producto</title>
-    <link rel="stylesheet" href="../src/css/detalleproducto.css"> <!-- Enlace al archivo CSS -->
+    <link rel="stylesheet" href="assets/css/detalleproducto.css"> <!-- Enlace al archivo CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <!-- Enlace a Tailwind CSS desde CDN -->
@@ -34,25 +34,25 @@
                 <!-- Logo (centrado en móviles, alineado a la izquierda en PC) -->
                 <div class="absolute left-1/2 transform -translate-x-1/2 lg:static lg:translate-x-0">
                     <span class="logo text-xl font-bold text-gray-800">
-                        <img src="/src/Imagenes/PNGLogo01.png" alt="" width="50px" height="50px">
+                        <img src="/Imagenes/PNGLogo01.png" alt="" width="50px" height="50px">
                     </span>
                 </div>
             </div>
 
             <!-- Menú de navegación en PC -->
             <ul class="hidden lg:flex space-x-8 ml-4">
-                <li class="nav-link hover:text-blue-600"><a href="../src/index.html">Inicio</a></li>
-                <li class="nav-link hover:text-blue-600"><a href="../src/club.html">Club Fortnite</a></li>
-                <li class="nav-link hover:text-blue-600"><a href="../src/shop.html">Tienda</a></li>
+                <li class="nav-link hover:text-blue-600"><a href="/index.html">Inicio</a></li>
+                <li class="nav-link hover:text-blue-600"><a href="/club.html">Club Fortnite</a></li>
+                <li class="nav-link hover:text-blue-600"><a href="/shop.html">Tienda</a></li>
             </ul>
 
             <!-- Carrito y Login en PC -->
             <nav class="hidden lg:flex gap-8 ml-auto">
                 <ul class="flex space-x-4">
                     <li class="icon" id="cart-desktop">
-                        <a href="#" class="hover:text-blue-600">Carrito</a>
+                        <a  class="hover:text-blue-600">Carrito</a>
                     </li>
-                    <li class="nav-link hover:text-blue-600"><a href="../src/login.html">Login</a></li>
+                    <li class="nav-link hover:text-blue-600"><a href="/login.html">Login</a></li>
                 </ul>
             </nav>
 
@@ -70,11 +70,11 @@
         <div class="bg-gray-800 p-6 w-3/4 max-w-xs h-full">
             <span class="material-symbols-outlined text-2xl cursor-pointer" id="close-menu">close</span>
             <ul class="mt-6 space-y-4">
-                <li><a href="../src/index.html" class="text-white hover:text-blue-600">Inicio</a></li>
-                <li><a href="../src/shop.html" class="text-white hover:text-blue-600">Tienda</a></li>
-                <li><a href="../src/club.html" class="text-white hover:text-blue-600">Club Fortnite</a></li>
+                <li><a href="/index.html" class="text-white hover:text-blue-600">Inicio</a></li>
+                <li><a href="/shop.html" class="text-white hover:text-blue-600">Tienda</a></li>
+                <li><a href="/club.html" class="text-white hover:text-blue-600">Club Fortnite</a></li>
                 <li><a href="about.html" class="text-white hover:text-blue-600">Acerca de nosotros</a></li>
-                <li><a href="../src/login.html" class="text-white hover:text-blue-600">Login</a></li>
+                <li><a href="/login.html" class="text-white hover:text-blue-600">Login</a></li>
             </ul>
         </div>
     </div>
@@ -146,7 +146,7 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
             <!-- Columna 1: Logo y Descripción -->
             <div class="flex flex-col items-center md:items-start">
-                <img src="/src/Imagenes/PNGLogo01.png" alt="Logo" class="w-32 mb-4">
+                <img src="/Imagenes/PNGLogo01.png" alt="Logo" class="w-32 mb-4">
                 <p class="text-sm text-center md:text-left">Tio Flashstore es tu tienda en línea preferida para
                     comprar cosmeticos de Fortnite al mejor precio!</p>
             </div>
@@ -155,9 +155,9 @@
             <div class="flex flex-col items-center md:items-start">
                 <h4 class="font-semibold text-lg mb-4">Enlaces Rápidos</h4>
                 <ul class="space-y-2">
-                    <li><a href="../src/index.html" class="text-sm hover:text-gray-400">Inicio</a></li>
-                    <li><a href="../src/shop.html" class="text-sm hover:text-gray-400">Tienda</a></li>
-                    <li><a href="../src/club.html" class="text-sm hover:text-gray-400">Club</a></li>
+                    <li><a href="/index.html" class="text-sm hover:text-gray-400">Inicio</a></li>
+                    <li><a href="/shop.html" class="text-sm hover:text-gray-400">Tienda</a></li>
+                    <li><a href="/club.html" class="text-sm hover:text-gray-400">Club</a></li>
                 </ul>
             </div>
 
@@ -208,7 +208,7 @@
     </div>
 
 
-    <script src="../src/js/detalleproducto.js"></script>
+    <script type="module" src="assets/js/detalleproducto.js"></script>
 </body>
 
 </html>

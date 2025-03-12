@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tienda Fortnite</title>
-    <link rel="stylesheet" href="/src/css/shop.css">
+    <link rel="stylesheet" href="assets/css/shop.css">
     <!-- Enlace a Tailwind CSS desde CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Añadimos Font Awesome para los iconos -->
@@ -32,7 +32,7 @@
                 <!-- Logo (centrado en móviles, alineado a la izquierda en PC) -->
                 <div class="absolute left-1/2 transform -translate-x-1/2 lg:static lg:translate-x-0">
                     <span class="logo text-xl font-bold text-gray-800">
-                        <img src="/src/Imagenes/PNGLogo01.png" alt="" width="50px" height="50px">
+                        <img src="/Imagenes/PNGLogo01.png" alt="" width="50px" height="50px">
                     </span>
                 </div>
             </div>
@@ -48,7 +48,7 @@
             <nav class="hidden lg:flex gap-8 ml-auto">
                 <ul class="flex space-x-4">
                     <li class="icon" id="cart-desktop">
-                        <a href="#" class="hover:text-blue-600">Carrito</a>
+                        <a  class="hover:text-blue-600">Carrito</a>
                     </li>
                     <li class="nav-link hover:text-blue-600"><a href="/login.html">Login</a></li>
                 </ul>
@@ -114,7 +114,7 @@
         </div>
     </div>
 
-    <script src="../src/js/shop.js"></script>
+    <script type="module" src="/assets/js/shop.js"></script>
 </body>
 
 </html>
