@@ -128,7 +128,7 @@ function btnaddcarrito() {
 }
 
 document.querySelector("#carrito-popup .total button").addEventListener("click", () => {
-    window.location.href = "checkout.html"; // Asegúrate de que esta ruta sea correcta
+    window.location.href = "/checkout.html"; // Asegúrate de que esta ruta sea correcta
 });
 
 function convertirPrecioANumero(precioTexto) {

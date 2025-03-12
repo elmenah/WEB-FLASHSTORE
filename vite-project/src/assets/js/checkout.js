@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Simulación de éxito en el pago
         setTimeout(() => {
           alert('Your payment was successful! Thank you for your purchase.');
-          window.location.href = '/thank-you'; // Redirigir a una página de agradecimiento
+          
         }, 2000); // Simular un retraso de 2 segundos antes de redirigir
       });
     }
