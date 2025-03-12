@@ -127,6 +127,10 @@ function btnaddcarrito() {
     agregarAlCarrito(producto);
 }
 
+document.querySelector("#carrito-popup .total button").addEventListener("click", () => {
+    window.location.href = "checkout.html"; // Asegúrate de que esta ruta sea correcta
+});
+
 function convertirPrecioANumero(precioTexto) {
     // Eliminar cualquier cosa que no sea un número o un punto (por ejemplo, "$" o ",")
     const precioLimpio = precioTexto.replace(/[^\d]/g, '');
