@@ -154,6 +154,8 @@ function mostrarNotificacion() {
 // fUNCIONES PARA MOSTRAR PRODUCTOS
 document.addEventListener("DOMContentLoaded", () => {
     const urlParams = new URLSearchParams(window.location.search);
+      // Verificar los parámetros de la URL
+  console.log(urlParams.toString());
     const nombre = urlParams.get('nombre');
     const precio = urlParams.get('precio');
     const imagen = urlParams.get('imagen');
