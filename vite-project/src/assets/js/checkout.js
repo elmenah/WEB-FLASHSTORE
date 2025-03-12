@@ -1,31 +1,43 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // Función para manejar el envío del formulario de checkout
-    const checkoutButton = document.querySelector('#proceed-to-payment'); // Usando el id del botón
-    if (checkoutButton) {  // Verificar si el botón existe
+  const checkoutButton = document.querySelector('#proceed-to-payment');
+
+  if (checkoutButton) {
       checkoutButton.addEventListener('click', (event) => {
-        event.preventDefault(); // Evitar que recargue la página
-  
-        const email = document.querySelector('#email').value.trim();
-        const discord = document.querySelector('#discord').value.trim();
-        const fortniteUsername = document.querySelector('#fortniteusername').value.trim();
-  
-        // Validación de campos obligatorios
-        if (!email || !discord || !fortniteUsername) {
-          alert('Please fill in all the required fields.');
-          return;
-        }
-  
-        // Simulación de procesamiento de pago (puedes agregar más lógica aquí)
-        alert('Processing your payment...');
-  
-        // Simulación de éxito en el pago
-        setTimeout(() => {
-          alert('Your payment was successful! Thank you for your purchase.');
-          
-        }, 2000); // Simular un retraso de 2 segundos antes de redirigir
+          event.preventDefault();
+
+          const email = document.querySelector('#email').value.trim();
+          const discord = document.querySelector('#discord').value.trim();
+          const fortniteUsername = document.querySelector('#fortniteusername').value.trim();
+
+          // Validación de campos obligatorios
+          if (!email || !discord || !fortniteUsername) {
+              alert('Please fill in all the required fields.');
+              return;
+          }
+
+          // Obtener productos del carrito
+          let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+          if (carrito.length === 0) {
+              alert('Your cart is empty.');
+              return;
+          }
+
+          // Calcular total del carrito
+          let total = carrito.reduce((acc, producto) => acc + (producto.precio * (producto.cantidad || 1)), 0);
+          total = total.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' });
+
+          // Enviar mensaje por WhatsApp
+          enviarwsp(email, discord, fortniteUsername, total, carrito);
+
+          // Simulación de procesamiento de pago
+          alert('Processing your payment...');
+          setTimeout(() => {
+              alert('Your payment was successful! Thank you for your purchase.');
+          }, 2000);
       });
-    }
-  });
+  }
+});
+
   
   document.addEventListener("DOMContentLoaded", () => {
     // Recuperar el carrito de localStorage
@@ -68,3 +80,24 @@ document.addEventListener("DOMContentLoaded", () => {
     mostrarProductosCarrito();
   });
   
+  
+function enviarwsp(email, discord, fortniteUsername, total, carrito) {
+  let mensaje = `NUEVA ORDEN\n\n`;
+    mensaje += `Email: ${email}\n`;
+    mensaje += `Discord: ${discord}\n`;
+    mensaje += `Fortnite Username: ${fortniteUsername}\n\n`;
+    mensaje += `Total: ${total}\n\n`;
+    mensaje += `Productos:\n`;
+
+    carrito.forEach((producto, index) => {
+        mensaje += `${index + 1}. ${producto.nombre} - ${producto.precio.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })} x${producto.cantidad || 1}\n`;
+    });
+
+  // Codificar el mensaje para URL
+  let mensajeCodificado = encodeURIComponent(mensaje);
+  let numeroWhatsApp = "56930917730"; // Reemplaza con tu número en formato internacional sin "+"
+  let url = `https://wa.me/${numeroWhatsApp}?text=${mensajeCodificado}`;
+
+  // Abrir WhatsApp en una nueva pestaña
+  window.open(url, '_blank');
+}

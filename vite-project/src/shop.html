@@ -15,7 +15,7 @@
 </head>
 
 <body class="flex flex-col min-h-screen bg-gray-900 text-gray-50 ">
-    
+
     <!-- NAVBAR -->
     <header
         class="fixed top-0 left-0 w-full z-40 bg-gray-900 bg-opacity-50 backdrop-blur-sm h-14 flex items-center px-6 border-b border-gray-900">
@@ -48,7 +48,7 @@
             <nav class="hidden lg:flex gap-8 ml-auto">
                 <ul class="flex space-x-4">
                     <li class="icon" id="cart-desktop">
-                        <a  class="hover:text-blue-600">Carrito</a>
+                        <a class="hover:text-blue-600">Carrito</a>
                     </li>
                     <li class="nav-link hover:text-blue-600"><a href="/login.html">Login</a></li>
                 </ul>
@@ -80,9 +80,10 @@
 
 
     <!-- NOTIFICACION AÑADIR AL CARRITO -->
-<div id="notificacion-carrito" class="hidden fixed top-20 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg transition-opacity duration-500">
-    Producto agregado al carrito
-</div>
+    <div id="notificacion-carrito"
+        class="hidden fixed top-20 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg transition-opacity duration-500">
+        Producto agregado al carrito
+    </div>
 
     <main>
 
@@ -91,6 +92,11 @@
             <p id="fecha-actual" class=" text-gray-400 mt-2"></p>
         </div>
 
+        <!-- Campo de búsqueda -->
+        <div class="flex justify-center my-6">
+            <input type="text" id="buscador" placeholder="Buscar productos..."
+                class="w-1/2 p-2 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600" />
+        </div>
 
         <section id="productos">
             <!-- Los productos se cargarán dinámicamente desde la API -->

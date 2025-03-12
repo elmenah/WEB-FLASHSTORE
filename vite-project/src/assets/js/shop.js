@@ -356,3 +356,58 @@ document.getElementById("fecha-actual").textContent = obtenerFechaYHora();
 document.querySelector("#carrito-popup .total button").addEventListener("click", () => {
   window.location.href = "checkout.html"; // Asegúrate de que esta ruta sea correcta
 });
+
+
+// BUSCADOR
+document.getElementById("buscador").addEventListener("input", function () {
+    const terminoBusqueda = this.value.toLowerCase();
+    const categorias = document.querySelectorAll(".category-title");
+
+    if (terminoBusqueda === "") {
+        // Si el campo de búsqueda está vacío, restaurar todos los productos y categorías
+        mostrarProductos();
+        return;
+    }
+
+    categorias.forEach((categoria) => {
+        const contenedorProductos = categoria.nextElementSibling; // Contenedor de productos
+        const productos = contenedorProductos.querySelectorAll(".product-card");
+
+        let tieneCoincidencias = false;
+
+        productos.forEach((producto) => {
+            const nombreProducto = producto.querySelector("h3").textContent.toLowerCase();
+            const coincide = nombreProducto.includes(terminoBusqueda);
+
+            producto.style.display = coincide ? "block" : "none";
+            if (coincide) tieneCoincidencias = true;
+        });
+
+        if (tieneCoincidencias) {
+            categoria.style.display = "block";
+            contenedorProductos.style.display = "";
+        } else {
+            // En lugar de eliminar, ocultamos la categoría y su contenedor
+            categoria.style.display = "none";
+            contenedorProductos.style.display = "none";
+        }
+    });
+});
+
+// Función para restaurar todos los productos y categorías
+function mostrarProductos() {
+    const categorias = document.querySelectorAll(".category-title");
+
+    categorias.forEach((categoria) => {
+        const contenedorProductos = categoria.nextElementSibling;
+        const productos = contenedorProductos.querySelectorAll(".product-card");
+
+        categoria.style.display = "block";
+        contenedorProductos.style.display = "";
+
+        productos.forEach((producto) => {
+            producto.style.display = "block";
+        });
+    });
+}
+
