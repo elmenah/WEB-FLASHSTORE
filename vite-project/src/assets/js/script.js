@@ -128,3 +128,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+document.querySelector("#carrito-popup .total button").addEventListener("click", () => {
+  window.location.href = "checkout.html"; // Asegúrate de que esta ruta sea correcta
+});
+

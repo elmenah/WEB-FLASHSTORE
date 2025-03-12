@@ -353,3 +353,6 @@ function obtenerFechaYHora() {
 
 // Mostrar la fecha y hora en el elemento con id "fecha-actual"
 document.getElementById("fecha-actual").textContent = obtenerFechaYHora();
+document.querySelector("#carrito-popup .total button").addEventListener("click", () => {
+  window.location.href = "checkout.html"; // Asegúrate de que esta ruta sea correcta
+});
