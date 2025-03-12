@@ -116,8 +116,15 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 
-function btnvertienda() {
-  window.location.href = '/shop.html';
-}
+document.addEventListener("DOMContentLoaded", () => {
+  const btnvertienda = document.getElementById("btnvertienda");
 
+  if (btnvertienda) {
+    // Aquí vinculamos el evento de clic al botón
+    btnvertienda.addEventListener("click", function() {
+      // Redirigir a la tienda cuando se haga clic
+      window.location.href = 'shop.html'; 
+    });
+  }
+});
 
