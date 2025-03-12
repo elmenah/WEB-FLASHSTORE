@@ -99,6 +99,14 @@ function agregarAlCarrito(producto) {
     mostrarNotificacion(); // Llamar a la función para mostrar la notificación
 }
 
+document.addEventListener("DOMContentLoaded", () => {
+    const btnAgregarCarrito = document.getElementById("agregar-carrito");
+    
+    if (btnAgregarCarrito) {
+        btnAgregarCarrito.addEventListener("click", btnaddcarrito);
+    }
+});
+
 function btnaddcarrito() {
     // Obtener los valores del DOM
     const productoNombre = document.getElementById("nombre-producto").textContent;
