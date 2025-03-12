@@ -132,3 +132,19 @@ document.querySelector("#carrito-popup .total button").addEventListener("click",
   window.location.href = "checkout.html"; // Asegúrate de que esta ruta sea correcta
 });
 
+document.addEventListener('DOMContentLoaded', function() {
+  const openModalButton = document.getElementById('openModal');
+  const modal = document.getElementById('myModal');
+  const closeModalButton = document.getElementById('closeModal');
+
+  // Abrir modal cuando se haga clic en el enlace
+  openModalButton.addEventListener('click', function(event) {
+      event.preventDefault();  // Evitar el comportamiento por defecto
+      modal.classList.remove('hidden');  // Mostrar el modal
+  });
+
+  // Cerrar modal cuando se haga clic en el botón de cerrar
+  closeModalButton.addEventListener('click', function() {
+      modal.classList.add('hidden');  // Ocultar el modal
+  });
+});

@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
           // Simulación de procesamiento de pago
           alert('Processing your payment...');
           setTimeout(() => {
-              alert('Your payment was successful! Thank you for your purchase.');
+             
           }, 2000);
       });
   }

@@ -511,3 +511,20 @@ h1 {
 ::-webkit-scrollbar {
    width: 12px; /* Ancho de la barra de desplazamiento */
 }
+.modal {
+   display: none;
+   justify-content: center;
+   align-items: center;
+   z-index: 1000;
+}
+
+.modal-content {
+   background-color: #2d2d2d;
+   padding: 20px;
+   border-radius: 8px;
+   text-align: center;
+}
+
+.hidden {
+   display: none;
+}

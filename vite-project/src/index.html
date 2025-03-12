@@ -165,7 +165,7 @@
         <h2 class="text-4xl font-bold text-center mb-8" style="font-style: italic;">Club Fortnite</h2>
 
         <!-- Contenedor de las cards -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 justify-center place-items-center">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 justify-center place-items-center">
             <!-- Card 1 -->
             <div
                 class="bg-gray-800 w-[275px] rounded-lg overflow-hidden shadow-lg flex flex-col justify-between mx-auto">
@@ -361,7 +361,17 @@
                     <div>
                         <h3 class="text-lg font-bold">PASO 1</h3>
                         <p class="text-gray-400">Asegurate de haber agregado nuestras cuentas 48 hrs antes de realizar
-                            una compra. <a href="#" class="text-blue-400 underline"><br>Click aqui para agregar.</a></p>
+                            una compra. <!-- Enlace que abre el modal -->
+                            <a href="" id="openModal" class="text-blue-400 underline">Click aquí para agregar.</a>
+                            
+                            <!-- Modal -->
+                            <div id="myModal" class="modal hidden fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex items-center justify-center">
+                                <div class="modal-content bg-gray-800 p-6 rounded-lg shadow-lg">
+                                    <p class="text-white">Cuenta que debes agregar <br>
+                                    Usuario: ZYKR</p>
+                                    <button id="closeModal" class="text-white bg-red-500 hover:bg-red-600 rounded px-4 py-2 mt-4">Cerrar</button>
+                                </div>
+                            </div></p>
                     </div>
                 </div>
 
