@@ -499,110 +499,45 @@ body {
     width: 12px; /* Ancho de la barra de desplazamiento */
  }
  
-/* 🌟 Media Queries para móviles */
 @media screen and (max-width: 768px) {
-
    .product-card:not(.big-product-card) {
-      width: 165px; /* Ancho para móviles */
-      height: 390px; /* Alto para móviles */
-  }
-   /* 📦 Tarjetas de Producto */
-.product-card {
-   position: relative;
-   width: 160px; /* Nuevo ancho */
-   height: 360px; /* Nueva altura */
-   border-radius: 12px; /* Bordes redondeados */
-   overflow: hidden;
-   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Sombra */
-   transition: transform 0.3s ease, box-shadow 0.3s ease;
-   background: linear-gradient(145deg, #1E0A3C, #3D1D6E); /* Fondo degradado */
-   flex: 0 0 auto; /* No se expande */
-   scroll-snap-align: start; /* Asegura que los elementos se alineen bien en el scroll */
-}
+      width: 140px; /* Ancho más pequeño */
+      height: 340px; /* Alto más pequeño */
+   }
 
-/* 🖼 Imágenes de los productos */
-.product-card img {
-   width: 100%;
-   height: 60%; /* Ajusta la altura de la imagen */
-   object-fit: cover; /* Ajusta la imagen dentro de la caja */
-}
+   .product-card {
+      width: 135px; /* Reducir aún más el ancho */
+      height: 320px; /* Reducir aún más la altura */
+   }
 
-/* 🏷 Información del producto */
-.product-info {
-   position: absolute;
-   bottom: 10px;
-   left: 10px;
-   width: calc(100% - 20px);
-   padding: 0;
-   color: white;
-   text-align: left;
-   font-size: 0.8rem; /* Reducir el tamaño de la fuente */
-}
+   /* 🏷 Información del producto */
+   .product-info {
+      font-size: 0.7rem; /* Texto más pequeño */
+   }
 
-/* 🏷 Nombre del producto */
-.product-info h3 {
-   font-size: 0.9rem; /* Reducir el tamaño del título */
-   font-weight: bold;
-   margin-bottom: 5px;
-}
+   /* 🏷 Nombre del producto */
+   .product-info h3 {
+      font-size: 0.8rem; /* Reducir el tamaño del título */
+   }
 
-/* 💰 Estilos de precio */
-.price {
-   display: flex;
-   align-items: center;
-   gap: 8px;
-   font-size: 0.8rem; /* Reducir el tamaño del precio */
-}
+   /* 💰 Estilos de precio */
+   .price {
+      font-size: 0.7rem; /* Precio más pequeño */
+   }
 
-/* 💰 Precio original tachado */
-.price .old-price {
-   text-decoration: line-through;
-   color: #aaa;
-}
+   /* 💰 Icono de V-Bucks */
+   .price img {
+      width: 15px; /* Icono más pequeño */
+      height: 15px;
+   }
 
-/* 💰 Precio nuevo */
-.price .new-price {
-   font-weight: bold;
-   color: #e6e5e6;
-}
+   /* 🏷 Banner de descuento */
+   .discount-banner {
+      font-size: 0.6rem; /* Reducir aún más el texto */
+      padding: 4px 6px; /* Espaciado menor */
+   }
 
-/* 💰 Precio en CLP */
-.price .clp-price {
-   font-weight: bold;
-   color: #FFD700; /* Amarillo oro */
-   margin-left: 5px;
-}
-
-/* 🎯 Icono de V-Bucks */
-.price img {
-   width: 20px; /* Reducir el tamaño del icono */
-   height: 20px;
-   vertical-align: middle;
-}
-
-.carrito {
-   display: none; /* Ocultar el botón de carrito en móviles */
-}
-
-/* ✨ Efecto hover en el botón de compra */
-.carrito:hover img {
-   opacity: 1;
-   transform: scale(1.2);
-}
-
-/* 🏷 Banner de descuento */
-.discount-banner {
-   position: absolute;
-   top: 10px;
-   left: 10px;
-   background: rgba(0, 0, 0, 0.327); /* Color con transparencia */
-   color: rgb(255, 255, 255); /* Texto en blanco */
-   font-size: 0.7rem; /* Reducir el tamaño del texto */
-   font-weight: bold;
-   padding: 5px 8px; /* Reducir el espaciado */
-   border-radius: 8px; /* Esquinas redondeadas */
-   backdrop-filter: blur(5px); /* Efecto de desenfoque */
-   box-shadow: 0 0 8px rgba(0, 0, 0, 0.2); /* Pequeño brillo */
-   text-transform: uppercase; /* Mayúsculas */
-}
+   .carrito {
+      display: none; /* Ocultar el botón de carrito en móviles */
+   }
 }
