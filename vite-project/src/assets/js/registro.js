@@ -38,6 +38,7 @@ window.registrar = () => {
     createUserWithEmailAndPassword(auth, email, password)
         .then(userCredential => {
             alert("Usuario registrado correctamente");
+            window.location.href = "login.html";
         })
         .catch(error => {
             console.error(error.message);
