@@ -241,7 +241,7 @@ document.addEventListener("DOMContentLoaded", () => {
                           <img src="https://lh3.googleusercontent.com/d/1VGnO_T1S2sH-IqqD8TX6aHyQKD7rEYzH=s220?authuser=0" alt="V-Bucks">
                           <span class="old-price">${producto.precio}</span>
                           <span class="new-price">${(
-                            producto.precio * 4.9
+                            producto.precio * 4.8
                           ).toLocaleString("es-CL")} CLP</span>
                       </div>
                   </div>
