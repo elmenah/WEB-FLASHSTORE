@@ -78,6 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
   
     // Llamar la función para mostrar los productos del carrito
     mostrarProductosCarrito();
+    actualizarResumenCarrito(carrito);
   });
   
   
@@ -100,4 +101,19 @@ function enviarwsp(email, discord, fortniteUsername, total, carrito) {
 
   // Abrir WhatsApp en una nueva pestaña
   window.open(url, '_blank');
+}
+
+function actualizarResumenCarrito(carrito) {
+  const subtotalElement = document.getElementById("subtotal");
+  const totalElement = document.getElementById("total");
+
+  let subtotal = carrito.reduce((acc, p) => acc + (p.precio * (p.cantidad || 1)), 0);
+
+  const formato = new Intl.NumberFormat('es-CL', {
+    style: 'currency',
+    currency: 'CLP',
+  });
+
+  subtotalElement.textContent = formato.format(subtotal);
+  totalElement.textContent = formato.format(subtotal); // Envío es gratis, así que total = subtotal
 }
