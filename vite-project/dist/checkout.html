@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout</title>
     <script src="https://cdn.tailwindcss.com"></script>
-  <script type="module" crossorigin src="/assets/checkout-efa08b73.js"></script>
+  <script type="module" crossorigin src="/assets/checkout-347bf4eb.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-3cfb730f.js">
 </head>
 <body class="bg-gray-900 text-white">
@@ -53,17 +53,17 @@
             <div class="bg-gray-800 p-6 rounded-lg shadow-md">
                 <h2 class="text-2xl font-semibold mb-4">Order Summary</h2>
                 <div class="flex justify-between mb-4">
-                    <span>Subtotal</span>
-                    <span>$12.60 USD</span>
-                </div>
-                <div class="flex justify-between mb-4">
-                    <span>Envío</span>
-                    <span>Free</span>
-                </div>
-                <div class="border-t border-gray-700 pt-4 flex justify-between font-medium">
-                    <span>Total</span>
-                    <span>$12.60 USD</span>
-                </div>
+  <span>Subtotal</span>
+  <span id="subtotal">$0 CLP</span>
+</div>
+<div class="flex justify-between mb-4">
+  <span>Envío</span>
+  <span>Free</span>
+</div>
+<div class="border-t border-gray-700 pt-4 flex justify-between font-medium">
+  <span>Total</span>
+  <span id="total">$0 CLP</span>
+</div>
                 <button id="proceed-to-payment" class="mt-6 w-full py-3 bg-green-500 rounded-md text-white hover:bg-green-600 transition">
                     Finalizar pedido
                   </button>
