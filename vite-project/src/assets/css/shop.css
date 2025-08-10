@@ -55,9 +55,50 @@ body {
  }
  
  @media screen and (max-width: 480px) {
-    .slideshow {
-       height: 300px; /* Altura más pequeña para móviles más pequeños */
-    }
+   .slideshow {
+      height: 300px; /* Altura más pequeña para móviles más pequeños */
+   }
+   
+   /* Responsive para el carrito en pantallas muy pequeñas */
+   #carrito-popup {
+       padding: 15px;
+   }
+   
+   #carrito-popup .carrito-header {
+       font-size: 1.1rem;
+       margin-bottom: 15px;
+   }
+   
+   #carrito-popup .carrito-item {
+       padding: 8px;
+       margin-bottom: 8px;
+   }
+   
+   #carrito-popup .carrito-item img {
+       width: 35px;
+       height: 35px;
+   }
+   
+   #carrito-popup .carrito-item .nombre {
+       font-size: 0.8rem;
+       margin: 0 8px;
+   }
+   
+   #carrito-popup .total {
+       font-size: 1rem;
+       padding: 15px;
+       margin-bottom: 10px;
+   }
+   
+   #carrito-popup .vaciar-btn {
+       padding: 8px;
+       font-size: 0.8rem;
+   }
+   
+   #carrito-popup .checkout-btn {
+       padding: 10px;
+       font-size: 0.9rem;
+   }
  }
  
  
@@ -74,6 +115,19 @@ body {
     text-align: left;
     margin-bottom: 10px;
     padding-left: 15px;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    position: relative;
+ }
+
+ .category-title::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 15px;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, #ff00ff, #00ffff);
+    border-radius: 2px;
  }
  
  /* Ajuste para dispositivos móviles */
@@ -86,9 +140,9 @@ body {
  .product-container {
    display: flex; /* Elementos en fila */
    flex-wrap: wrap; /* Permite que pasen a la siguiente línea si no caben */
-   gap: 20px; /* Espacio entre productos */
+   gap: 25px; /* Espacio entre productos */
    justify-content: center; /* Alinea los productos en el centro */
-   padding: 10px;
+   padding: 20px;
    align-items: flex-start; /* Alinea los lotes arriba y los productos debajo */
 }
  
@@ -99,30 +153,30 @@ body {
     flex-wrap: wrap; /* 🏆 Permite múltiples filas */
     overflow-y: auto; /* 🔥 Activa el scroll vertical */
     max-height: 600px; /* 📏 Límite de altura antes del scroll */
-    padding: 10px;
+    padding: 20px;
     justify-content: center; /* ✨ Centra los elementos */
-    gap: 15px;
+    gap: 25px;
     position: relative; /* 🛠 Permite posicionar el scrollbar */
  }
  
  /* 🎯 Personalización del scroll (Vertical y más pequeño) */
  .pistas-container::-webkit-scrollbar {
-    width: 6px; /* 📏 Más delgado */
-    height: 6px; /* 📏 También agregamos altura para que sea horizontal */
+    width: 8px; /* 📏 Más delgado */
+    height: 8px; /* 📏 También agregamos altura para que sea horizontal */
     display: block; /* 🛠 Asegura que el scrollbar siempre se vea */
     margin: 10px auto; /* 📏 Espacio y centrado */
  }
  
  /* 🎨 Apariencia del scrollbar */
  .pistas-container::-webkit-scrollbar-thumb {
-    background: #FF00FF; /* 🔥 Color llamativo */
-    border-radius: 5px;
+    background: linear-gradient(180deg, #ff00ff, #00ffff); /* 🔥 Gradiente llamativo */
+    border-radius: 10px;
  }
  
  /* 🌟 Estilo del track (fondo del scrollbar) */
  .pistas-container::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.2); /* 🌟 Un poco de contraste */
-    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.1); /* 🌟 Un poco de contraste */
+    border-radius: 10px;
     margin: 0 auto; /* 📌 Centrar el scrollbar */
  }
  
@@ -133,77 +187,133 @@ body {
     margin-top: 10px; /* 📏 Espacio superior */
  }
  
- /* 📦 Tarjetas de Producto */
+ /* 📦 Tarjetas de Producto - VERSIÓN MEJORADA */
  .product-card {
     position: relative;
-    width: 260px;
-    height: 400px;
-    border-radius: 12px; /* Bordes redondeados */
+    width: 280px;
+    height: 420px;
+    border-radius: 20px; /* Bordes más redondeados */
     overflow: hidden;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Sombra */
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    background: linear-gradient(145deg, #1E0A3C, #3D1D6E); /* Fondo degradado */
+    
+    backdrop-filter: blur(10px); /* Efecto glassmorphism */
+    border: 1px solid rgba(255, 255, 255, 0.1); /* Borde sutil */
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2); /* Sombras múltiples */
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Transición suave */
     flex: 0 0 auto; /* No se expande */
     scroll-snap-align: start; /* Asegura que los elementos se alineen bien en el scroll */
+    cursor: pointer;
  }
  
  /* 🏆 Tarjetas más grandes para los lotes */
  .big-product-card {
     width: calc(100% - 20px); /* Toma toda la fila */
-    max-width: 580px; /* Máximo ancho */
-    height: 500px; /* Más alto */
+    max-width: 600px; /* Máximo ancho */
+    height: 520px; /* Más alto */
  }
  
- /* 🖼 Efecto hover en productos */
+ /* 🖼 Efecto hover en productos - MEJORADO */
  .product-card:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 15px rgba(255, 0, 255, 0.5);
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 
+        0 20px 40px rgba(255, 0, 255, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 0, 255, 0.5);
+ }
+
+ .product-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    z-index: 1;
+ }
+
+ .product-card:hover::before {
+    opacity: 1;
  }
  
- /* 🖼 Imágenes de los productos */
+ /* 🖼 Imágenes de los productos - MEJORADO */
  .product-card img {
     width: 100%;
-    height: 60%;
+    height: 65%;
     object-fit: cover; /* Ajusta la imagen dentro de la caja */
+    transition: transform 0.3s ease;
+    filter: brightness(0.9) contrast(1.1); /* Mejora la imagen */
+ }
+
+ .product-card:hover img {
+    transform: scale(1.05);
+    filter: brightness(1) contrast(1.2);
  }
  
- /* 🏷 Información del producto */
+ /* 🏷 Información del producto - MEJORADO */
  .product-info {
     position: absolute;
-    bottom: 10px;
-    left: 10px;
-    width: calc(100% - 20px);
-    padding: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px;
     color: white;
     text-align: left;
-    font-size: 1rem;
+    font-size: 0.95rem;
+    background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.8));
+    backdrop-filter: blur(5px);
+    transform: translateY(0);
+    transition: transform 0.3s ease;
+ }
+
+ .product-card:hover .product-info {
+    transform: translateY(-5px);
  }
  
- /* 🏷 Nombre del producto */
+ /* 🏷 Nombre del producto - MEJORADO */
  .product-info h3 {
-    font-size: 1.3rem;
-    font-weight: bold;
-    margin-bottom: 5px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    line-height: 1.3;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    color: #ffffff;
  }
- 
- /* 💰 Estilos de precio */
+
+ /* 💰 Estilos de precio - MEJORADO */
  .price {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     font-size: 1.1rem;
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
  }
  
  /* 💰 Precio original tachado */
  .price .old-price {
-    text-decoration: line-through;
-    color: #aaa;
+    
+    color: white;
+    font-size: 0.9rem;
+    opacity: 0.7;
  }
  
  /* 💰 Precio nuevo */
  .price .new-price {
     font-weight: bold;
-    color: #e6e5e6;
+    color: #FFD700; /* Amarillo oro */
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    font-size: 1.1rem;
  }
  
  /* 💰 Precio en CLP */
@@ -213,40 +323,55 @@ body {
     margin-left: 5px;
  }
  
- /* 🎯 Icono de V-Bucks */
+ /* 🎯 Icono de V-Bucks - MEJORADO */
  .price img {
-    width: 25px;
-    height: 25px;
+    width: 28px;
+    height: 28px;
     vertical-align: middle;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    transition: transform 0.3s ease;
+ }
+
+ .product-card:hover .price img {
+    transform: scale(1.1) rotate(5deg);
  }
  
- /* 🛒 Botón de compra */
+ /* 🛒 Botón de compra - MEJORADO */
  .carrito {
     position: absolute;
-    bottom: 15px;
-    right: 15px;
-    background: none;
+    bottom: 20px;
+    right: 20px;
+    background: linear-gradient(45deg, #ff00ff, #00ffff);
     border: none;
     cursor: pointer;
-    padding: 0;
+    padding: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
+    border-radius: 50%;
+    box-shadow: 0 4px 15px rgba(255, 0, 255, 0.4);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 10;
  }
  
  /* 🛒 Imagen del botón de compra */
  .carrito img {
-    width: 40px;
-    height: auto;
-    opacity: 0.7;
-    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-    content: url('https://lh3.googleusercontent.com/d/1G3MVAV9knIYqiLI6cI7gwKob6Vuvo5MC=s220?authuser=0');
+    width: 24px;
+    height: 24px;
+    opacity: 1;
+    transition: all 0.3s ease;
+    filter: brightness(0) invert(1); /* Hace el icono blanco */
  }
  
- /* ✨ Efecto hover en el botón de compra */
+ /* ✨ Efecto hover en el botón de compra - MEJORADO */
+ .carrito:hover {
+    transform: scale(1.15) rotate(5deg);
+    box-shadow: 0 8px 25px rgba(255, 0, 255, 0.6);
+    background: linear-gradient(45deg, #ff33ff, #33ffff);
+ }
+
  .carrito:hover img {
-    opacity: 1;
-    transform: scale(1.2);
+    transform: scale(1.1);
  }
  
  /* 🎯 Icono de V-Bucks */
@@ -254,23 +379,28 @@ body {
     content: url('https://lh3.googleusercontent.com/d/1VGnO_T1S2sH-IqqD8TX6aHyQKD7rEYzH=s220?authuser=0');
  }
  
- /* 🔽 Botón "Ver más" en categorías */
+ /* 🔽 Botón "Ver más" en categorías - MEJORADO */
  .show-more {
     display: block;
-    background-color: #c8aec8;
+    background: linear-gradient(45deg, #ff00ff, #00ffff);
     color: white;
     font-size: 1rem;
     font-weight: bold;
     border: none;
-    padding: 10px 20px;
-    margin: 10px auto;
+    padding: 12px 24px;
+    margin: 15px auto;
     cursor: pointer;
-    border-radius: 5px;
-    transition: 0.3s;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255, 0, 255, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
  }
- /* 🔽 Efecto hover en "Ver más" */
+
  .show-more:hover {
-    background-color:rgb(255, 255, 255);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 0, 255, 0.5);
+    background: linear-gradient(45deg, #ff33ff, #33ffff);
  }
  
  /* 🏷 Ajuste final para que los lotes se alineen mejor */
@@ -282,51 +412,46 @@ body {
  .product-card:not(.big-product-card) {
     flex: 0 0 auto;
     width: 280px;
-    height: 500px;
+    height: 420px;
  }
- /* 🔹 Estilo del banner de información */
- .info-banner {
-    background: hsla(240, 45.50%, 21.60%, 0.00); /* Fondo sutil más elegante */
-    color: #ffffff; /* Texto en blanco */
-    font-size: 1.1rem; /* 📏 Texto más grande */
-    text-align: left; /* 📍 Alineado a la izquierda */
-    padding: 10px 30px; /* 📏 Más compacto */
-    margin: 120px auto 40px 30px; /* 📍 Mejor espaciado */
-    max-width: 600px; /* 📏 Ajuste del ancho */
-    border-radius: 0; /* ❌ Quitamos el borde redondeado */
-    box-shadow: none; /* ❌ Eliminamos el efecto brillante */
-    font-weight: 500; /* 📍 Más profesional */
- }
- 
- /* 🌟 Resaltar los textos importantes */
- .info-banner strong {
-    color:rgb(255, 255, 255); /* 🌟 Amarillo dorado para destacar */
-    font-size: 1.8rem; /* 📏 Un poco más grande */
- }
- 
- /* 🔹 Ajuste de estructura */
- .info-banner p {
-    line-height: 1.8; /* 📏 Más espacio entre líneas */
-    max-width: 90%;
-    margin: 0 auto;
- }
- /* 🏷 Banner de descuento */
+
+ /* 🏷 Banner de descuento - MEJORADO */
  .discount-banner {
     position: absolute; /* 📌 Ubicado sobre la imagen */
-    top: 10px;
-    left: 10px;
-    background: rgba(0, 0, 0, 0.327); /* 🎨 Color magenta con transparencia */
-    color: rgb(255, 255, 255); /* 🔠 Texto en blanco */
-    font-size: 0.9rem; /* 📏 Tamaño del texto */
-    font-weight: ROBOTO;
-    padding: 5px 12px; /* 🖼 Espaciado interno */
-    border-radius: 8px; /* 🔹 Esquinas redondeadas */
-    backdrop-filter: blur(5px); /* 🌫 Efecto de desenfoque */
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.2); /* ✨ Pequeño brillo */
+    top: 15px;
+    left: 15px;
+    background: linear-gradient(45deg, #ff0066, #ff00ff);
+    color: white; /* 🔠 Texto en blanco */
+    font-size: 0.85rem; /* 📏 Tamaño del texto */
+    font-weight: 700;
+    
+    border-radius: 20px; /* 🔹 Esquinas redondeadas */
+    backdrop-filter: blur(10px); /* 🌫 Efecto de desenfoque */
+    box-shadow: 0 4px 15px rgba(255, 0, 255, 0.4); /* ✨ Brillo */
     text-transform: uppercase; /* 🔠 Mayúsculas */
+    
+    z-index: 5;
+    animation: pulse 2s infinite;
  }
- 
- 
+
+ @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+ }
+
+ /* 🌟 Indicador de rareza con colores */
+ .product-info p strong {
+    color: #FFD700;
+    font-weight: 600;
+ }
+
+ .product-info p {
+    margin: 5px 0;
+    font-size: 0.85rem;
+    opacity: 0.9;
+    line-height: 1.4;
+ }
+
  /* 🔹 Hero Principal */
  .hero {
     background: linear-gradient(135deg, #0175ca, #003366);
@@ -381,15 +506,9 @@ body {
  h2 {
     font-size: 1rem;
     color: #ffffff;
-    text-transform: uppercase;
+    
     margin-bottom: 15px;
  }
- 
- 
- 
- 
- 
- 
  
  /* Contenedor para el título en el centro */
  h1 {
@@ -399,63 +518,153 @@ body {
      flex-grow: 1; /* Esto hará que el h1 se expanda para estar en el centro */
  }
  
- 
- 
- 
- 
- 
- /* Aquí puedes agregar el estilo para el carrito de compras */
- #carrito-popup {
-     position: fixed;
-     right: 0;
-     top: 0;
-     width: 300px;
-     height: 100%;
-     background-color:rgba(17, 17, 21);
-     box-shadow: -4px 0 10px rgba(0, 0, 0, 0.3);
-     transform: translateX(100%);
-     transition: transform 0.3s ease;
-     padding: 20px;
-     z-index: 1000;
- }
- 
- #carrito-popup.open {
-     transform: translateX(0);
- }
- 
- #carrito-popup .carrito-header {
-     display: flex;
-     justify-content: space-between;
-     align-items: center;
-     font-size: 20px;
-     margin-bottom: 20px;
- }
- 
- #carrito-popup .carrito-item {
-     display: flex;
-     justify-content: space-between;
-     align-items: center;
-     margin-bottom: 10px;
- }
- 
- #carrito-popup .carrito-item img {
-     width: 40px;
-     height: 40px;
-     margin-right: 10px;
- }
- 
- #carrito-popup .total {
-     font-size: 18px;
-     margin-top: 20px;
-     text-align: center;
- }
- 
- #carrito-popup .vaciar-btn {
-    background-color: #ff0000;
-    color: white;
-    border-radius: 10px;
-    padding: 10px;
+/* 🛒 Estilos del carrito popup */
+#carrito-popup {
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 350px;
+    height: 100%;
+    background: rgba(17, 17, 21, 0.95);
+    backdrop-filter: blur(20px);
+    box-shadow: -8px 0 30px rgba(0, 0, 0, 0.5);
+    transform: translateX(100%);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    padding: 30px;
+    z-index: 1000;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#carrito-popup.open {
+    transform: translateX(0);
+}
+
+#carrito-popup .carrito-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+#carrito-popup .cerrar-carrito {
     cursor: pointer;
+    font-size: 1.2rem;
+    color: #ff6b6b;
+    transition: color 0.3s ease;
+}
+
+#carrito-popup .cerrar-carrito:hover {
+    color: #ff4444;
+}
+
+#carrito-popup .carrito-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#carrito-popup .carrito-item img {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+#carrito-popup .carrito-item .nombre {
+    flex: 1;
+    margin: 0 15px;
+    font-weight: 500;
+}
+
+#carrito-popup .carrito-item .precio {
+    color: #ffd700;
+    font-weight: 600;
+}
+
+#carrito-popup .carrito-item .eliminar {
+    cursor: pointer;
+    color: #ff6b6b;
+    font-size: 1.1rem;
+    transition: color 0.3s ease;
+}
+
+#carrito-popup .carrito-item .eliminar:hover {
+    color: #ff4444;
+}
+
+#carrito-popup .total {
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-align: center;
+    padding: 20px;
+    background: rgba(255, 215, 0, 0.1);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    margin-bottom: 10px;
+}
+
+#carrito-popup .vaciar-btn {
+    width: 80%;
+    background: linear-gradient(45deg, #ff6b6b, #ff4444);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    margin: 20px auto;
+    transition: all 0.3s ease;
+    display: block;
+}
+
+#carrito-popup .vaciar-btn:hover {
+    background: linear-gradient(45deg, #ff4444, #ff0000);
+    transform: translateY(-2px);
+}
+
+/* Separador visual entre secciones del carrito */
+#carrito-popup .carrito-separador {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    margin: 25px 0;
+    border-radius: 1px;
+}
+
+/* Botón de checkout separado */
+#carrito-popup .checkout-btn {
+    width: 100%;
+    background: linear-gradient(45deg, #4CAF50, #45a049);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 15px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-top: 20px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+}
+
+#carrito-popup .checkout-btn:hover {
+    background: linear-gradient(45deg, #45a049, #3d8b40);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+#carrito-popup .checkout-btn:active {
+    transform: translateY(-1px);
 }
  
  /* Estilos para el botón de carrito */
@@ -463,26 +672,7 @@ body {
      cursor: pointer;
  }
  
- #total_vaciar_carrito {
-     position: fixed;  /* Fija el div en la parte inferior */
-     bottom: 0;        /* Alinea el div en la parte inferior */
-     left: 0;          /* Alinea el div en el borde izquierdo */
-     width: 100%;      /* Asegura que el div ocupe todo el ancho */
-     background-color: rgba(0, 0, 0, 0.8); /* Fondo oscuro para resaltar */
-     color: white;     /* Texto en blanco */
-     padding: 20px;    /* Espaciado interno */
-     text-align: center; /* Centra el texto dentro */
-     box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.5); /* Sombra para resaltar */
-     z-index: 1000;    /* Asegura que esté por encima de otros elementos */
- }
 
- #total_vaciar_carrito button{
-    border-radius: 10px;
-    width: 150px;
-    background-color: #0175ca;
- }
- 
- 
  /* Personalizar la apariencia del pulgar de la barra de desplazamiento */
  ::-webkit-scrollbar-thumb {
     background: #4f46e5; /* Color del pulgar de la barra de desplazamiento */
@@ -501,43 +691,102 @@ body {
  
 @media screen and (max-width: 768px) {
    .product-card:not(.big-product-card) {
-      width: 140px; /* Ancho más pequeño */
-      height: 340px; /* Alto más pequeño */
+      width: 160px; /* Ancho más pequeño */
+      height: 360px; /* Alto más pequeño */
+   }
+   
+   /* Responsive para el carrito */
+   #carrito-popup {
+       width: 100%;
+       padding: 20px;
+   }
+   
+   #carrito-popup .carrito-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 30px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+   }
+   
+   #carrito-popup .carrito-item {
+       padding: 10px;
+       margin-bottom: 10px;
+   }
+   
+   #carrito-popup .carrito-item img {
+       width: 40px;
+       height: 40px;
+   }
+   
+   #carrito-popup .carrito-item .nombre {
+       font-size: 0.9rem;
+       margin: 0 10px;
+   }
+   
+   #carrito-popup .total {
+       font-size: 1rem;
+       padding: 15px;
+       margin-bottom: 10px;
+   }
+   
+   #carrito-popup .vaciar-btn {
+       padding: 10px;
+       font-size: 0.9rem;
+   }
+   
+   #carrito-popup .checkout-btn {
+       padding: 12px;
+       font-size: 1rem;
    }
 
    .product-card {
-      width: 135px; /* Reducir aún más el ancho */
-      height: 320px; /* Reducir aún más la altura */
+      width: 160px; /* Reducir aún más el ancho */
+      height: 360px; /* Reducir aún más la altura */
    }
 
    /* 🏷 Información del producto */
    .product-info {
-      font-size: 0.7rem; /* Texto más pequeño */
+      font-size: 0.75rem; /* Texto más pequeño */
+      padding: 15px;
    }
 
    /* 🏷 Nombre del producto */
    .product-info h3 {
-      font-size: 0.8rem; /* Reducir el tamaño del título */
+      font-size: 0.9rem; /* Reducir el tamaño del título */
    }
 
    /* 💰 Estilos de precio */
    .price {
-      font-size: 0.7rem; /* Precio más pequeño */
+      font-size: 0.75rem; /* Precio más pequeño */
+      padding: 6px 10px;
    }
 
    /* 💰 Icono de V-Bucks */
    .price img {
-      width: 15px; /* Icono más pequeño */
-      height: 15px;
+      width: 20px; /* Icono más pequeño */
+      height: 20px;
    }
 
    /* 🏷 Banner de descuento */
    .discount-banner {
-      font-size: 0.6rem; /* Reducir aún más el texto */
-      padding: 4px 6px; /* Espaciado menor */
+      font-size: 0.7rem; /* Reducir aún más el texto */
+      padding: 6px 12px;
+      top: 10px;
+      left: 10px;
    }
 
    .carrito {
-      display: none; /* Ocultar el botón de carrito en móviles */
+      padding: 10px;
+      bottom: 15px;
+      right: 15px;
+   }
+
+   .carrito img {
+      width: 20px;
+      height: 20px;
    }
 }

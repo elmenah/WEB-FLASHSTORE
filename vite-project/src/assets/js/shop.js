@@ -71,6 +71,11 @@ document.getElementById("vaciar-carrito").addEventListener("click", () => {
   actualizarCarrito();
 });
 
+// Botón de checkout
+document.querySelector("#carrito-popup .checkout-btn").addEventListener("click", () => {
+  window.location.href = "/checkout.html"; // Asegúrate de que esta ruta sea correcta
+});
+
 function agregarAlCarrito(producto) {
   carrito.push(producto);
   localStorage.setItem("carrito", JSON.stringify(carrito)); // Guardar en localStorage

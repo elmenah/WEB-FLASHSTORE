@@ -16,9 +16,9 @@
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
 
-  <script type="module" crossorigin src="/assets/detalleproducto-3ae93b1a.js"></script>
+  <script type="module" crossorigin src="/assets/detalleproducto-6a62fb48.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-3cfb730f.js">
-  <link rel="stylesheet" href="/assets/detalleproducto-b78191b2.css">
+  <link rel="stylesheet" href="/assets/detalleproducto-b3cb13f6.css">
 </head>
 
 <body>
@@ -87,59 +87,72 @@
 
 <!-- DETALLE PRODUCTO -->
     <main>
-        <div class="producto-detalle flex flex-col lg:flex-row items-center lg:items-start gap-6">
+        <div class="producto-detalle">
             <!-- Imagen del producto -->
             <div class="producto-imagen">
                 <img id="producto-imagen" src="" alt="Imagen del Producto">
+                <!-- Badge de rareza -->
+                <div class="rareza-badge" id="rareza-badge"></div>
             </div>
 
             <!-- Detalles del producto -->
             <div class="producto-info">
-                <h1 id="nombre-producto" class="font-black lg:italic text-5xl max-lg:mt-2">Nombre del Producto</h1>
+                <h1 id="nombre-producto">Nombre del Producto</h1>
 
                 <p id="descripcion-producto"></p>
 
-                <div style="display: flex; align-items: center;">
-                    <h3>Tipo: </Label>
-                        <h3 id="mainType" style="margin-left: 5px;" class="textdospuntos"></h3>
-                </div>
-
-                <div style="display: flex; align-items: center;">
-                    <h3>Rareza: </Label>
-                        <h3 id="rareza" style="margin-left: 5px;" class="textdospuntos"></h3>
-                </div>
-
-                <div style="display: flex; align-items: center;">
-                    <h3>Parte del lote: </Label>
-                        <h3 id="partede" style="margin-left: 5px;" class="textdospuntos"></h3>
-                </div>
-
-
-                <p id="precio-producto"></p>
-
-                <!-- Aca aparecen los items del bundle si corresponde -->
-                <div>
-                    <h3>Esta compra incluye: </h3>
-                    <div id="producto-imagenes">
-                        <!-- Las imágenes del producto se agregarán aquí -->
+                <!-- Información del producto -->
+                <div class="producto-details">
+                    <div class="detail-item">
+                        <h3><i class="fas fa-tag"></i> Tipo:</h3>
+                        <span id="mainType" class="textdospuntos"></span>
                     </div>
 
-                </div><br>
-                
+                    <div class="detail-item">
+                        <h3><i class="fas fa-star"></i> Rareza:</h3>
+                        <span id="rareza" class="textdospuntos"></span>
+                    </div>
 
-
-                <div id="fecha-inicio" class="llegoseva"></div>
-
-                <div id="fecha-salida" class="llegoseva"></div>
-
-                <p id="mensaje-salida" style="color: red;"></p> <!-- Aquí se mostrará el mensaje de salida -->
-                <div id="notificacion-carrito" class="hidden fixed top-20 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg transition-opacity duration-500">
-                    Producto agregado al carrito
+                    <div class="detail-item">
+                        <h3><i class="fas fa-box"></i> Parte del lote:</h3>
+                        <span id="partede" class="textdospuntos"></span>
+                    </div>
                 </div>
 
-                <button id="agregar-carrito" class="btn-agregar">Añadir al Carro</button>
+                <!-- Precio -->
+                <div id="precio-producto"></div>
 
+                <!-- Items del bundle -->
+                <div class="bundle-section" id="bundle-section" style="display: none;">
+                    <h3><i class="fas fa-gift"></i> Esta compra incluye:</h3>
+                    <div id="producto-imagenes" class="bundle-gallery">
+                        <!-- Las imágenes del producto se agregarán aquí -->
+                    </div>
+                </div>
 
+                <!-- Fechas de disponibilidad -->
+                <div class="fechas-section">
+                    <div id="fecha-inicio" class="llegoseva"></div>
+                    <div id="fecha-salida" class="llegoseva"></div>
+                </div>
+
+                <!-- Mensaje de salida -->
+                <p id="mensaje-salida"></p>
+
+                <!-- Notificación de carrito -->
+                <div id="notificacion-carrito">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Producto agregado al carrito</span>
+                    <button class="cerrar-notificacion" onclick="cerrarNotificacion()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <!-- Botón de agregar al carrito -->
+                <button id="agregar-carrito">
+                    <i class="fas fa-shopping-cart"></i>
+                    Añadir al Carrito
+                </button>
             </div>
         </div>
     </main>
@@ -204,11 +217,18 @@
         <div class="carrito-contenido" id="carrito-contenido">
             <!-- Aquí se cargarán los productos del carrito -->
         </div>
-        <button id="vaciar-carrito" class="vaciar-btn">Vaciar carrito</button>
-        <div class="total" id="total_vaciar_carrito">
-            <p>Total: <span id="total-precio">0</span> CLP</p>
-            <button style="margin-bottom: 30px;">Ir al checkout</button>
-        </div>
+                 <button id="vaciar-carrito" class="vaciar-btn">Vaciar carrito</button>
+         
+         <!-- Separador visual -->
+         <div class="carrito-separador"></div>
+         
+         <!-- Total separado -->
+         <div class="total" id="total_vaciar_carrito">
+             <p>Total: <span id="total-precio">0</span> CLP</p>
+         </div>
+         
+         <!-- Botón checkout separado -->
+         <button class="checkout-btn">Ir al checkout</button>
     </div>
 
 

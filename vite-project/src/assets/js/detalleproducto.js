@@ -127,7 +127,7 @@ function btnaddcarrito() {
     agregarAlCarrito(producto);
 }
 
-document.querySelector("#carrito-popup .total button").addEventListener("click", () => {
+document.querySelector("#carrito-popup .checkout-btn").addEventListener("click", () => {
     window.location.href = "/checkout.html"; // Asegúrate de que esta ruta sea correcta
 });
 
@@ -145,18 +145,35 @@ function convertirPrecioANumero(precioTexto) {
 // NOTIFICACION AGREGADO AL CARRITO
 function mostrarNotificacion() {
     const notificacion = document.getElementById("notificacion-carrito");
-    notificacion.classList.remove("hidden");
-    notificacion.classList.add("opacity-100");
-
-    // Ocultar la notificación después de 2 segundos
+    
+    // Asegurarse de que la notificación esté oculta antes de mostrarla
+    notificacion.classList.remove("show");
+    
+    // Pequeño delay para asegurar que la transición funcione
     setTimeout(() => {
-        notificacion.classList.add("hidden");
-        notificacion.classList.remove("opacity-100");
-    }, 2000);
+        notificacion.classList.add("show");
+        
+        // Ocultar la notificación después de 3 segundos
+        setTimeout(() => {
+            notificacion.classList.remove("show");
+        }, 3000);
+    }, 100);
+}
+
+// Función para cerrar la notificación manualmente
+function cerrarNotificacion() {
+    const notificacion = document.getElementById("notificacion-carrito");
+    notificacion.classList.remove("show");
 }
 
 // fUNCIONES PARA MOSTRAR PRODUCTOS
 document.addEventListener("DOMContentLoaded", () => {
+    // Asegurarse de que la notificación esté oculta al cargar la página
+    const notificacion = document.getElementById("notificacion-carrito");
+    if (notificacion) {
+        notificacion.classList.remove("show");
+    }
+    
     const urlParams = new URLSearchParams(window.location.search);
       // Verificar los parámetros de la URL
   console.log(urlParams.toString());
@@ -181,7 +198,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const precioProducto = document.getElementById('precio-producto');
     const productoImagen = document.getElementById('producto-imagen');
     const descripcionProducto = document.getElementById('descripcion-producto');
-    const partOfElement = document.getElementById('partOf');
     const mainTypeElement = document.getElementById('mainType');
     const rarezaitem = document.getElementById('rareza');
     const partedelote = document.getElementById('partede');
@@ -216,13 +232,23 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (nombreProducto) nombreProducto.textContent = nombre;
-    if (precioProducto) precioProducto.innerHTML = `Precio: <span>$${(precio * 4.9).toLocaleString("es-CL")} CLP</span>`;
+    if (precioProducto) precioProducto.innerHTML = `<span>$${(precio * 4.9).toLocaleString("es-CL")} CLP</span>`;
     if (productoImagen) productoImagen.src = imagen;
     if (descripcionProducto) descripcionProducto.textContent = descripcion || "Descripción no disponible.";
-    if (partOfElement) partOfElement.textContent = partOf || "No especificado";
     if (mainTypeElement) mainTypeElement.textContent = mainType || "No especificado";
     if (rarezaitem) rarezaitem.textContent = rareza;
     if (partedelote) partedelote.textContent = partede;
+
+    // Configurar badge de rareza
+    const rarezaBadge = document.getElementById('rareza-badge');
+    if (rarezaBadge && rareza) {
+        rarezaBadge.textContent = rareza.toUpperCase();
+        rarezaBadge.style.display = 'block';
+    }
+
+    // Configurar sección del bundle
+    const bundleSection = document.getElementById('bundle-section');
+    
     if (imglote) {
         // Limpiar cualquier imagen previamente agregada
         imglote.innerHTML = '';
@@ -233,44 +259,47 @@ document.addEventListener("DOMContentLoaded", () => {
         if (imgbundle) {
             const imagen1 = document.createElement('img');
             imagen1.id = "imagen1";
-            imagen1.src = imgbundle; // Primera imagen
+            imagen1.src = imgbundle;
             imagen1.alt = 'Imagen del producto - Bundle 1';
-            imagen1.classList.add('producto-imagen-lote'); // Añadir clase para estilo
-            imagenes.push(imagen1); // Agregar la primera imagen al array
+            imagen1.classList.add('producto-imagen-lote');
+            imagenes.push(imagen1);
         }
 
         if (imgbundle2 && imgbundle2 !== "undefined" && imgbundle2 !== "") {
             const imagen2 = document.createElement('img');
             imagen2.id = "imagen2";
-            imagen2.src = imgbundle2; // Segunda imagen
+            imagen2.src = imgbundle2;
             imagen2.alt = 'Imagen del producto - Bundle 2';
-            imagen2.classList.add('producto-imagen-lote'); // Añadir clase para estilo
-            imagenes.push(imagen2); // Agregar la segunda imagen al array
+            imagen2.classList.add('producto-imagen-lote');
+            imagenes.push(imagen2);
         }
 
         if (imgbundle3 && imgbundle3 !== "undefined" && imgbundle3 !== "") {
             const imagen3 = document.createElement('img');
             imagen3.id = "imagen3";
-            imagen3.src = imgbundle3; // Tercera imagen
+            imagen3.src = imgbundle3;
             imagen3.alt = 'Imagen del producto - Bundle 3';
-            imagen3.classList.add('producto-imagen-lote'); // Añadir clase para estilo
-            imagenes.push(imagen3); // Agregar la tercera imagen al array
+            imagen3.classList.add('producto-imagen-lote');
+            imagenes.push(imagen3);
         }
 
         if (imgbundle4 && imgbundle4 !== "undefined" && imgbundle4 !== "") {
             const imagen4 = document.createElement('img');
             imagen4.id = "imagen4";
-            imagen4.src = imgbundle4; // Cuarta imagen
+            imagen4.src = imgbundle4;
             imagen4.alt = 'Imagen del producto - Bundle 4';
             imagen4.classList.add('producto-imagen-lote');
-            imagenes.push(imagen4); // Agregar la cuarta imagen al array
+            imagenes.push(imagen4);
         }
 
-        // Agregar las imágenes al contenedor solo si hay imágenes disponibles
+        // Mostrar la sección del bundle solo si hay imágenes disponibles
         if (imagenes.length > 0) {
+            bundleSection.style.display = 'block';
             imagenes.forEach(imagen => {
                 imglote.appendChild(imagen);
             });
+        } else {
+            bundleSection.style.display = 'none';
         }
     }
     

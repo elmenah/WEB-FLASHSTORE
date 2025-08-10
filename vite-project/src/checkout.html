@@ -1,82 +1,149 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Checkout</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-900 text-white">
+<body class="bg-gray-900 text-white antialiased">
+  <div class="max-w-7xl mx-auto px-4 lg:px-8 py-8">
 
-    <div class="max-w-7xl mx-auto mt-10 px-4">
-        <!-- Header -->
-        <div class="flex justify-between items-center mb-8">
-            <a href="/" class="text-gray-400 hover:text-white flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M15 18l-6-6 6-6"></path>
-                </svg>
-                <span class="ml-2">Regresar</span>
-            </a>
-        </div>
+    <!-- Header -->
+    <header class="flex items-center justify-between mb-8">
+      <a href="/" class="inline-flex items-center text-gray-400 hover:text-white transition">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        <span class="ml-2">Regresar</span>
+      </a>
+      <h1 class="text-xl font-semibold">Finaliza tu compra</h1>
+    </header>
 
-        <div class="grid lg:grid-cols-2 gap-8">
-            <!-- Shipping Details -->
-            <div class="bg-gray-800 p-6 rounded-lg shadow-md">
-                <h2 class="text-2xl font-semibold mb-4">Detalles de envio</h2>
-                <div class="grid grid-cols-1 gap-4">
-                    <div>
-                        <label for="email" class="text-sm font-medium">Dirección de correo</label>
-                        <input type="email" id="email" class="mt-2 p-3 w-full bg-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="youremail@example.com">
-                    </div>
-                    <div>
-                        <label for="discord" class="text-sm font-medium">Usuario De Discord</label>
-                        <input type="text" id="discord" class="mt-2 p-3 w-full bg-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="YourDiscordID">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Delivery Information -->
-            <div class="bg-gray-800 p-6 rounded-lg shadow-md">
-                <h2 class="text-2xl font-semibold mb-4">Información De Entrega</h2>
-                <p class="text-sm mb-4">Nuestro equipo enviara tu skin y/o lote, asegurate de habernos agregado a amigos 48 hrs antes de realizar el pedido.</p>
-                <div>
-                    <label for="fortniteusername" class="text-sm font-medium">Nombre en Fortnite</label>
-                    <input type="text" id="fortniteusername" class="mt-2 p-3 w-full bg-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="YourFortniteUsername">
-                </div>
-            </div>
-        </div>
-
-        <div class="grid lg:grid-cols-2 gap-8 mt-8">
-            <!-- Order Summary -->
-            <div class="bg-gray-800 p-6 rounded-lg shadow-md">
-                <h2 class="text-2xl font-semibold mb-4">Order Summary</h2>
-                <div class="flex justify-between mb-4">
-  <span>Subtotal</span>
-  <span id="subtotal">$0 CLP</span>
-</div>
-<div class="flex justify-between mb-4">
-  <span>Envío</span>
-  <span>Free</span>
-</div>
-<div class="border-t border-gray-700 pt-4 flex justify-between font-medium">
-  <span>Total</span>
-  <span id="total">$0 CLP</span>
-</div>
-                <button id="proceed-to-payment" class="mt-6 w-full py-3 bg-green-500 rounded-md text-white hover:bg-green-600 transition">
-                    Finalizar pedido
-                  </button>
-                              </div>
-
-            <!-- Items in Cart -->
-            <div class="bg-gray-800 p-6 rounded-lg shadow-md">
-                <h2 class="text-2xl font-semibold mb-4">Items en el carro</h2>
-                <div id="cart-items-container"></div>
-            </div>
-            
-        </div>
+    <!-- Steps -->
+    <div class="mb-8">
+      <ol class="flex items-center justify-center gap-6 text-sm">
+        <li class="flex items-center gap-2 text-green-400">
+          <span class="w-6 h-6 rounded-full bg-green-500/20 grid place-content-center">1</span> Carrito
+        </li>
+        <li class="flex items-center gap-2 text-white">
+          <span class="w-6 h-6 rounded-full bg-blue-500/20 grid place-content-center border border-blue-400">2</span> Datos
+        </li>
+        <li class="flex items-center gap-2 text-gray-400">
+          <span class="w-6 h-6 rounded-full bg-gray-700 grid place-content-center">3</span> Confirmación
+        </li>
+      </ol>
     </div>
-    <script type="module" src="/assets/js/checkout.js"></script>
 
-</script>
+    <div class="grid lg:grid-cols-5 gap-8">
+      <!-- Col izquierda: Datos -->
+      <section class="lg:col-span-3 space-y-6">
+        <!-- Datos de contacto -->
+        <div class="bg-gray-800 rounded-xl shadow-md p-6">
+          <h2 class="text-2xl font-semibold mb-4">Datos de contacto</h2>
+          <div class="grid md:grid-cols-2 gap-4">
+            <div class="md:col-span-2">
+              <label for="email" class="block text-sm text-gray-300">Correo electrónico</label>
+              <input id="email" type="email" placeholder="tuemail@ejemplo.com"
+                class="mt-2 w-full rounded-lg bg-gray-700 border border-gray-600 p-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+            </div>
+            <div class="md:col-span-2">
+              <label for="fortniteusername" class="block text-sm text-gray-300">Nombre en Fortnite</label>
+              <input id="fortniteusername" type="text" placeholder="TuNombreEnFortnite"
+                class="mt-2 w-full rounded-lg bg-gray-700 border border-gray-600 p-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+              <p class="text-xs text-gray-400 mt-2">Asegúrate de escribirlo exactamente como aparece en el juego.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notas (opcional) -->
+        <div class="bg-gray-800 rounded-xl shadow-md p-6">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-lg font-semibold">Notas para el pedido (opcional)</h3>
+            <span class="text-xs text-gray-400">Máx. 200 caracteres</span>
+          </div>
+          <textarea id="order-notes" rows="4" maxlength="200" placeholder="Ej: estoy conectado de 20:00 a 22:00…"
+            class="w-full rounded-lg bg-gray-700 border border-gray-600 p-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+        </div>
+
+        <!-- Items del carrito -->
+        <div class="bg-gray-800 rounded-xl shadow-md p-6">
+          <h2 class="text-2xl font-semibold mb-4">Items en el carrito</h2>
+          <div id="cart-items-container" class="space-y-4">
+            <!-- Tu JS inyecta aquí cada item -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Col derecha: Resumen -->
+      <aside class="lg:col-span-2">
+        <div class="lg:sticky lg:top-6 space-y-6">
+          <!-- Cupón -->
+          <div class="bg-gray-800 rounded-xl shadow-md p-6">
+            <h3 class="text-lg font-semibold mb-3">¿Tienes un cupón?</h3>
+            <div class="flex gap-2">
+              <input id="coupon" type="text" placeholder="INGRESA-CUPON"
+                class="flex-1 rounded-lg bg-gray-700 border border-gray-600 p-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+              <button id="apply-coupon" class="px-4 py-3 rounded-lg bg-gray-700 hover:bg-gray-600 border border-gray-600 transition">
+                Aplicar
+              </button>
+            </div>
+            <p id="coupon-feedback" class="text-xs text-gray-400 mt-2"></p>
+          </div>
+
+          <!-- Resumen -->
+          <div class="bg-gray-800 rounded-xl shadow-md p-6">
+            <h2 class="text-2xl font-semibold mb-4">Resumen del pedido</h2>
+
+            <div class="flex justify-between py-2">
+              <span class="text-gray-300">Subtotal</span>
+              <span id="subtotal" class="font-medium">$0 CLP</span>
+            </div>
+
+            <div class="flex justify-between py-2 border-t border-gray-700">
+              <span class="text-gray-300">Envío</span>
+              <span class="font-medium">Gratis</span>
+            </div>
+
+            <div class="flex justify-between py-4 border-t border-gray-700 text-lg font-semibold">
+              <span>Total</span>
+              <span id="total">$0 CLP</span>
+            </div>
+
+            <label class="flex items-start gap-3 text-sm text-gray-300 mt-2">
+              <input id="accept-terms" type="checkbox" class="mt-1 rounded border-gray-600 bg-gray-700 text-blue-500 focus:ring-blue-500">
+              <span>Acepto los <a href="#" class="underline hover:no-underline">términos y condiciones</a> y confirmo que mi nombre de Fortnite es correcto.</span>
+            </label>
+
+            <button id="proceed-to-payment"
+              class="mt-6 w-full py-3 rounded-lg bg-green-500 hover:bg-green-600 font-semibold transition disabled:opacity-60 disabled:cursor-not-allowed"
+              disabled>
+              Finalizar pedido
+            </button>
+
+            <p class="text-xs text-gray-400 mt-3">
+              Al finalizar, te contactaremos al correo indicado para coordinar la entrega en el juego.
+            </p>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    // Pequeña UX: habilitar el botón cuando hay email, usuario Fortnite y términos aceptados
+    const emailEl = document.getElementById('email');
+    const userEl  = document.getElementById('fortniteusername');
+    const termsEl = document.getElementById('accept-terms');
+    const ctaEl   = document.getElementById('proceed-to-payment');
+
+    const validate = () => {
+      const ok = emailEl.value.trim() !== '' && userEl.value.trim() !== '' && termsEl.checked;
+      ctaEl.disabled = !ok;
+    };
+
+    [emailEl, userEl, termsEl].forEach(el => el.addEventListener('input', validate));
+  </script>
+
+  <!-- Tu lógica principal -->
+  <script type="module" src="/assets/js/checkout.js"></script>
 </body>
 </html>
