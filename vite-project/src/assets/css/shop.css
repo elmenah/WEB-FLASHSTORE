@@ -89,7 +89,8 @@ main {
 .product-card img {
     width: 100%;
     height: 65%;
-    object-fit: cover;
+    object-fit: contain; /* 👈 muestra la imagen completa */
+    
     transition: transform 0.3s ease;
 }
 
@@ -215,8 +216,8 @@ main {
 /* 📦 Productos normales debajo de los lotes */
 .product-card:not(.big-product-card) {
     flex: 0 0 auto;
-    width: 280px;
-    height: 420px;
+    width: 380px;
+    height: 520px;
 }
 
 /* 🏷 Banner de descuento */

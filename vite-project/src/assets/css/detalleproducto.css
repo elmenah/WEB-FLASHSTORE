@@ -524,6 +524,7 @@ main {
     .producto-detalle {
         padding: 15px;
         gap: 30px;
+        align-items: center;
     }
     .producto-imagen {
         max-width: 100%;
@@ -566,6 +567,7 @@ main {
     }
     .producto-imagen img {
         height: 300px;
+
     }
     .producto-info {
         padding: 20px 10px;

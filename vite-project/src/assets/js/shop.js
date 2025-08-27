@@ -175,9 +175,7 @@ document.addEventListener("DOMContentLoaded", () => {
       categorias[categoria].push({
         nombre: item.displayName,
         precio: item.price.finalPrice,
-        imagen: item.displayAssets?.length
-          ? item.displayAssets[0].background || item.displayAssets[0].url
-          : item.granted?.[0]?.images?.icon_background,
+        imagen: item.displayAssets?.[0]?.url,
         descripcion:
           item.displayDescription ||
           item.description ||
@@ -193,6 +191,7 @@ document.addEventListener("DOMContentLoaded", () => {
         bundle2: item.granted?.[1]?.images?.icon_background,
         bundle3: item.granted?.[2]?.images?.icon_background,
         bundle4: item.granted?.[3]?.images?.icon_background,
+        colorfondo: item.colors.color1,
 
         rareza: item.rarity?.name || "Sin rareza", // Agregar la rareza // Agregar el mensaje de salida
       });
@@ -231,36 +230,25 @@ document.addEventListener("DOMContentLoaded", () => {
         // Comprobar si hay una imagen del bundle y agregarla a la tarjeta
 
         productCard.innerHTML = `
-                  ${
-                    producto.descuento
-                      ? `<div class="discount-banner">${producto.descuento}</div>`
-                      : ""
-                  }
-                  <img src="${producto.imagen}" alt="${producto.nombre}">
-                  
-                  <div class="product-info">
-                      <h3>${producto.nombre}</h3>
-                       <p><strong>Rareza:</strong> ${rareza}</p>
-                       <p><strong></strong> ${partede}</p>
-                      <div class="price">
-                          <img src="https://lh3.googleusercontent.com/d/1VGnO_T1S2sH-IqqD8TX6aHyQKD7rEYzH=s220?authuser=0" alt="V-Bucks" style="
-    width: 20px;
-">
-                          <span class="old-price">${producto.precio}</span>
-                          <span class="new-price">${(
-                            producto.precio * 4.4
-                          ).toLocaleString("es-CL")} CLP</span>
-                      </div>
-                  </div>
-                  <button class="carrito" data-product="${
-                    producto.nombre
-                  }" data-price="${producto.precio}" data-imagen="${
-          producto.imagen
-        }" data-fecha="${producto.fin}">
-                      <img src="https://lh3.googleusercontent.com/d/1G3MVAV9knIYqiLI6cI7gwKob6Vuvo5MC=s220?authuser=0" alt="Añadir al carrito">
-                  </button>
-                  
-              `;
+  ${producto.descuento ? `<div class="discount-banner">${producto.descuento}</div>` : ""}
+  <div class="product-image" style="background-color: ${producto.colorfondo};">
+    <img src="${producto.imagen}" alt="${producto.nombre}">
+  </div>
+  <div class="product-info">
+      <h3>${producto.nombre}</h3>
+      <p><strong>Rareza:</strong> ${rareza}</p>
+      <p><strong></strong> ${partede}</p>
+      <div class="price">
+          <img src="https://lh3.googleusercontent.com/d/1VGnO_T1S2sH-IqqD8TX6aHyQKD7rEYzH=s220?authuser=0" alt="V-Bucks" style="width: 20px;">
+          <span class="old-price">${producto.precio}</span>
+          <span class="new-price">${(producto.precio * 4.4).toLocaleString("es-CL")} CLP</span>
+      </div>
+  </div>
+  <button class="carrito" data-product="${producto.nombre}" data-price="${producto.precio}" data-imagen="${producto.imagen}" data-fecha="${producto.fin}">
+      <img src="https://lh3.googleusercontent.com/d/1G3MVAV9knIYqiLI6cI7gwKob6Vuvo5MC=s220?authuser=0" alt="Añadir al carrito">
+  </button>
+`;
+
 
         // Agregar el evento para añadir al carrito
         productCard
