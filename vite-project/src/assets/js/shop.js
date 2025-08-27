@@ -248,7 +248,7 @@ document.addEventListener("DOMContentLoaded", () => {
 ">
                           <span class="old-price">${producto.precio}</span>
                           <span class="new-price">${(
-                            producto.precio * 4.9
+                            producto.precio * 4.4
                           ).toLocaleString("es-CL")} CLP</span>
                       </div>
                   </div>
