@@ -243,7 +243,9 @@ document.addEventListener("DOMContentLoaded", () => {
                        <p><strong>Rareza:</strong> ${rareza}</p>
                        <p><strong></strong> ${partede}</p>
                       <div class="price">
-                          <img src="https://lh3.googleusercontent.com/d/1VGnO_T1S2sH-IqqD8TX6aHyQKD7rEYzH=s220?authuser=0" alt="V-Bucks">
+                          <img src="https://lh3.googleusercontent.com/d/1VGnO_T1S2sH-IqqD8TX6aHyQKD7rEYzH=s220?authuser=0" alt="V-Bucks" style="
+    width: 20px;
+">
                           <span class="old-price">${producto.precio}</span>
                           <span class="new-price">${(
                             producto.precio * 4.9
