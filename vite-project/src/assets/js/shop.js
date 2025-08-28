@@ -124,6 +124,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
+// ==================== TIENDA ====================
+let productosGlobal = []; // aquí guardamos todos los productos para el buscador
+
 document.addEventListener("DOMContentLoaded", () => {
   const productosContainer = document.getElementById("productos");
 
@@ -139,7 +142,8 @@ document.addEventListener("DOMContentLoaded", () => {
       );
       if (!response.ok) throw new Error("Error al obtener los datos de la API");
       const data = await response.json();
-      mostrarProductos(data.shop);
+      productosGlobal = data.shop; // guardamos todos los productos
+      mostrarProductos(productosGlobal);
     } catch (error) {
       console.error("❌ Error al cargar la API:", error);
     }
@@ -154,24 +158,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const categoria = item.section?.name || displayType || "Otros";
       if (!categorias[categoria]) categorias[categoria] = [];
 
-      // Obtener la fecha 'out' y compararla con la fecha actual
-      const fechaSalida = new Date(item.offerDates?.out);
-      const fechaActual = new Date();
-      let mensajeSalida = "";
-
-      // Si el producto está a punto de salir
-      if (fechaSalida <= fechaActual) {
-        mensajeSalida = "Este producto está fuera de oferta";
-      } else {
-        const diferenciaDias = Math.ceil(
-          (fechaSalida - fechaActual) / (1000 * 60 * 60 * 24)
-        );
-        if (diferenciaDias <= 2) {
-          // Si falta 2 días o menos
-          mensajeSalida = `¡Últimas horas! Sale en ${diferenciaDias} día(s)`;
-        }
-      }
-
       categorias[categoria].push({
         nombre: item.displayName,
         precio: item.price.finalPrice,
@@ -185,76 +171,45 @@ document.addEventListener("DOMContentLoaded", () => {
         descuento: item.banner?.name || null,
         inicio: item.offerDates?.in || null,
         fin: item.offerDates?.out || null,
-        mensajeSalida: mensajeSalida,
-        partede: item.granted?.[0]?.set?.partOf || "",
-        bundle: item.granted?.[0]?.images?.icon_background,
-        bundle2: item.granted?.[1]?.images?.icon_background,
-        bundle3: item.granted?.[2]?.images?.icon_background,
-        bundle4: item.granted?.[3]?.images?.icon_background,
-        colorfondo: item.colors.color1,
-
-        rareza: item.rarity?.name || "Sin rareza", // Agregar la rareza // Agregar el mensaje de salida
+        rareza: item.rarity?.name || "Sin rareza",
       });
     });
 
-    let categoriasOrdenadas = Object.entries(categorias).sort(([a], [b]) => {
-      if (a === "Pistas de improvisación") return 1;
-      if (b === "Pistas de improvisación") return -1;
-      return 0;
-    });
-
-    categoriasOrdenadas.forEach(([categoria, productos]) => {
+    Object.entries(categorias).forEach(([categoria, productos]) => {
       const tituloCategoria = document.createElement("h2");
       tituloCategoria.textContent = categoria;
       tituloCategoria.className = "category-title";
       productosContainer.appendChild(tituloCategoria);
 
       const contenedorProductos = document.createElement("div");
-      contenedorProductos.className =
-        categoria === "Pistas de improvisación"
-          ? "pistas-container"
-          : "product-container";
+      contenedorProductos.className = "product-container";
 
-      productos.slice(0, 20).forEach((producto) => {
+      productos.forEach((producto) => {
         const productCard = document.createElement("div");
         productCard.classList.add("product-card");
-        if (producto.tipo === "bundle")
-          productCard.classList.add("big-product-card");
-
-        // Agregar la rareza del producto
-        const rareza = producto.rareza;
-
-        // Agregar la subcadena 'partedesubstr' correctamente
-        const partede = producto.partede || "";
-        const partedesubstr = partede.substr(18);
-        // Comprobar si hay una imagen del bundle y agregarla a la tarjeta
 
         productCard.innerHTML = `
-  ${producto.descuento ? `<div class="discount-banner">${producto.descuento}</div>` : ""}
-  <div class="product-image" style="background-color: ${producto.colorfondo};">
-    <img src="${producto.imagen}" alt="${producto.nombre}">
-  </div>
-  <div class="product-info">
-      <h3>${producto.nombre}</h3>
-      <p><strong>Rareza:</strong> ${rareza}</p>
-      <p><strong></strong> ${partede}</p>
-      <div class="price">
-          <img src="https://lh3.googleusercontent.com/d/1VGnO_T1S2sH-IqqD8TX6aHyQKD7rEYzH=s220?authuser=0" alt="V-Bucks" style="width: 20px;">
-          <span class="old-price">${producto.precio}</span>
-          <span class="new-price">${(producto.precio * 4.4).toLocaleString("es-CL")} CLP</span>
-      </div>
-  </div>
-  <button class="carrito" data-product="${producto.nombre}" data-price="${producto.precio}" data-imagen="${producto.imagen}" data-fecha="${producto.fin}">
-      <img src="https://lh3.googleusercontent.com/d/1G3MVAV9knIYqiLI6cI7gwKob6Vuvo5MC=s220?authuser=0" alt="Añadir al carrito">
-  </button>
-`;
+          ${producto.descuento ? `<div class="discount-banner">${producto.descuento}</div>` : ""}
+          <div class="product-image">
+            <img src="${producto.imagen}" alt="${producto.nombre}">
+          </div>
+          <div class="product-info">
+              <h3>${producto.nombre}</h3>
+              <p><strong>Rareza:</strong> ${producto.rareza}</p>
+              <div class="price">
+                  <span class="new-price">${(producto.precio * 4.4).toLocaleString("es-CL")} CLP</span>
+              </div>
+          </div>
+          <button class="carrito" data-product="${producto.nombre}" data-price="${producto.precio}" data-imagen="${producto.imagen}">
+              <img src="https://lh3.googleusercontent.com/d/1G3MVAV9knIYqiLI6cI7gwKob6Vuvo5MC=s220?authuser=0" alt="Añadir al carrito">
+          </button>
+        `;
 
-
-        // Agregar el evento para añadir al carrito
+        // Agregar evento al botón carrito
         productCard
           .querySelector(".carrito")
           .addEventListener("click", (event) => {
-            event.stopPropagation(); // Evitar la propagación del evento y la redirección
+            event.stopPropagation();
 
             const productoNombre =
               event.target.closest("button").dataset.product;
@@ -263,20 +218,17 @@ document.addEventListener("DOMContentLoaded", () => {
             const productoImagen =
               event.target.closest("button").dataset.imagen;
 
-            // Crear un objeto para el producto
-            const producto = {
+            const productoObj = {
               nombre: productoNombre,
               precio: productoPrecio,
               imagen: productoImagen,
             };
 
-            // Agregar al carrito y actualizar la vista
-            agregarAlCarrito(producto);
+            agregarAlCarrito(productoObj);
             mostrarNotificacion();
-            
           });
 
-        // Agregar el evento para redirigir al detalle del producto
+          // Agregar el evento para redirigir al detalle del producto
         productCard.addEventListener("click", (event) => {
           if (!event.target.closest(".carrito")) {
             const descripcion =
@@ -301,30 +253,42 @@ document.addEventListener("DOMContentLoaded", () => {
             )}&out=${encodeURIComponent(
               fechaOut
             )}&mensajeSalida=${encodeURIComponent(
-              producto.mensajeSalida
+              producto.mensajeSalida || ""
             )}&rareza=${encodeURIComponent(
               producto.rareza
             )}&partede=${encodeURIComponent(
-              partedesubstr
+              producto.grupo // 👈 aquí estaba el error
             )}&imgbundle=${encodeURIComponent(
-              producto.bundle
+              producto.bundle || ""
             )}&imgbundle2=${encodeURIComponent(
-            producto.bundle2
+              producto.bundle2 || ""
             )}&imgbundle3=${encodeURIComponent(
-            producto.bundle3
-        )}&imgbundle4=${encodeURIComponent(
-            producto.bundle4)}
-            
-            `;
+              producto.bundle3 || ""
+            )}&imgbundle4=${encodeURIComponent(
+              producto.bundle4 || ""
+            )}`;
+
           }
         });
-
         contenedorProductos.appendChild(productCard);
       });
 
       productosContainer.appendChild(contenedorProductos);
     });
   }
+
+  // ==================== BUSCADOR ====================
+  document.getElementById("buscador").addEventListener("input", function () {
+    const termino = this.value.toLowerCase();
+    if (termino === "") {
+      mostrarProductos(productosGlobal);
+    } else {
+      const filtrados = productosGlobal.filter((item) =>
+        item.displayName.toLowerCase().includes(termino)
+      );
+      mostrarProductos(filtrados);
+    }
+  });
 
   fetchItems();
 });
