@@ -233,7 +233,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (nombreProducto) nombreProducto.textContent = nombre;
-    if (precioProducto) precioProducto.innerHTML = `<span>$${(precio * 4.9).toLocaleString("es-CL")} CLP</span>`;
+    if (precioProducto) precioProducto.innerHTML = `<span>$${(precio * 4.4).toLocaleString("es-CL")} CLP</span>`;
     if (productoImagen) productoImagen.src = imagen;
     if (descripcionProducto) descripcionProducto.textContent = descripcion || "Descripción no disponible.";
     if (mainTypeElement) mainTypeElement.textContent = mainType || "No especificado";
