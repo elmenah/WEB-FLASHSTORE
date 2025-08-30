@@ -192,6 +192,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const imgbundle2 = urlParams.get("imgbundle2");
     const imgbundle3 = urlParams.get("imgbundle3");
     const imgbundle4 = urlParams.get("imgbundle4");
+    const colorFondo = urlParams.get("colorFondo"); // Color de fondo predeterminado blanco
 
     // Asignar valores a los elementos del DOM
     const nombreProducto = document.getElementById('nombre-producto');
@@ -238,7 +239,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (mainTypeElement) mainTypeElement.textContent = mainType || "No especificado";
     if (rarezaitem) rarezaitem.textContent = rareza;
     if (partedelote) partedelote.textContent = partede;
-
+    if (productoImagen) productoImagen.style.backgroundColor = colorFondo;
     // Configurar badge de rareza
     const rarezaBadge = document.getElementById('rareza-badge');
     if (rarezaBadge && rareza) {

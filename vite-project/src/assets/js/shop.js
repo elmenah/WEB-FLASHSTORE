@@ -172,6 +172,7 @@ document.addEventListener("DOMContentLoaded", () => {
         inicio: item.offerDates?.in || null,
         fin: item.offerDates?.out || null,
         rareza: item.rarity?.name || "Sin rareza",
+        colorfondo: item.colors.color1,
       });
     });
 
@@ -190,14 +191,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         productCard.innerHTML = `
           ${producto.descuento ? `<div class="discount-banner">${producto.descuento}</div>` : ""}
-          <div class="product-image">
-            <img src="${producto.imagen}" alt="${producto.nombre}">
-          </div>
+          <div class="product-image" style="background-color: ${producto.colorfondo};"> <img src="${producto.imagen}" alt="${producto.nombre}"> </div>
           <div class="product-info">
               <h3>${producto.nombre}</h3>
               <p><strong>Rareza:</strong> ${producto.rareza}</p>
               <div class="price">
-                  <span class="new-price">${(producto.precio * 4.4).toLocaleString("es-CL")} CLP</span>
+                  <span class="new-price">$${(producto.precio * 4.4).toLocaleString("es-CL")} CLP</span>
               </div>
           </div>
           <button class="carrito" data-product="${producto.nombre}" data-price="${producto.precio}" data-imagen="${producto.imagen}">
@@ -214,7 +213,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const productoNombre =
               event.target.closest("button").dataset.product;
             const productoPrecio =
-              event.target.closest("button").dataset.price * 4.9;
+              event.target.closest("button").dataset.price * 4.4;
             const productoImagen =
               event.target.closest("button").dataset.imagen;
 
@@ -266,6 +265,8 @@ document.addEventListener("DOMContentLoaded", () => {
               producto.bundle3 || ""
             )}&imgbundle4=${encodeURIComponent(
               producto.bundle4 || ""
+            )}&colorFondo=${encodeURIComponent(
+              producto.colorfondo || ""
             )}`;
 
           }

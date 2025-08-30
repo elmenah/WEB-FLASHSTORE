@@ -149,7 +149,7 @@ main {
 /* 💰 Precio nuevo */
 .price .new-price {
     font-weight: bold;
-    color: #4f46e5;
+    
     font-size: 1.1rem;
 }
 
@@ -237,8 +237,12 @@ main {
 
 /* 🌟 Indicador de rareza con colores */
 .product-info p strong {
-    color: #4f46e5;
-    font-weight: 600;
+    background: linear-gradient(to right, #ff0000, #ff6600, #ffd900);
+  -webkit-background-clip: text; /* Para navegadores basados en WebKit (Chrome, Safari) */
+  background-clip: text;
+  color: transparent;
+  
+  font-weight: bold;
 }
 
 .product-info p {
