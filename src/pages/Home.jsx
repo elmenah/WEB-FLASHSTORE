@@ -20,8 +20,7 @@ const Home = () => {
             Ver la tienda de hoy
           </Link>
         </div>
-
-        <img src="/Imagenes/1076581.jpg" className="slide w-full h-full object-cover z-0" alt="Hero" />
+        <img src="src/public/Imagenes/1076581.jpg" className="slide w-full h-full object-cover z-0" alt="Hero" />
       </div>
 
       {/* NUESTROS SERVICIOS */}
