@@ -40,12 +40,12 @@ const Club = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {[
-            { img: "/Imagenes/clubagosto.jpg", title: "Paquete de Club", desc: "Contenido exclusivo mensual" },
-            { img: "/Imagenes/pasebatalla.jpg", title: "Pase de Batalla", desc: "Acceso completo incluido" },
-            { img: "/Imagenes/paseog.jpg", title: "Pase de Orígenes", desc: "Experiencias únicas" },
-            { img: "/Imagenes/paselego.jpg", title: "Pase de LEGO", desc: "Construcción creativa" },
-            { img: "/Imagenes/pasemusical.jpg", title: "Pase Musical", desc: "Ritmos y melodías" },
-            { img: "/Imagenes/vbucks.jpg", title: "1000 Pavos", desc: "Cada mes automáticamente" }
+            { img: "../src/Imagenes/clubagosto.jpg", title: "Paquete de Club", desc: "Contenido exclusivo mensual" },
+            { img: "../src/Imagenes/pasebatalla.jpg", title: "Pase de Batalla", desc: "Acceso completo incluido" },
+            { img: "../src/Imagenes/paseog.jpg", title: "Pase de Orígenes", desc: "Experiencias únicas" },
+            { img: "../src/Imagenes/paselego.jpg", title: "Pase de LEGO", desc: "Construcción creativa" },
+            { img: "../src/Imagenes/pasemusical.jpg", title: "Pase Musical", desc: "Ritmos y melodías" },
+            { img: "../src/Imagenes/vbucks.jpg", title: "1000 Pavos", desc: "Cada mes automáticamente" }
           ].map((benefit, index) => (
             <div key={index} className="rounded-xl overflow-hidden relative">
               <img src={benefit.img} alt={benefit.title} className="w-full h-40 object-cover" />

@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import ProductCard from '../components/ProductCard';
-import '../assets/css/shop.css';
+import '../css/shop.css'; // ¡Importante! Aquí se importan los estilos.
+
 
 const Shop = () => {
   const [products, setProducts] = useState([]);

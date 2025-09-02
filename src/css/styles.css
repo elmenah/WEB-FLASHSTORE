@@ -24,6 +24,7 @@
 body {
     font-family: 'Roboto', sans-serif;
     background: var(--dark-bg);
+    
     color: var(--text-primary);
     line-height: 1.6;
     overflow-x: hidden;
@@ -33,6 +34,7 @@ body {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 20px;
+    background-color: rgb(17 24 39 / var(--tw-bg-opacity, 1));
 }
 
 /* ===== TIPOGRAFÍA ===== */

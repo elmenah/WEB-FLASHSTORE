@@ -1,15 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import '../css/styles.css';
 
 const Home = () => {
   return (
     <>
       {/* PORTADA */}
-      <div className="slideshow relative flex items-center justify-center h-screen">
-        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent"></div>
+      <div className="slideshow relative flex items-center justify-center h-screen bg-gray-900 text-white overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent z-10"></div>
         
-        <div className="absolute left-1/2 transform -translate-x-1/2 sm:left-6 sm:transform-none sm:-translate-x-0 top-1/2 transform -translate-y-1/2 z-10 text-center">
-          <h1 className="text-3xl md:text-5xl font-bold mb-4" style={{ fontFamily: 'Inter, sans-serif', fontStyle: 'italic' }}>
+        <div className="absolute left-1/2 transform -translate-x-1/2 sm:left-6 sm:transform-none sm:-translate-x-0 top-1/2 -translate-y-1/2 z-20 text-center">
+          <h1 className="text-3xl md:text-5xl font-bold mb-4 italic">
             Bienvenido a <span className="bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500 bg-clip-text text-transparent">Tio Flashstore</span>
           </h1>
           <Link 
@@ -20,11 +21,11 @@ const Home = () => {
           </Link>
         </div>
 
-        <img src="/Imagenes/1076581.jpg" className="slide w-full h-full object-cover" alt="Hero" />
+        <img src="/src/Imagenes/1076581.jpg" className="slide w-full h-full object-cover z-0" alt="Hero" />
       </div>
 
       {/* NUESTROS SERVICIOS */}
-      <div className="bg-gray-900 py-16">
+      <div className="bg-gray-900 py-16 text-white">
         <div className="flex justify-center w-full">
           <article className="flex items-center gap-10 flex-col xl:flex-row max-w-7xl mx-auto px-6">
             <figure>
@@ -32,8 +33,8 @@ const Home = () => {
                 loading="lazy" 
                 width="412" 
                 height="200" 
-                src="/Imagenes/Servicios IMG.png"
-                className="w-full sm:w-[824px] sm:h-[400px]"
+                src="/src/Imagenes/Servicios IMG.png"
+                className="w-full sm:w-[824px] sm:h-[400px] rounded-lg"
                 alt="Servicios"
               />
             </figure>
@@ -42,7 +43,7 @@ const Home = () => {
                 <p className="text-sm bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-sky-400 to-fuchsia-400 bg-[length:200%_auto] animate-pulse">
                   SKINS
                 </p>
-                <h2 className="font-medium text-xl mt-2">Compra skins e items más barato aquí</h2>
+                <h2 className="font-medium text-xl mt-2">Compra skins e items más baratos aquí</h2>
               </header>
               <p className="max-w-[400px] mt-2 text-sm text-gray-400 mx-auto">
                 ¿<strong>Cansado de que las skins que te gustan desaparezcan de la tienda porque no tienes V-Bucks?</strong> 😩🎮
@@ -55,9 +56,9 @@ const Home = () => {
               <footer>
                 <div className="mt-4 flex flex-col md:flex-row items-center gap-4">
                   <div className="relative inline-block group w-[80%] md:w-[240px] h-[45px]">
-                    <div className="absolute border group-hover:translate-x-1 transition-all border-gray-600 inset-0 bg-transparent transform -translate-x-1 translate-y-1"></div>
+                    <div className="absolute border group-hover:translate-x-1 transition-all border-gray-600 inset-0 bg-transparent transform -translate-x-1 translate-y-1 rounded-md"></div>
                     <Link 
-                      className="w-full h-full flex items-center transition-all text-center justify-center relative text-sm bg-indigo-600 text-white hover:bg-indigo-700"
+                      className="w-full h-full flex items-center transition-all text-center justify-center relative text-sm bg-indigo-600 text-white hover:bg-indigo-700 rounded-md"
                       to="/shop"
                     >
                       Comprar Skins Ahora
@@ -71,9 +72,8 @@ const Home = () => {
       </div>
 
       {/* CLUB FORTNITE */}
-      <div className="container mx-auto p-4">
-        <h2 className="text-4xl font-bold text-center mb-8" style={{ fontStyle: 'italic' }}>Club Fortnite</h2>
-
+      <div className="container mx-auto p-4 text-white">
+        <h2 className="text-4xl font-bold text-center mb-8 italic">Club Fortnite</h2>
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-8 justify-center place-items-center">
           {[
             { title: "1 Mes Fortnite Crew", desc: "Activalo hoy mismo!", price: "$6.000 CLP" },
@@ -88,7 +88,7 @@ const Home = () => {
                 width="160" 
                 height="240" 
                 className="object-cover object-bottom w-full" 
-                src="/Imagenes/fn crew/fnmarzo.png"
+                src="/src/Imagenes/fn crew/fnmarzo.png"
               />
               <div className="p-4 flex-1 flex flex-col justify-between">
                 <div>
@@ -110,16 +110,14 @@ const Home = () => {
       </div>
 
       {/* COMO FUNCIONA */}
-      <div className="flex flex-col lg:flex-row items-center justify-center bg-gray-900 py-16 space-y-8 lg:space-y-0 lg:space-x-10">
+      <div className="flex flex-col lg:flex-row items-center justify-center bg-gray-900 py-16 text-white space-y-8 lg:space-y-0 lg:space-x-10">
         <img 
-          src="/Imagenes/goku_ultra_instinto_2_0__fortnite__by_urielreyes05_dgo3i6b-414w-2x.png" 
+          src="/src/Imagenes/goku_ultra_instinto_2_0__fortnite__by_urielreyes05_dgo3i6b-414w-2x.png" 
           alt="Character"
-          className="w-64 h-auto"
+          className="w-64 h-auto rounded-lg"
         />
-
         <div className="text-center lg:text-left">
           <h2 className="text-3xl font-bold mb-2">¿Cómo Funciona?</h2>
-
           <div className="space-y-6">
             <div className="flex flex-col lg:flex-row items-center lg:items-start space-y-4 lg:space-y-0 lg:space-x-4">
               <div className="w-10 h-10 flex items-center justify-center bg-gray-700 text-lg font-bold rounded-md">1</div>
@@ -131,7 +129,6 @@ const Home = () => {
                 </p>
               </div>
             </div>
-
             <div className="flex flex-col lg:flex-row items-center lg:items-start space-y-4 lg:space-y-0 lg:space-x-4">
               <div className="w-10 h-10 flex items-center justify-center bg-gray-700 text-lg font-bold rounded-md">2</div>
               <div>
@@ -142,7 +139,6 @@ const Home = () => {
                 </p>
               </div>
             </div>
-
             <div className="flex flex-col lg:flex-row items-center lg:items-start space-y-4 lg:space-y-0 lg:space-x-4">
               <div className="w-10 h-10 flex items-center justify-center bg-gray-700 text-lg font-bold rounded-md">3</div>
               <div>
@@ -157,7 +153,7 @@ const Home = () => {
       </div>
 
       {/* FAQ */}
-      <div className="flex justify-center bg-gray-900 p-12">
+      <div className="flex justify-center bg-gray-900 p-12 text-white">
         <div className="space-y-4 w-full max-w-4xl">
           {[
             {

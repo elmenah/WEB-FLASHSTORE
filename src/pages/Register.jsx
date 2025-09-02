@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import '../assets/css/registro.css';
+
 
 const Register = () => {
   const [email, setEmail] = useState('');

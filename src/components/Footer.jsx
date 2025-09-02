@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-
+import '../css/styles.css';
 const Footer = () => {
   return (
     <footer className="bg-gray-800 text-white py-8">
