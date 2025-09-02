@@ -19,7 +19,7 @@ const CartPopup = () => {
   };
 
   return (
-    <div className={`fixed right-0 top-0 w-350 h-full bg-gray-900 bg-opacity-95 backdrop-blur-20 shadow-lg transform transition-transform duration-400 ease-out padding-30 z-1000 border-l border-gray-700 ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+      <div className={`fixed right-0 top-0 w-[350px] h-full bg-gray-900 bg-opacity-95 backdrop-blur shadow-lg transform transition-transform duration-400 ease-out p-6 z-50 border-l border-gray-700 ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}>
       <div className="carrito-header flex justify-between items-center text-xl font-bold mb-8 pb-4 border-b-2 border-gray-700">
         <h2>Mi Carrito</h2>
         <span 

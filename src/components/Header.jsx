@@ -33,7 +33,7 @@ const Header = () => {
 
             <div className="absolute left-1/2 transform -translate-x-1/2 lg:static lg:translate-x-0">
               <Link to="/" className="logo text-xl font-bold text-gray-800">
-                <img src="../src/Imagenes/PNGLogo01.png" alt="Logo" width="50px" height="50px" />
+                <img src="/Imagenes/PNGLogo01.png" alt="Logo" width="50px" height="50px" />
               </Link>
             </div>
           </div>

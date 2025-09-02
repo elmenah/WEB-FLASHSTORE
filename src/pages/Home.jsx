@@ -20,7 +20,7 @@ const Home = () => {
             Ver la tienda de hoy
           </Link>
         </div>
-        <img src="src/public/Imagenes/1076581.jpg" className="slide w-full h-full object-cover z-0" alt="Hero" />
+        <img src="/Imagenes/1076581.jpg" className="slide w-full h-full object-cover z-0" alt="Hero" />
       </div>
 
       {/* NUESTROS SERVICIOS */}
@@ -32,7 +32,7 @@ const Home = () => {
                 loading="lazy" 
                 width="412" 
                 height="200" 
-                src="/src/Imagenes/Servicios IMG.png"
+                src="/Imagenes/Servicios IMG.png"
                 className="w-full sm:w-[824px] sm:h-[400px] rounded-lg"
                 alt="Servicios"
               />
@@ -87,7 +87,7 @@ const Home = () => {
                 width="160" 
                 height="240" 
                 className="object-cover object-bottom w-full" 
-                src="/src/Imagenes/fn crew/fnmarzo.png"
+                src="/Imagenes/fn crew/fnmarzo.png"
               />
               <div className="p-4 flex-1 flex flex-col justify-between">
                 <div>
@@ -111,7 +111,7 @@ const Home = () => {
       {/* COMO FUNCIONA */}
       <div className="flex flex-col lg:flex-row items-center justify-center bg-gray-900 py-16 text-white space-y-8 lg:space-y-0 lg:space-x-10">
         <img 
-          src="/src/Imagenes/goku_ultra_instinto_2_0__fortnite__by_urielreyes05_dgo3i6b-414w-2x.png" 
+          src="/Imagenes/goku_ultra_instinto_2_0__fortnite__by_urielreyes05_dgo3i6b-414w-2x.png" 
           alt="Character"
           className="w-64 h-auto rounded-lg"
         />
