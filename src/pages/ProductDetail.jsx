@@ -1,8 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import '../css/detalleproducto.css';
-
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -15,11 +13,11 @@ const ProductDetail = () => {
     precio: Number(searchParams.get('precio')) || 0,
     imagen: searchParams.get('imagen') || '',
     descripcion: searchParams.get('descripcion') || 'Descripción no disponible.',
-    tipo: searchParams.get('mainType') || 'No especificado',
+    tipo: searchParams.get('tipo') || 'No especificado',
     rareza: searchParams.get('rareza') || 'Sin rareza',
     partede: searchParams.get('partede') || '',
-    inicio: searchParams.get('fecha') || null,
-    fin: searchParams.get('out') || null,
+    inicio: searchParams.get('inicio') || null,
+    fin: searchParams.get('fin') || null,
     mensajeSalida: searchParams.get('mensajeSalida') || '',
     bundle: searchParams.get('bundle') || '',
     bundle2: searchParams.get('bundle2') || '',
@@ -30,7 +28,6 @@ const ProductDetail = () => {
 
   const formatDate = (dateStr) => {
     if (!dateStr) return 'Fecha no disponible';
-    
     const fecha = new Date(dateStr);
     const dia = String(fecha.getDate()).padStart(2, '0');
     const mes = String(fecha.getMonth() + 1).padStart(2, '0');
@@ -38,7 +35,6 @@ const ProductDetail = () => {
     const horas = String(fecha.getHours()).padStart(2, '0');
     const minutos = String(fecha.getMinutes()).padStart(2, '0');
     const segundos = String(fecha.getSeconds()).padStart(2, '0');
-
     return `${dia}-${mes}-${año} ${horas}:${minutos}:${segundos}`;
   };
 
@@ -48,7 +44,6 @@ const ProductDetail = () => {
       precio: productData.precio * 4.4,
       imagen: productData.imagen,
     };
-
     addToCart(product);
     showNotification();
   };
@@ -66,83 +61,105 @@ const ProductDetail = () => {
   ].filter(img => img && img !== "undefined" && img !== "");
 
   return (
-    <div className="pt-14">
+    <div className="pt-20 pb-20">
       {/* Notification */}
-      <div className={`fixed top-20 right-20 bg-gradient-to-r from-green-500 to-green-600 text-white py-4 px-6 rounded-2xl shadow-lg font-semibold z-50 flex items-center gap-3 backdrop-blur-10 border border-white border-opacity-20 transition-all duration-300 ${notification ? 'opacity-100 visible translate-x-0' : 'opacity-0 invisible translate-x-full'}`}>
+      <div className={`fixed top-20 right-20 bg-green-500 text-white py-4 px-6 rounded-2xl shadow-lg font-semibold z-50 flex items-center gap-3 backdrop-blur-sm border border-white border-opacity-20 transition-all duration-300 ${notification ? 'opacity-100 visible translate-x-0' : 'opacity-0 invisible translate-x-full'}`}>
         <i className="fas fa-check-circle text-xl"></i>
         <span>Producto agregado al carrito</span>
       </div>
 
-      <main>
-        <div className="producto-detalle">
-          <div className="producto-imagen">
+      <main className="max-w-7xl mx-auto px-4">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Imagen del producto */}
+          <div className="relative flex-shrink-0 w-full lg:w-1/2 rounded-lg overflow-hidden shadow-lg border border-gray-700">
             <img 
               src={productData.imagen} 
               alt={productData.nombre}
+              className="w-full h-full object-cover"
               style={{ backgroundColor: productData.colorfondo }}
             />
             {productData.rareza && (
-              <div className="rareza-badge">
+              <div className="absolute top-4 right-4 bg-gray-800 text-white py-1 px-3 rounded-md text-xs font-bold shadow-md">
                 {productData.rareza.toUpperCase()}
               </div>
             )}
           </div>
 
-          <div className="producto-info">
-            <h1>{productData.nombre}</h1>
-            <p className="descripcion">{productData.descripcion}</p>
+          {/* Información del producto */}
+          <div className="flex flex-col w-full lg:w-1/2 bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
+            <h1 className="text-3xl font-bold text-white mb-4">{productData.nombre}</h1>
+            <p className="text-gray-400 mb-6">{productData.descripcion}</p>
 
-            <div className="producto-details">
-              <div className="detail-item">
-                <h3><i className="fas fa-tag"></i> Tipo:</h3>
-                <span className="textdospuntos">{productData.tipo}</span>
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <h3 className="text-yellow-400 font-semibold flex items-center gap-2">
+                  <i className="fas fa-tag"></i> Tipo:
+                </h3>
+                <span className="text-white">{productData.tipo}</span>
               </div>
-              <div className="detail-item">
-                <h3><i className="fas fa-star"></i> Rareza:</h3>
-                <span className="textdospuntos">{productData.rareza}</span>
+              <div className="flex items-center gap-4">
+                <h3 className="text-yellow-400 font-semibold flex items-center gap-2">
+                  <i className="fas fa-star"></i> Rareza:
+                </h3>
+                <span className="text-white">{productData.rareza}</span>
               </div>
-              <div className="detail-item">
-                <h3><i className="fas fa-box"></i> Parte del lote:</h3>
-                <span className="textdospuntos">{productData.partede}</span>
+              <div className="flex items-center gap-4">
+                <h3 className="text-yellow-400 font-semibold flex items-center gap-2">
+                  <i className="fas fa-box"></i> Parte del lote:
+                </h3>
+                <span className="text-white">{productData.partede}</span>
+              </div>
+              <div className="flex items-center gap-4">
+                <h3 className="text-yellow-400 font-semibold flex items-center gap-2">
+                  <i class="fa-solid fa-coins"></i> Costo en pavos:
+                </h3>
+                <span className="text-white">{productData.precio}</span>
               </div>
             </div>
 
-            <div className="precio-producto">
-              <span>${(productData.precio * 4.4).toLocaleString("es-CL")} CLP</span>
-            </div>
+            
 
             {bundleImages.length > 0 && (
-              <div className="bundle-section">
-                <h3><i className="fas fa-gift"></i> Esta compra incluye:</h3>
-                <div className="bundle-gallery">
+              <div className="mt-6">
+                <h3 className="text-blue-400 font-semibold mb-4 flex items-center gap-2">
+                  <i className="fas fa-gift"></i> Esta compra incluye:
+                </h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                   {bundleImages.map((img, index) => (
                     <img
                       key={index}
                       src={img}
                       alt={`Bundle ${index + 1}`}
-                      className="producto-imagen-lote"
+                      className="w-full h-24 object-cover rounded-lg border border-gray-700"
                     />
                   ))}
                 </div>
               </div>
             )}
 
-            <div className="fechas-section">
-              <div className="llegoseva">
+            <div className="mt-6 space-y-2">
+              <p className="text-gray-400">
                 Llegó a la tienda: {formatDate(productData.inicio)}
-              </div>
-              <div className="llegoseva">
+              </p>
+              <p className="text-gray-400">
                 Se va de la tienda: {formatDate(productData.fin)}
-              </div>
+              </p>
             </div>
 
             {productData.mensajeSalida && (
-              <p className="mensaje-salida">{productData.mensajeSalida}</p>
+              <p className="mt-4 text-red-400 font-semibold text-center">
+                {productData.mensajeSalida}
+              </p>
             )}
+            <div className="mt-6 text-center">
+              <span className="text-2xl font-bold text-yellow-400">
+                ${(productData.precio * 4.4).toLocaleString("es-CL")} CLP
+              </span>
+            </div>
 
             <button 
               onClick={handleAddToCart}
-              className="agregar-carrito"
+              className="mt-6 w-full bg-blue-600 text-white py-3 rounded-lg font-bold shadow-lg hover:bg-blue-700 transition-all flex items-center justify-center gap-2"
             >
               <i className="fas fa-shopping-cart"></i>
               Añadir al Carrito

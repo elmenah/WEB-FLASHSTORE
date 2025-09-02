@@ -1,14 +1,72 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import '../css/styles.css';
+import { useCart } from '../context/CartContext';
 
 const Home = () => {
+  const { addToCart } = useCart();
+  const [notification, setNotification] = useState(false);
+
+  const clubItems = [
+    { 
+      id: 1, 
+      title: "1 Mes Fortnite Crew", 
+      desc: "Actívalo hoy mismo!", 
+      price: 6000, 
+      image: "/Imagenes/fn crew/fnmarzo.png" 
+    },
+    { 
+      id: 2, 
+      title: "2 Meses Fortnite Crew", 
+      desc: "Obtén 2 Meses del club de Fortnite!", 
+      price: 10000, 
+      image: "/Imagenes/fn crew/fnmarzo.png" 
+    },
+    { 
+      id: 3, 
+      title: "3 Meses Fortnite Crew", 
+      desc: "Obtén 3 Meses del club de Fortnite!", 
+      price: 15000, 
+      image: "/Imagenes/fn crew/fnmarzo.png" 
+    },
+    { 
+      id: 4, 
+      title: "6 Meses Fortnite Crew", 
+      desc: "Obtén 6 Meses del club de Fortnite!", 
+      price: 26000, 
+      image: "/Imagenes/fn crew/fnmarzo.png" 
+    }
+  ];
+
+  const handleAddToCart = (item) => {
+    const cartItem = {
+      nombre: item.title,
+      precio: item.price,
+      imagen: item.image,
+      descripcion: item.desc,
+    };
+    addToCart(cartItem);
+    showNotification();
+  };
+
+  const showNotification = () => {
+    setNotification(true);
+    setTimeout(() => setNotification(false), 2000); // Oculta la notificación después de 2 segundos
+  };
+
   return (
     <>
+      {/* Notificación */}
+      <div
+        className={`fixed top-20 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg transition-opacity duration-500 z-50 ${
+          notification ? 'opacity-100' : 'opacity-0 hidden'
+        }`}
+      >
+        Producto agregado al carrito
+      </div>
+
       {/* PORTADA */}
-      <div className="slideshow relative flex items-center justify-center h-screen bg-gray-900 text-white overflow-hidden">
+      <div className="relative flex items-center justify-center h-screen bg-gray-900 text-white overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent z-10"></div>
-        
         <div className="absolute left-1/2 transform -translate-x-1/2 sm:left-6 sm:transform-none sm:-translate-x-0 top-1/2 -translate-y-1/2 z-20 text-center">
           <h1 className="text-3xl md:text-5xl font-bold mb-4 italic">
             Bienvenido a <span className="bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500 bg-clip-text text-transparent">Tio Flashstore</span>
@@ -20,74 +78,22 @@ const Home = () => {
             Ver la tienda de hoy
           </Link>
         </div>
-        <img src="/Imagenes/1076581.jpg" className="slide w-full h-full object-cover z-0" alt="Hero" />
-      </div>
-
-      {/* NUESTROS SERVICIOS */}
-      <div className="bg-gray-900 py-16 text-white">
-        <div className="flex justify-center w-full">
-          <article className="flex items-center gap-10 flex-col xl:flex-row max-w-7xl mx-auto px-6">
-            <figure>
-              <img 
-                loading="lazy" 
-                width="412" 
-                height="200" 
-                src="/Imagenes/Servicios IMG.png"
-                className="w-full sm:w-[824px] sm:h-[400px] rounded-lg"
-                alt="Servicios"
-              />
-            </figure>
-            <div className="max-xl:w-full text-center xl:text-left">
-              <header>
-                <p className="text-sm bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-sky-400 to-fuchsia-400 bg-[length:200%_auto] animate-pulse">
-                  SKINS
-                </p>
-                <h2 className="font-medium text-xl mt-2">Compra skins e items más baratos aquí</h2>
-              </header>
-              <p className="max-w-[400px] mt-2 text-sm text-gray-400 mx-auto">
-                ¿<strong>Cansado de que las skins que te gustan desaparezcan de la tienda porque no tienes V-Bucks?</strong> 😩🎮
-                ¡No te preocupes más! Con nuestro <strong>sistema exclusivo de envío por regalo</strong>, puedes
-                comprar skins de Fortnite al <strong>mejor precio</strong> y recibirlas de manera segura. 🚀✨
-                Solo agréganos como amigos, y después de <strong>48 horas</strong>, podrás recibir las skins que
-                compres. <strong>¡No dejes pasar las mejores ofertas y consigue tus skins favoritas antes de que
-                desaparezcan!</strong> 🔥💎
-              </p>
-              <footer>
-                <div className="mt-4 flex flex-col md:flex-row items-center gap-4">
-                  <div className="relative inline-block group w-[80%] md:w-[240px] h-[45px]">
-                    <div className="absolute border group-hover:translate-x-1 transition-all border-gray-600 inset-0 bg-transparent transform -translate-x-1 translate-y-1 rounded-md"></div>
-                    <Link 
-                      className="w-full h-full flex items-center transition-all text-center justify-center relative text-sm bg-indigo-600 text-white hover:bg-indigo-700 rounded-md"
-                      to="/shop"
-                    >
-                      Comprar Skins Ahora
-                    </Link>
-                  </div>
-                </div>
-              </footer>
-            </div>
-          </article>
-        </div>
+        <img src="/Imagenes/1076581.jpg" className="w-full h-full object-cover z-0" alt="Hero" />
       </div>
 
       {/* CLUB FORTNITE */}
       <div className="container mx-auto p-4 text-white">
         <h2 className="text-4xl font-bold text-center mb-8 italic">Club Fortnite</h2>
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-8 justify-center place-items-center">
-          {[
-            { title: "1 Mes Fortnite Crew", desc: "Activalo hoy mismo!", price: "$6.000 CLP" },
-            { title: "2 Meses Fortnite Crew", desc: "Obtén 2 Meses del club de fortnite!", price: "$10.000 CLP" },
-            { title: "3 Meses Fortnite Crew", desc: "Obtén 3 Meses del club de fortnite!", price: "$15.000 CLP" },
-            { title: "6 Meses Fortnite Crew", desc: "Obtén 6 Meses del club de fortnite!", price: "$26.000 CLP" }
-          ].map((item, index) => (
-            <div key={index} className="bg-gray-800 w-[160px] sm:w-[190px] md:w-[190px] rounded-lg overflow-hidden shadow-lg flex flex-col justify-between mx-auto">
+          {clubItems.map((item) => (
+            <div key={item.id} className="bg-gray-800 w-[160px] sm:w-[190px] md:w-[190px] rounded-lg overflow-hidden shadow-lg flex flex-col justify-between mx-auto">
               <img 
                 alt={item.title} 
                 loading="lazy" 
                 width="160" 
                 height="240" 
                 className="object-cover object-bottom w-full" 
-                src="/Imagenes/fn crew/fnmarzo.png"
+                src={item.image}
               />
               <div className="p-4 flex-1 flex flex-col justify-between">
                 <div>
@@ -95,12 +101,15 @@ const Home = () => {
                   <p className="text-gray-400 text-xs sm:text-sm truncate">{item.desc}</p>
                 </div>
                 <div className="flex items-center justify-between mt-4">
-                  <p className="text-gray-100 text-xs sm:text-sm font-semibold">{item.price}</p>
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-2 hover:bg-gray-900 p-2 hover:cursor-pointer rounded-full transition-all">
-                      <i className="fas fa-shopping-cart w-4 h-4 text-gray-400"></i>
-                    </div>
-                  </div>
+                  <p className="text-gray-100 text-xs sm:text-sm font-semibold">
+                    {new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(item.price)}
+                  </p>
+                  <button 
+                    onClick={() => handleAddToCart(item)} 
+                    className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-full transition-all"
+                  >
+                    <i className="fas fa-shopping-cart w-4 h-4"></i>
+                  </button>
                 </div>
               </div>
             </div>
@@ -108,77 +117,65 @@ const Home = () => {
         </div>
       </div>
 
-      {/* COMO FUNCIONA */}
-      <div className="flex flex-col lg:flex-row items-center justify-center bg-gray-900 py-16 text-white space-y-8 lg:space-y-0 lg:space-x-10">
-        <img 
-          src="/Imagenes/goku_ultra_instinto_2_0__fortnite__by_urielreyes05_dgo3i6b-414w-2x.png" 
-          alt="Character"
-          className="w-64 h-auto rounded-lg"
-        />
-        <div className="text-center lg:text-left">
-          <h2 className="text-3xl font-bold mb-2">¿Cómo Funciona?</h2>
-          <div className="space-y-6">
-            <div className="flex flex-col lg:flex-row items-center lg:items-start space-y-4 lg:space-y-0 lg:space-x-4">
-              <div className="w-10 h-10 flex items-center justify-center bg-gray-700 text-lg font-bold rounded-md">1</div>
-              <div>
-                <h3 className="text-lg font-bold">PASO 1</h3>
-                <p className="text-gray-400">
-                  Asegúrate de haber agregado nuestras cuentas 48 hrs antes de realizar una compra.
-                  <br />Usuario: Reydelosvbucks
-                </p>
-              </div>
-            </div>
-            <div className="flex flex-col lg:flex-row items-center lg:items-start space-y-4 lg:space-y-0 lg:space-x-4">
-              <div className="w-10 h-10 flex items-center justify-center bg-gray-700 text-lg font-bold rounded-md">2</div>
-              <div>
-                <h3 className="text-lg font-bold">PASO 2</h3>
-                <p className="text-gray-400">
-                  Elige la skin que quieras de la rotación diaria de la tienda.
-                  <br />Agrega al carrito y termina el proceso de compra
-                </p>
-              </div>
-            </div>
-            <div className="flex flex-col lg:flex-row items-center lg:items-start space-y-4 lg:space-y-0 lg:space-x-4">
-              <div className="w-10 h-10 flex items-center justify-center bg-gray-700 text-lg font-bold rounded-md">3</div>
-              <div>
-                <h3 className="text-lg font-bold">PASO 3</h3>
-                <p className="text-gray-400">
-                  Recibe las skins y/o lotes que hayas elegido directamente en tu cuenta enviadas por nuestro equipo.
-                </p>
-              </div>
-            </div>
+      {/* FAQ */}
+      <div className="container mx-auto p-4 text-white">
+        <h2 className="text-4xl font-bold text-center mb-8 italic">Preguntas Frecuentes</h2>
+        <div className="space-y-6">
+          <div>
+            <h3 className="text-xl font-semibold">¿Cómo recibo los productos que compro?</h3>
+            <p className="text-gray-400">
+              Los productos adquiridos serán entregados directamente en tu cuenta de Fortnite mediante el nombre de usuario que proporciones al momento de la compra.
+            </p>
+          </div>
+          <div>
+            <h3 className="text-xl font-semibold">¿Cuánto tiempo tarda la entrega?</h3>
+            <p className="text-gray-400">
+              La entrega se realiza en un plazo máximo de 24 horas después de confirmar tu compra. En la mayoría de los casos, la entrega es inmediata.
+            </p>
+          </div>
+          <div>
+            <h3 className="text-xl font-semibold">¿Por qué es tan barato?</h3>
+            <p className="text-gray-400">
+              Al aprovechar los precios regionales favorables, podemos comprar productos de Epic Games a un mejor precio a través de tiendas en otros países. Siempre pagamos el precio completo que Epic Games establece en ese país, incluidos los impuestos. No utilizamos ningún tipo de exploits ni métodos fraudulentos.
+            </p>
+          </div>
+          <div>
+            <h3 className="text-xl font-semibold">¿Esto es seguro?</h3>
+            <p className="text-gray-400">
+              Llevamos años en la venta de servicios digitales, tenemos cientos de clientes en nuestro Instagram @tioflashstore, sin riesgos para tu cuenta. Todo el proceso se hace respetando las reglas de Epic Games, así que no hay peligro de baneos ni sanciones.
+            </p>
+          </div>
+          <div>
+            <h3 className="text-xl font-semibold">¿Cuáles son los métodos de pago?</h3>
+            <p className="text-gray-400">
+              Ofrecemos métodos de pagos locales para Chile y aceptamos también pagos con criptomonedas como USDT.
+            </p>
           </div>
         </div>
       </div>
 
-      {/* FAQ */}
-      <div className="flex justify-center bg-gray-900 p-12 text-white">
-        <div className="space-y-4 w-full max-w-4xl">
-          {[
-            {
-              icon: "💲",
-              title: "¿Por qué es tan barato?",
-              content: "Al aprovechar los precios regionales favorables, podemos comprar productos de Epic Games a un mejor precio a través de tiendas en otros países. Siempre pagamos el precio completo que Epic Games establece en ese país, incluidos los impuestos. No utilizamos ningún tipo de exploits ni métodos fraudulentos."
-            },
-            {
-              icon: "✅",
-              title: "¿Esto es seguro?",
-              content: "Llevamos años en la venta de servicios digitales, tenemos cientos de clientes en nuestro instagram @tioflashstore, sin riesgos para tu cuenta, todo el proceso se hace respetando las reglas de Epic Games, así que no hay peligro de baneos ni sanciones."
-            },
-            {
-              icon: "💳",
-              title: "¿Cuáles son los métodos de pago?",
-              content: "Ofrecemos métodos de pagos locales para Chile y aceptamos también pagos con criptomonedas como USDT."
-            }
-          ].map((faq, index) => (
-            <div key={index} className="bg-gray-800 p-6 rounded-lg flex items-start space-x-4 shadow-md">
-              <div className="text-2xl">{faq.icon}</div>
-              <div>
-                <h3 className="text-lg font-bold">{faq.title}</h3>
-                <p className="text-gray-400 text-sm">{faq.content}</p>
-              </div>
-            </div>
-          ))}
+      {/* SERVICIOS */}
+      <div className="container mx-auto p-4 text-white">
+        <h2 className="text-4xl font-bold text-center mb-8 italic">Servicios</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+          <div className="bg-gray-800 rounded-lg shadow-lg p-6">
+            <h3 className="text-xl font-semibold mb-4">Venta de productos Fortnite</h3>
+            <p className="text-gray-400">
+              Ofrecemos una amplia variedad de productos de Fortnite, incluyendo skins, lotes y membresías del Club Fortnite.
+            </p>
+          </div>
+          <div className="bg-gray-800 rounded-lg shadow-lg p-6">
+            <h3 className="text-xl font-semibold mb-4">Entrega rápida</h3>
+            <p className="text-gray-400">
+              Garantizamos entregas rápidas y seguras directamente en tu cuenta de Fortnite.
+            </p>
+          </div>
+          <div className="bg-gray-800 rounded-lg shadow-lg p-6">
+            <h3 className="text-xl font-semibold mb-4">Soporte personalizado</h3>
+            <p className="text-gray-400">
+              Nuestro equipo está disponible para ayudarte con cualquier duda o problema relacionado con tu compra.
+            </p>
+          </div>
         </div>
       </div>
     </>

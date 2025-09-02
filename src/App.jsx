@@ -8,6 +8,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import ProductDetail from './pages/ProductDetail';
 import Checkout from './pages/Checkout';
+import TermsAndConditions from './pages/TermsAndConditions';
 import { CartProvider } from './context/CartContext';
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
           <Route path="register" element={<Register />} />
           <Route path="product/:id" element={<ProductDetail />} />
           <Route path="checkout" element={<Checkout />} />
+          <Route path="terminos" element={<TermsAndConditions />} />
         </Route>
       </Routes>
     </CartProvider>

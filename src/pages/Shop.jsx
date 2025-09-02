@@ -2,12 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import ProductCard from '../components/ProductCard';
-import '../css/shop.css'; // ¡Importante! Aquí se importan los estilos.
-
 
 const Shop = () => {
   const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
   const [loading, setLoading] = useState(true);
   const [notification, setNotification] = useState(false);
   const { addToCart } = useCart();
@@ -27,9 +26,9 @@ const Shop = () => {
           },
         }
       );
-      
+
       if (!response.ok) throw new Error("Error al obtener los datos de la API");
-      
+
       const data = await response.json();
       setProducts(data.shop);
       setLoading(false);
@@ -45,7 +44,7 @@ const Shop = () => {
       precio: product.price.finalPrice * 4.4,
       imagen: product.displayAssets?.[0]?.url || product.granted?.[0]?.images?.icon_background,
     };
-    
+
     addToCart(cartProduct);
     showNotification();
   };
@@ -83,28 +82,13 @@ const Shop = () => {
     setTimeout(() => setNotification(false), 2000);
   };
 
-  const getCurrentDateTime = () => {
-    const fecha = new Date();
-    const opciones = {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: true,
-    };
-    return fecha.toLocaleString("es-ES", opciones);
-  };
-
   const organizeProductsByCategory = () => {
     const categorias = {};
-    
+
     products.forEach((item) => {
       const categoria = item.section?.name || item.displayType || "Otros";
       if (!categorias[categoria]) categorias[categoria] = [];
-      
+
       categorias[categoria].push(item);
     });
 
@@ -112,11 +96,22 @@ const Shop = () => {
   };
 
   const filteredProducts = () => {
-    if (!searchTerm) return products;
-    return products.filter(product => 
-      product.displayName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.rarity?.name?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    let filtered = products;
+
+    if (searchTerm) {
+      filtered = filtered.filter(product =>
+        product.displayName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.rarity?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    if (selectedCategory) {
+      filtered = filtered.filter(product =>
+        (product.section?.name || product.displayType || "Otros") === selectedCategory
+      );
+    }
+
+    return filtered;
   };
 
   if (loading) {
@@ -140,7 +135,7 @@ const Shop = () => {
       <div className="pt-20 pb-8">
         <div className="text-center mt-8">
           <h1 className="text-4xl font-bold">Tienda de Fortnite</h1>
-          <p className="text-gray-400 mt-2">{getCurrentDateTime()}</p>
+          <p className="text-gray-400 mt-2">{new Date().toLocaleString('es-ES')}</p>
         </div>
 
         {/* Search */}
@@ -154,12 +149,29 @@ const Shop = () => {
           />
         </div>
 
+        {/* Dropdown de categorías */}
+        <div className="flex justify-center my-6">
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="w-1/2 p-2 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
+          >
+            <option value="">Todas las categorías</option>
+            {Object.keys(categorizedProducts).map((categoria) => (
+              <option key={categoria} value={categoria}>
+                {categoria}
+              </option>
+            ))}
+          </select>
+        </div>
+
         <section className="px-4">
-          {searchTerm ? (
-            // Show filtered results
+          {selectedCategory ? (
             <div>
-              <h2 className="category-title">Resultados de búsqueda</h2>
-              <div className="product-container">
+              <h2 className="text-2xl font-semibold text-white border-b-2 border-blue-500 pb-2 mb-4">
+                {selectedCategory}
+              </h2>
+              <div className="flex flex-wrap gap-[25px] justify-center items-start p-5">
                 {filtered.slice(0, 20).map((product, index) => (
                   <ProductCard
                     key={`${product.displayName}-${index}`}
@@ -171,25 +183,23 @@ const Shop = () => {
               </div>
             </div>
           ) : (
-            // Show categorized products
-            Object.entries(categorizedProducts)
-              .sort(([a], [b]) => a === "Pistas de improvisación" ? 1 : b === "Pistas de improvisación" ? -1 : 0)
-              .map(([categoria, productos]) => (
-                <div key={categoria} className="mb-12">
-                  <h2 className="category-title">{categoria}</h2>
-                  <div className={categoria === "Pistas de improvisación" ? "pistas-container" : "product-container"}>
-                    {productos.slice(0, 20).map((product, index) => (
-                      <ProductCard
-                        key={`${product.displayName}-${index}`}
-                        product={product}
-                        onAddToCart={handleAddToCart}
-                        onClick={handleProductClick}
-                        isBundle={product.displayType === "bundle"}
-                      />
-                    ))}
-                  </div>
+            Object.entries(categorizedProducts).map(([categoria, productos]) => (
+              <div key={categoria} className="mb-12">
+                <h2 className="text-2xl font-semibold text-white border-b-2 border-blue-500 pb-2 mb-4">
+                  {categoria}
+                </h2>
+                <div className="flex flex-wrap gap-[25px] justify-center items-start p-5">
+                  {productos.slice(0, 20).map((product, index) => (
+                    <ProductCard
+                      key={`${product.displayName}-${index}`}
+                      product={product}
+                      onAddToCart={handleAddToCart}
+                      onClick={handleProductClick}
+                    />
+                  ))}
                 </div>
-              ))
+              </div>
+            ))
           )}
         </section>
       </div>
