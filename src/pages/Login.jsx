@@ -1,33 +1,73 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-
+import { supabase } from '../supabaseCliente';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
+
+  // 🔹 Nuevo efecto: detectar confirmación de email
+  useEffect(() => {
+    const handleConfirm = async () => {
+      const { data, error } = await supabase.auth.getSession();
+      if (error) {
+        console.error('Error al obtener sesión:', error.message);
+        return;
+      }
+      if (data.session) {
+        console.log('Usuario confirmado:', data.session.user);
+        navigate('/'); // redirigir al inicio o dashboard
+      }
+    };
+
+    handleConfirm();
+  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    // Simulate login process
-    setTimeout(() => {
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        setError('Credenciales incorrectas. Intenta nuevamente.');
+      } else {
+        alert('Login exitoso');
+        navigate('/');
+      }
+    } catch (err) {
+      setError('Ocurrió un error al iniciar sesión.');
+    } finally {
       setLoading(false);
-      alert('Login exitoso');
-      navigate('/');
-    }, 2000);
+    }
   };
 
-  const handleGoogleLogin = () => {
+  const handleGoogleLogin = async () => {
     setLoading(true);
-    // Simulate Google login
-    setTimeout(() => {
+
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: "https://tioflashstore.netlify.app/login", // 👈 asegura redirección correcta
+        },
+      });
+
+      if (error) {
+        setError('Ocurrió un error al iniciar sesión con Google.');
+      }
+    } catch (err) {
+      setError('Ocurrió un error al iniciar sesión con Google.');
+    } finally {
       setLoading(false);
-      alert('Login con Google exitoso');
-      navigate('/');
-    }, 2000);
+    }
   };
 
   return (
@@ -101,20 +141,10 @@ const Login = () => {
                 Iniciar sesión con Google
               </button>
             </form>
+            {error && <p className="text-red-400 text-sm mt-4">{error}</p>}
           </div>
         </div>
       </div>
-
-      {loading && (
-        <div className="spinner">
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
-        </div>
-      )}
     </div>
   );
 };

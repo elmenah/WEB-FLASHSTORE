@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-
+import { supabase } from '../supabaseCliente'; // Asegúrate de tener configurado el cliente de Supabase
 
 const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!acceptTerms) {
       alert("Debes aceptar los términos y condiciones para registrarte.");
       return;
@@ -19,34 +20,30 @@ const Register = () => {
 
     setLoading(true);
 
-    // Simulate registration process
-    setTimeout(() => {
-      setLoading(false);
-      alert('Usuario registrado correctamente');
-      navigate('/login');
-    }, 2000);
-  };
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
 
-  const handleGoogleRegister = () => {
-    if (!acceptTerms) {
-      alert("Debes aceptar los términos y condiciones para registrarte.");
-      return;
+      if (error) {
+        setError('Ocurrió un error al registrarte. Intenta nuevamente.');
+      } else {
+        alert('Se ha enviado un correo de confirmación. Por favor verifica tu correo electrónico.');
+        navigate('/login'); // Redirige al login
+      }
+    } catch (err) {
+      setError('Ocurrió un error inesperado.');
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(true);
-    
-    // Simulate Google registration
-    setTimeout(() => {
-      setLoading(false);
-      alert('Registro con Google exitoso');
-      navigate('/');
-    }, 2000);
   };
 
   return (
-    <div className="h-screen flex items-center justify-center bg-gray-900 pt-14">
+    <div className="min-h-screen flex items-center justify-center bg-gray-900">
       <div className="w-full max-w-4xl flex shadow-lg rounded-lg overflow-hidden">
-        <div className="w-1/2 hidden md:block">
+        {/* Imagen de fondo */}
+        <div className="hidden md:block w-1/2">
           <img 
             src="/Imagenes/og-s2-line-up-1920x1080-1114b1e89809.webp" 
             alt="Imagen de fondo"
@@ -54,83 +51,62 @@ const Register = () => {
           />
         </div>
 
+        {/* Formulario */}
         <div className="w-full md:w-1/2 bg-gray-800 p-8 flex flex-col justify-center">
-          <div className="w-full max-w-md bg-gray-800 p-6">
-            <h2 className="text-2xl font-bold text-gray-200 mb-4">Registro</h2>
-            <form className="flex flex-col" onSubmit={handleSubmit}>
-              <input 
-                type="email"
-                placeholder="Correo"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="bg-gray-700 text-gray-200 border-0 rounded-md p-2 mb-4 focus:bg-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
-                required
-              />
-              <input 
-                type="password"
-                placeholder="Clave"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="bg-gray-700 text-gray-200 border-0 rounded-md p-2 mb-4 focus:bg-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
-                required
-              />
-
-              <div className="mb-4">
-                <label className="checkbox-wrapper">
-                  <input 
-                    type="checkbox" 
-                    checked={acceptTerms}
-                    onChange={(e) => setAcceptTerms(e.target.checked)}
-                  />
-                  <div className="checkmark">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                      <path d="M20 6L9 17L4 12" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"></path>
-                    </svg>
-                  </div>
-                  <span className="label">Soy mayor de 18 años.</span>
+          <div className="w-full max-w-md mx-auto">
+            <h2 className="text-3xl font-bold text-white mb-6 text-center">Registro</h2>
+            <form className="space-y-6" onSubmit={handleSubmit}>
+              <div>
+                <label htmlFor="email" className="block text-sm text-gray-300 mb-2">Correo Electrónico</label>
+                <input 
+                  id="email"
+                  type="email"
+                  placeholder="tuemail@ejemplo.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full rounded-lg bg-gray-700 border border-gray-600 p-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="password" className="block text-sm text-gray-300 mb-2">Contraseña</label>
+                <input 
+                  id="password"
+                  type="password"
+                  placeholder="********"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full rounded-lg bg-gray-700 border border-gray-600 p-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div className="flex items-center">
+                <input 
+                  type="checkbox" 
+                  id="acceptTerms"
+                  checked={acceptTerms}
+                  onChange={(e) => setAcceptTerms(e.target.checked)}
+                  className="rounded border-gray-600 bg-gray-700 text-blue-500 focus:ring-blue-500"
+                />
+                <label htmlFor="acceptTerms" className="ml-2 text-sm text-gray-300">
+                  Acepto los <Link to="/terms" className="text-blue-500 underline">términos y condiciones</Link>.
                 </label>
               </div>
-
               <button
                 type="submit"
                 disabled={loading}
-                className="bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-bold py-2 px-4 rounded-md mt-4 hover:bg-indigo-600 hover:to-blue-600 transition ease-in-out duration-150 disabled:opacity-50"
+                className="w-full py-3 rounded-lg bg-green-500 hover:bg-green-600 text-white font-semibold transition disabled:opacity-50"
               >
                 {loading ? 'Registrando...' : 'Registrarme'}
               </button>
-
-              <button
-                type="button"
-                onClick={handleGoogleRegister}
-                disabled={loading}
-                className="bg-white text-gray-800 font-bold py-2 px-4 rounded-md mt-4 hover:bg-gray-200 transition ease-in-out duration-150 flex items-center justify-center border border-gray-300 shadow-md disabled:opacity-50"
-              >
-                <img 
-                  src="https://img.icons8.com/?size=100&id=V5cGWnc9R4xj&format=png&color=000000" 
-                  alt="Google"
-                  className="w-5 h-5 mr-2"
-                />
-                Registro con Google
-              </button>
-
-              <Link to="/login" className="text-white mt-4 hover:text-blue-400 transition-colors">
-                Ya tengo una cuenta
-              </Link>
+              <p className="text-sm text-gray-400 text-center">
+                ¿Ya tienes una cuenta? <Link to="/login" className="text-blue-500 underline">Inicia sesión</Link>
+              </p>
             </form>
+            {error && <p className="text-red-400 text-sm mt-4 text-center">{error}</p>}
           </div>
         </div>
       </div>
-
-      {loading && (
-        <div className="spinner">
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
-        </div>
-      )}
     </div>
   );
 };

@@ -86,7 +86,7 @@ const Checkout = () => {
     const totalAmount = getTotal();
     const totalFormatted = CLP.format(totalAmount);
 
-    // Create WhatsApp message
+    // Crear mensaje de WhatsApp
     let mensaje = `NUEVA ORDEN\n\n`;
     mensaje += `Email: ${email.trim()}\n`;
     mensaje += `Fortnite Username: ${fortniteUsername.trim()}\n`;
@@ -99,6 +99,7 @@ const Checkout = () => {
       const precio = CLP.format(producto.precio);
       const cantidad = producto.cantidad || 1;
       mensaje += `${i + 1}. ${producto.nombre} - ${precio} x${cantidad}\n`;
+      mensaje += `Imagen: ${producto.imagen}\n`; // Agregar URL de la imagen
     });
 
     const url = `https://wa.me/56930917730?text=${encodeURIComponent(mensaje)}`;
