@@ -47,7 +47,7 @@ const ProductCard = ({ product, onAddToCart, onClick }) => {
             alt="V-Bucks" 
             className="w-4 h-4"
           />
-          <span className="text-[#999] text-xs line-through">{product.price.finalPrice}</span>
+          <span className="text-[#999] text-xs ">{product.price.finalPrice}</span>
           <span className="text-[#4f46e5] font-bold text-sm">
             {(product.price.finalPrice * 4.4).toLocaleString("es-CL")} CLP
           </span>
