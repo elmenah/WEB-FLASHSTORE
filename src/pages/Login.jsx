@@ -18,7 +18,7 @@ const Login = () => {
       }
       if (data.session) {
         // Si hay una sesión activa, redirige a /home
-        navigate('/home');
+        navigate('/');
       }
     };
 
