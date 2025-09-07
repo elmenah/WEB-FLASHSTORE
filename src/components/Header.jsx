@@ -1,11 +1,27 @@
-import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { supabase } from '../supabaseCliente';
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [session, setSession] = useState(null); // Estado para la sesión activa
   const { openCart } = useCart();
   const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data, error } = await supabase.auth.getSession();
+      if (error) {
+        console.error('Error al obtener sesión:', error.message);
+        return;
+      }
+      setSession(data.session); // Actualiza el estado de la sesión
+    };
+
+    checkSession();
+  }, []);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -17,6 +33,10 @@ const Header = () => {
 
   const isActive = (path) => {
     return location.pathname === path;
+  };
+
+  const handleAccountRedirect = () => {
+    navigate('/micuenta'); // Redirige a la página MiCuenta
   };
 
   return (
