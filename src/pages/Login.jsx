@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseCliente';
 
@@ -9,37 +9,21 @@ const Login = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  // 🔹 Nuevo efecto: detectar confirmación de email
-  useEffect(() => {
-    const handleConfirm = async () => {
-      const { data, error } = await supabase.auth.getSession();
-      if (error) {
-        console.error('Error al obtener sesión:', error.message);
-        return;
-      }
-      if (data.session) {
-        console.log('Usuario confirmado:', data.session.user);
-        navigate('/'); // redirigir al inicio o dashboard
-      }
-    };
-
-    handleConfirm();
-  }, [navigate]);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
         setError('Credenciales incorrectas. Intenta nuevamente.');
-      } else {
-        alert('Login exitoso');
+      } else if (data.session) {
+        // ✅ La sesión solo se crea aquí, después del login correcto
         navigate('/');
       }
     } catch (err) {
@@ -51,12 +35,13 @@ const Login = () => {
 
   const handleGoogleLogin = async () => {
     setLoading(true);
+    setError('');
 
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: "https://tioflashstore.netlify.app/login", // 👈 asegura redirección correcta
+          redirectTo: "https://tioflashstore.netlify.app/login",
         },
       });
 
