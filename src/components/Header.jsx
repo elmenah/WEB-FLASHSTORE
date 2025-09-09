@@ -6,7 +6,9 @@ import { supabase } from '../supabaseCliente';
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [session, setSession] = useState(null); // Estado para la sesión activa
-  const { openCart } = useCart();
+  const [showLogoutModal, setShowLogoutModal] = useState(false); // Estado para el modal de confirmación
+  const [logoutMessage, setLogoutMessage] = useState(""); // Estado para el mensaje de confirmación
+  const { cart, openCart } = useCart(); // Obtener el carrito desde el contexto
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -47,10 +49,22 @@ const Header = () => {
         return;
       }
       setSession(null); // Limpia el estado de la sesión
-      navigate('/'); // Redirige al inicio después del logout
+      setLogoutMessage("Sesión cerrada exitosamente."); // Mensaje de confirmación
+      setTimeout(() => {
+        navigate('/login'); // Redirige al login después del logout
+        setLogoutMessage(""); // Limpia el mensaje después de 3 segundos
+      }, 3000);
     } catch (err) {
       console.error('Error al cerrar sesión:', err.message);
     }
+  };
+
+  const openLogoutModal = () => {
+    setShowLogoutModal(true); // Muestra el modal de confirmación
+  };
+
+  const closeLogoutModal = () => {
+    setShowLogoutModal(false); // Cierra el modal de confirmación
   };
 
   return (
@@ -86,8 +100,11 @@ const Header = () => {
 
           <nav className="hidden lg:flex gap-8 ml-auto">
             <ul className="flex space-x-4">
-              <li className="icon cursor-pointer" onClick={openCart}>
-                <span className="hover:text-blue-600">Carrito</span>
+              <li
+                className={`icon cursor-pointer relative ${cart.length > 0 ? 'text-yellow-500' : 'hover:text-blue-600'}`}
+                onClick={openCart}
+              >
+                <span>Carrito</span>
               </li>
               {!session ? (
                 <li className={`nav-link hover:text-blue-600 ${isActive('/login') ? 'text-blue-600' : ''}`}>
@@ -105,7 +122,7 @@ const Header = () => {
                   </li>
                   <li className="nav-link hover:text-blue-600">
                     <button
-                      onClick={handleLogout}
+                      onClick={openLogoutModal}
                       className="text-white hover:text-red-600"
                     >
                       Logout
@@ -118,85 +135,52 @@ const Header = () => {
 
           <div className="lg:hidden flex items-center">
             <span 
-              className="material-symbols-outlined text-2xl cursor-pointer" 
+              className="material-symbols-outlined text-2xl cursor-pointer relative" 
               onClick={openCart}
             >
               shopping_cart
+              {cart.length > 0 && (
+                <span className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                  {cart.length}
+                </span>
+              )}
             </span>
           </div>
         </div>
       </header>
 
-      {/* Mobile Menu */}
-      <div className={`lg:hidden fixed inset-0 bg-gray-800 bg-opacity-70 z-40 ${isMobileMenuOpen ? '' : 'hidden'}`}>
-        <div className="bg-gray-800 p-6 w-3/4 max-w-xs h-full">
-          <span 
-            className="material-symbols-outlined text-2xl cursor-pointer" 
-            onClick={closeMobileMenu}
-          >
-            close
-          </span>
-          <ul className="mt-6 space-y-4">
-            <li>
-              <Link 
-                to="/" 
-                className="text-white hover:text-blue-600" 
-                onClick={closeMobileMenu}
+      {/* Modal de confirmación */}
+      {showLogoutModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-black rounded-lg p-6 shadow-lg">
+            <h2 className="text-lg font-bold mb-4">¿Estás seguro de que quieres cerrar sesión?</h2>
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={closeLogoutModal}
+                className="px-4 py-2 bg-white text-black rounded hover:bg-gray-400"
               >
-                Inicio
-              </Link>
-            </li>
-            <li>
-              <Link 
-                to="/shop" 
-                className="text-white hover:text-blue-600" 
-                onClick={closeMobileMenu}
+                Cancelar
+              </button>
+              <button
+                onClick={() => {
+                  closeLogoutModal();
+                  handleLogout();
+                }}
+                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
               >
-                Tienda
-              </Link>
-            </li>
-            <li>
-              <Link 
-                to="/club" 
-                className="text-white hover:text-blue-600" 
-                onClick={closeMobileMenu}
-              >
-                Club Fortnite
-              </Link>
-            </li>
-            {!session ? (
-              <li>
-                <Link 
-                  to="/login" 
-                  className="text-white hover:text-blue-600" 
-                  onClick={closeMobileMenu}
-                >
-                  Login
-                </Link>
-              </li>
-            ) : (
-              <>
-                <li>
-                  <button
-                    onClick={handleAccountRedirect}
-                    className="text-white hover:text-blue-600"
-                  >
-                    Mi Cuenta
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={handleLogout}
-                    className="text-white hover:text-red-600"
-                  >
-                    Logout
-                  </button>
-                </li>
-              </>
-            )}
-          </ul>
+                Confirmar
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Mensaje de confirmación */}
+      {logoutMessage && (
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white py-2 px-4 rounded shadow-lg">
+          {logoutMessage}
+        </div>
+      )}
     </>
   );
 };

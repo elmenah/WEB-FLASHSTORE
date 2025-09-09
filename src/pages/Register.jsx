@@ -44,6 +44,28 @@ const Register = () => {
     }
   };
 
+  const handleGoogleRegister = async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: "https://tioflashstore.netlify.app/",
+        },
+      });
+
+      if (error) {
+        setError("Ocurrió un error al registrarte con Google.");
+      }
+    } catch (err) {
+      setError("Ocurrió un error inesperado.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900">
       <div className="w-full max-w-4xl flex shadow-lg rounded-lg overflow-hidden">
@@ -110,6 +132,19 @@ const Register = () => {
                 className="w-full py-3 rounded-lg bg-green-500 hover:bg-green-600 text-white font-semibold transition disabled:opacity-50"
               >
                 {loading ? "Registrando..." : "Registrarme"}
+              </button>
+              <button
+                type="button"
+                onClick={handleGoogleRegister}
+                disabled={loading}
+                className="w-full py-3 rounded-lg bg-white text-gray-800 font-semibold border border-gray-300 hover:bg-gray-200 transition disabled:opacity-50 flex items-center justify-center"
+              >
+                <img
+                  src="https://img.icons8.com/?size=100&id=V5cGWnc9R4xj&format=png&color=000000"
+                  alt="Google"
+                  className="w-5 h-5 mr-2"
+                />
+                Registrarme con Google
               </button>
               <p className="text-sm text-gray-400 text-center">
                 ¿Ya tienes una cuenta?{" "}
