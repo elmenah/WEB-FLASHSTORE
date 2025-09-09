@@ -39,6 +39,20 @@ const Header = () => {
     navigate('/micuenta'); // Redirige a la página MiCuenta
   };
 
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Error al cerrar sesión:', error.message);
+        return;
+      }
+      setSession(null); // Limpia el estado de la sesión
+      navigate('/'); // Redirige al inicio después del logout
+    } catch (err) {
+      console.error('Error al cerrar sesión:', err.message);
+    }
+  };
+
   return (
     <>
       <header className="fixed top-0 left-0 w-full z-40 bg-gray-900 bg-opacity-50 backdrop-blur-sm h-14 flex items-center px-6 border-b border-gray-900">
@@ -75,9 +89,30 @@ const Header = () => {
               <li className="icon cursor-pointer" onClick={openCart}>
                 <span className="hover:text-blue-600">Carrito</span>
               </li>
-              <li className={`nav-link hover:text-blue-600 ${isActive('/login') ? 'text-blue-600' : ''}`}>
-                <Link to="/login">Login</Link>
-              </li>
+              {!session ? (
+                <li className={`nav-link hover:text-blue-600 ${isActive('/login') ? 'text-blue-600' : ''}`}>
+                  <Link to="/login">Login</Link>
+                </li>
+              ) : (
+                <>
+                  <li className="nav-link hover:text-blue-600">
+                    <button
+                      onClick={handleAccountRedirect}
+                      className="text-white hover:text-blue-600"
+                    >
+                      Mi Cuenta
+                    </button>
+                  </li>
+                  <li className="nav-link hover:text-blue-600">
+                    <button
+                      onClick={handleLogout}
+                      className="text-white hover:text-red-600"
+                    >
+                      Logout
+                    </button>
+                  </li>
+                </>
+              )}
             </ul>
           </nav>
 
@@ -129,15 +164,36 @@ const Header = () => {
                 Club Fortnite
               </Link>
             </li>
-            <li>
-              <Link 
-                to="/login" 
-                className="text-white hover:text-blue-600" 
-                onClick={closeMobileMenu}
-              >
-                Login
-              </Link>
-            </li>
+            {!session ? (
+              <li>
+                <Link 
+                  to="/login" 
+                  className="text-white hover:text-blue-600" 
+                  onClick={closeMobileMenu}
+                >
+                  Login
+                </Link>
+              </li>
+            ) : (
+              <>
+                <li>
+                  <button
+                    onClick={handleAccountRedirect}
+                    className="text-white hover:text-blue-600"
+                  >
+                    Mi Cuenta
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={handleLogout}
+                    className="text-white hover:text-red-600"
+                  >
+                    Logout
+                  </button>
+                </li>
+              </>
+            )}
           </ul>
         </div>
       </div>

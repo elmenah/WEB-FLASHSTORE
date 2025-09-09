@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseCliente';
 
@@ -8,22 +8,6 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const checkSession = async () => {
-      const { data, error } = await supabase.auth.getSession();
-      if (error) {
-        console.error('Error al obtener sesión:', error.message);
-        return;
-      }
-      if (data.session) {
-        // Si hay una sesión activa, redirige a /home
-        navigate('/');
-      }
-    };
-
-    checkSession();
-  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -39,7 +23,8 @@ const Login = () => {
       if (error) {
         setError('Credenciales incorrectas. Intenta nuevamente.');
       } else if (data.session) {
-        navigate('/'); // Redirige al usuario a /home después del login exitoso
+        // 👇 Aquí recién se crea la sesión al loguearse
+        navigate('/');
       }
     } catch (err) {
       setError('Ocurrió un error al iniciar sesión.');
@@ -118,7 +103,7 @@ const Login = () => {
                   Regístrate
                 </Link>
               </p>
-              
+
               <button
                 type="submit"
                 disabled={loading}

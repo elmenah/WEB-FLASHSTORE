@@ -9,6 +9,7 @@ import Register from './pages/Register';
 import ProductDetail from './pages/ProductDetail';
 import Checkout from './pages/Checkout';
 import TermsAndConditions from './pages/TermsAndConditions';
+import MiCuenta from './pages/MiCuenta';
 import { CartProvider } from './context/CartContext';
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
+          <Route path="Micuenta" element={<MiCuenta />} />
           <Route path="shop" element={<Shop />} />
           <Route path="club" element={<Club />} />
           <Route path="login" element={<Login />} />

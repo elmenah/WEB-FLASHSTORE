@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { Particles } from "@/components/magicui/particles";
 
 const Home = () => {
   const { addToCart } = useCart();
@@ -66,11 +67,21 @@ const Home = () => {
 
       {/* PORTADA */}
       <div className="relative flex items-center justify-center h-screen bg-gray-900 text-white overflow-hidden">
+        {/* Partículas sobre la imagen */}
+        <Particles 
+          className="absolute inset-0 z-10 pointer-events-none" 
+          quantity={250} 
+          staticity={10} 
+          ease={50} 
+          size={1.5} 
+          color="#ffffff" 
+        />
+        <img src="/Imagenes/1076581.jpg" className="w-full h-full object-cover z-0" alt="Hero" />
         <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent z-10"></div>
         <div className="absolute left-1/2 transform -translate-x-1/2 sm:left-6 sm:transform-none sm:-translate-x-0 top-1/2 -translate-y-1/2 z-20 text-center">
           <h1 className="text-3xl md:text-5xl font-bold mb-4 italic">
             Bienvenido a <span className="bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500 bg-clip-text text-transparent">Tio Flashstore</span>
-          </h1>
+          </h1><br />
           <Link 
             to="/shop"
             className="bg-white text-gray-900 px-4 py-2 rounded-lg text-lg font-semibold shadow-lg hover:bg-gray-100 transition-colors"
@@ -78,7 +89,6 @@ const Home = () => {
             Ver la tienda de hoy
           </Link>
         </div>
-        <img src="/Imagenes/1076581.jpg" className="w-full h-full object-cover z-0" alt="Hero" />
       </div>
 
       {/* ¿CÓMO FUNCIONA? */}
