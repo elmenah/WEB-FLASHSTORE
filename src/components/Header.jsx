@@ -244,6 +244,15 @@ const Header = () => {
             <ul className="space-y-4">
               <li>
                 <Link
+                  to="/"
+                  className="text-white hover:text-yellow-500"
+                  onClick={closeMobileMenu}
+                >
+                  Inicio
+                </Link>
+              </li>
+              <li>
+                <Link
                   to="/shop"
                   className="text-white hover:text-yellow-500"
                   onClick={closeMobileMenu}
