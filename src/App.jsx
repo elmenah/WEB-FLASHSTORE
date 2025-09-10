@@ -11,7 +11,7 @@ import AuthGuard from "./components/AuthGuard";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import CartPopup from "./components/CartPopup";
-
+import ProductDetail from "./pages/ProductDetail";
 import { CartProvider } from './context/CartContext';
 
 const App = () => {
@@ -32,6 +32,7 @@ const App = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/" element={ <AuthGuard> <Home /> </AuthGuard>} />
+            <Route path="product/:id" element={<AuthGuard><ProductDetail /></AuthGuard>} />
             <Route path="/shop" element={ <AuthGuard> <Shop /> </AuthGuard>} />
             <Route path="/club" element={ <AuthGuard> <Club /> </AuthGuard>} />
             {/* Rutas protegidas */}

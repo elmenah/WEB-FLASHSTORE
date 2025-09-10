@@ -34,7 +34,7 @@ const Register = () => {
       } else {
         setSuccessMessage("Registro exitoso. Redirigiendo al login...");
         setTimeout(() => {
-          navigate("/login"); // 👈 solo redirige al login
+          navigate("/login");
         }, 2000);
       }
     } catch (err) {
@@ -68,8 +68,9 @@ const Register = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900">
-      <div className="w-full max-w-4xl flex shadow-lg rounded-lg overflow-hidden">
-        <div className="hidden md:block w-1/2">
+      <div className="w-full max-w-4xl flex flex-col md:flex-row shadow-lg rounded-lg overflow-hidden">
+        {/* Imagen de fondo */}
+        <div className="w-full md:w-1/2 h-64 md:h-auto">
           <img
             src="/Imagenes/og-s2-line-up-1920x1080-1114b1e89809.webp"
             alt="Imagen de fondo"
@@ -77,6 +78,7 @@ const Register = () => {
           />
         </div>
 
+        {/* Formulario */}
         <div className="w-full md:w-1/2 bg-gray-800 p-8 flex flex-col justify-center">
           <div className="w-full max-w-md mx-auto">
             <h2 className="text-3xl font-bold text-white mb-6 text-center">

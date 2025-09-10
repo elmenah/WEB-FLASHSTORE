@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import ProductCard from '../components/ProductCard';
+import '../css/Shop.css';
 
 const Shop = () => {
   const [products, setProducts] = useState([]);
@@ -31,10 +32,18 @@ const Shop = () => {
 
       const data = await response.json();
       setProducts(data.shop);
-      setLoading(false);
+
+      // Retraso de 4 segundos antes de ocultar el loader
+      setTimeout(() => {
+        setLoading(false);
+      }, 3000);
     } catch (error) {
       console.error("❌ Error al cargar la API:", error);
-      setLoading(false);
+
+      // Retraso de 4 segundos antes de ocultar el loader en caso de error
+      setTimeout(() => {
+        setLoading(false);
+      }, 3000);
     }
   };
 
@@ -66,7 +75,8 @@ const Shop = () => {
       bundle2: product.granted?.[1]?.images?.icon_background,
       bundle3: product.granted?.[2]?.images?.icon_background,
       bundle4: product.granted?.[3]?.images?.icon_background,
-      colorfondo: product.colors?.color1
+      colorfondo: product.colors?.color1,
+      colorfondo2: product.colors?.color2
     };
 
     const params = new URLSearchParams();
@@ -117,7 +127,21 @@ const Shop = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-2xl">Cargando productos...</div>
+      <div className="card">
+        <div className="loader">
+        <p>Cargando</p>
+        <div className="words">
+          <span className="word">Items</span>
+          <span className="word">Skins</span>
+          <span className="word">Lotes</span>
+          <span className="word">Bailes</span>
+          <span className="word">Canciones</span>
+        </div>
+        </div>
+        <div>
+        Codigo <span style={{ color: 'gold', fontWeight: 'bold' }}>TIOFLASH</span> en la tienda de fortnite
+        </div>
+      </div>
       </div>
     );
   }
@@ -134,19 +158,8 @@ const Shop = () => {
 
       <div className="pt-20 pb-8">
         <div className="text-center mt-8">
-          <h1 className="text-4xl font-bold">Tienda de Fortnite</h1>
+          <h1 className="text-4xl font-bold">Tienda</h1>
           <p className="text-gray-400 mt-2">{new Date().toLocaleString('es-ES')}</p>
-        </div>
-
-        {/* Search */}
-        <div className="flex justify-center my-6">
-          <input 
-            type="text" 
-            placeholder="Buscar productos..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-1/2 p-2 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600" 
-          />
         </div>
 
         {/* Dropdown de categorías */}

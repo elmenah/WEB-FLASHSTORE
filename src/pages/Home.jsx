@@ -182,42 +182,8 @@ const Home = () => {
           </div>
         </div>
       </div>
-      {/* CLUB FORTNITE */}
-      <div className="container mx-auto p-4 text-white">
-        <h2 className="text-4xl font-bold text-center mb-8 italic">Club Fortnite</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-8 justify-center place-items-center">
-          {clubItems.map((item) => (
-            <div key={item.id} className="bg-gray-800 w-[160px] sm:w-[190px] md:w-[190px] rounded-lg overflow-hidden shadow-lg flex flex-col justify-between mx-auto">
-              <img 
-                alt={item.title} 
-                loading="lazy" 
-                width="160" 
-                height="240" 
-                className="object-cover object-bottom w-full" 
-                src={item.image}
-              />
-              <div className="p-4 flex-1 flex flex-col justify-between">
-                <div>
-                  <h3 className="text-sm sm:text-lg font-semibold mb-2 truncate">{item.title}</h3>
-                  <p className="text-gray-400 text-xs sm:text-sm truncate">{item.desc}</p>
-                </div>
-                <div className="flex items-center justify-between mt-4">
-                  <p className="text-gray-100 text-xs sm:text-sm font-semibold">
-                    {new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(item.price)}
-                  </p>
-                  <button 
-                    onClick={() => handleAddToCart(item)} 
-                    className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-full transition-all"
-                  >
-                    <i className="fas fa-shopping-cart w-4 h-4"></i>
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
+      
+      
       
 
      

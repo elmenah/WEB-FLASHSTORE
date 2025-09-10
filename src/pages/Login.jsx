@@ -108,10 +108,7 @@ const Login = () => {
               />
               
               <div className="flex items-center justify-between flex-wrap">
-                <label className="text-sm text-gray-200 cursor-pointer">
-                  <input className="mr-2" type="checkbox" />
-                  Recuérdame
-                </label>
+                
                 <a className="text-sm text-blue-500 hover:underline mb-0.5" href="#">
                   ¿Olvidaste tu clave?
                 </a>

@@ -16,8 +16,8 @@ const ProductCard = ({ product, onAddToCart, onClick }) => {
   return (
     <div 
       className={`relative bg-[#1e1e24] rounded-lg shadow-lg overflow-hidden transition-transform transform hover:translate-y-[-5px] hover:shadow-2xl hover:border-[#4f46e5] cursor-pointer ${
-        isBundle ? 'w-[400px]' : 'w-[280px]'
-      } h-[420px]`}
+        isBundle ? 'w-[550px]' : 'w-[270px]'
+      } h-[450px]`}
       onClick={handleCardClick}
     >
       {product.banner?.name && (
@@ -27,13 +27,15 @@ const ProductCard = ({ product, onAddToCart, onClick }) => {
       )}
       
       <div 
-        className="h-[65%] flex items-center justify-center bg-[#111115]"
-        style={{ backgroundColor: product.colors?.color1 }}
+        className="h-[75%] flex items-center justify-center"
+        style={{
+          background: `linear-gradient(to bottom, ${product.colors?.color1 || '#111115'}, ${product.colors?.color2 || '#111115'})`
+        }}
       >
         <img 
           src={product.displayAssets?.[0]?.url || product.granted?.[0]?.images?.icon_background} 
           alt={product.displayName}
-          className="object-contain w-full h-full transition-transform duration-300 hover:scale-105"
+          className="object-contain w-full h-[280px] transition-transform duration-300 hover:scale-105"
         />
       </div>
       
