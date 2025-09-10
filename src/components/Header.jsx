@@ -40,6 +40,7 @@ const Header = () => {
   };
 
   const openModal = () => {
+    closeMobileMenu();
     setIsModalOpen(true); // Abre el modal de logout
   };
 

@@ -63,9 +63,8 @@ const ProductDetail = () => {
   return (
     <div className="pt-20 pb-20">
       {/* Notification */}
-      <div className={`fixed top-20 right-20 bg-green-500 text-white py-4 px-6 rounded-2xl shadow-lg font-semibold z-50 flex items-center gap-3 backdrop-blur-sm border border-white border-opacity-20 transition-all duration-300 ${notification ? 'opacity-100 visible translate-x-0' : 'opacity-0 invisible translate-x-full'}`}>
-        <i className="fas fa-check-circle text-xl"></i>
-        <span>Producto agregado al carrito</span>
+      <div className={`fixed top-20 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg transition-opacity duration-500 z-50 ${notification ? 'opacity-100' : 'opacity-0 hidden'}`}>
+        Producto agregado al carrito
       </div>
 
       <main className="max-w-7xl mx-auto px-4">

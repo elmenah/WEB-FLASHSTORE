@@ -107,7 +107,7 @@ const Home = () => {
           {/* Pasos */}
           <div className="w-full md:w-2/3 space-y-6">
             <div className="flex items-start gap-4">
-              <div className="bg-blue-500 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg">
+              <div className="hidden md:block bg-blue-500 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-lg">
                 1
               </div>
               <div>
@@ -119,7 +119,7 @@ const Home = () => {
               </div>
             </div>
             <div className="flex items-start gap-4">
-              <div className="bg-blue-500 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg">
+              <div className="hidden md:block bg-blue-500 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-lg">
                 2
               </div>
               <div>
@@ -131,7 +131,7 @@ const Home = () => {
               </div>
             </div>
             <div className="flex items-start gap-4">
-              <div className="bg-blue-500 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg">
+              <div className="hidden md:block bg-blue-500 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-lg">
                 3
               </div>
               <div>

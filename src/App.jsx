@@ -33,7 +33,7 @@ const App = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/" element={ <AuthGuard> <Home /> </AuthGuard>} />
-            <Route path="/terminos" element={ <AuthGuard> <TermsAndConditions /> </AuthGuard>} />
+            <Route path="/terminos" element={  <TermsAndConditions /> } />
             <Route path="product/:id" element={<AuthGuard><ProductDetail /></AuthGuard>} />
             <Route path="/shop" element={ <AuthGuard> <Shop /> </AuthGuard>} />
             <Route path="/club" element={ <AuthGuard> <Club /> </AuthGuard>} />
