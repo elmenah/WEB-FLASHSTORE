@@ -59,8 +59,10 @@ const Header = () => {
     try {
       await supabase.auth.signOut();
       setSession(null); // Actualiza el estado de la sesión
+      setIsMobileMenuOpen(false); // Cierra el menú hamburguesa
       closeModal(); // Cierra el modal después de cerrar sesión
-      showNotification(); // Muestra la notificación y redirige
+      showNotification(); // Muestra la notificación de logout
+      
     } catch (error) {
       console.error("Error al cerrar sesión:", error.message);
     }
