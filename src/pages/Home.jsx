@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { Particles } from "@/components/magicui/particles";
-
+import { MorphingText } from "@/components/magicui/morphing-text";
 const Home = () => {
   const { addToCart } = useCart();
   const [notification, setNotification] = useState(false);
@@ -92,6 +92,8 @@ const Home = () => {
       </div>
 
       {/* ¿CÓMO FUNCIONA? */}
+      
+      <MorphingText texts={["Skins", "Bailes", "Lotes", "Emotes", "Club"]} />
       <div className="container mx-auto p-4 text-white">
         <h2 className="text-4xl font-bold text-center mb-8 italic">¿Cómo Funciona?</h2>
         <div className="flex flex-col md:flex-row items-center justify-center gap-8">

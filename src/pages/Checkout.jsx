@@ -58,11 +58,72 @@ const Checkout = () => {
     }
 
     try {
-      // Simulación de envío de datos
+      // 1️⃣ Obtener el usuario logueado
+      const {
+        data: { user: currentUser },
+      } = await supabase.auth.getUser();
+
+      if (!currentUser) {
+        alert("Debes iniciar sesión para hacer un pedido.");
+        return;
+      }
+
+      // 2️⃣ Insertar pedido principal en Supabase
+      const { data: pedidoData, error: pedidoError } = await supabase
+        .from("pedidos")
+        .insert([
+          {
+            user_id: currentUser.id,
+            correo: email.trim(),
+            username_fortnite: fortniteUsername.trim(),
+            estado: "No Pagado",
+          },
+        ])
+        .select()
+        .single();
+
+      if (pedidoError) throw pedidoError;
+
+      // 3️⃣ Insertar ítems del carrito
+      const itemsToInsert = cart.map((item) => ({
+        pedido_id: pedidoData.id,
+        nombre_producto: item.nombre,
+        precio_unitario: item.precio,
+        cantidad: item.cantidad || 1,
+        imagen_url: item.imagen,
+      }));
+
+      const { error: itemsError } = await supabase
+        .from("pedido_items")
+        .insert(itemsToInsert);
+
+      if (itemsError) throw itemsError;
+
+      // 4️⃣ Crear mensaje de WhatsApp
+      let mensaje = `NUEVA ORDEN\n\n`;
+      mensaje += `Correo: ${email.trim()}\n`;
+      mensaje += `Nombre Usuario: ${fortniteUsername.trim()}\n`;
+      if (orderNotes.trim()) mensaje += `Notas: ${orderNotes.trim()}\n`;
+      mensaje += `\nTotal: ${CLP.format(getTotal())}\n\n`;
+      mensaje += `Productos:\n`;
+
+      cart.forEach((producto, i) => {
+        const precio = CLP.format(producto.precio);
+        const cantidad = producto.cantidad || 1;
+        mensaje += `${i + 1}. ${producto.nombre} - ${precio} x${cantidad}\n`;
+        mensaje += `Imagen: ${producto.imagen}\n`;
+      });
+
+      const whatsappLink = `https://wa.me/56930917730?text=${encodeURIComponent(
+        mensaje
+      )}`;
+      window.open(whatsappLink, "_blank");
+
+      // 5️⃣ Limpiar carrito y redirigir
       clearCart();
       navigate("/micuenta");
     } catch (err) {
-      console.error(err);
+      console.error("Error al crear el pedido:", err.message);
       alert("Ocurrió un error al crear tu pedido.");
     }
   };
