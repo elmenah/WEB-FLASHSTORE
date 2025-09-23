@@ -10,7 +10,7 @@ const ProductCard = ({ product, onAddToCart, onClick }) => {
     onClick(product);
   };
 
-  // Verificar si el tipo contiene "Lote de"
+  // Verificar si el tipo contiene "Lote de" 
   const isBundle = product.displayType?.toLowerCase().includes("lote de");
 
   return (
