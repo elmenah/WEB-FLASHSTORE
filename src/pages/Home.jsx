@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { Particles } from "@/components/magicui/particles";
@@ -6,44 +7,93 @@ import { Particles } from "@/components/magicui/particles";
 const Home = () => {
   const { addToCart } = useCart();
   const [notification, setNotification] = useState(false);
+  
+  // Testimonios
+  const testimonios = [
+    { nombre: "@juanito", texto: "¡Me llegó todo súper rápido! 10/10" },
+    { nombre: "@vale.gamer", texto: "Excelente atención y precios, recomendado." },
+    { nombre: "@matifn", texto: "Ya he comprado varias veces y siempre cumplen." },
+    { nombre: "@sofiaplayz", texto: "El mejor lugar para comprar skins sin riesgo." },
+  ];
+  // Referencia y función para el slider de destacados
+  const sliderRef = useRef(null);
+  const scrollSlider = (dir) => {
+    if (!sliderRef.current) return;
+    sliderRef.current.scrollBy({ left: dir * 350, behavior: 'smooth' });
+  };
+  // Auto-slide destacados
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (sliderRef.current) {
+        const slider = sliderRef.current;
+        const maxScroll = slider.scrollWidth - slider.clientWidth;
+        // Si está cerca del final, vuelve al inicio
+        if (slider.scrollLeft + 400 >= maxScroll) {
+          slider.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          slider.scrollBy({ left: 350, behavior: 'smooth' });
+        }
+      }
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
+  // Productos destacados reales desde la API
+  const [destacados, setDestacados] = useState([]);
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch("https://fortnite-api.com/v2/shop?language=es");
+        if (!response.ok) throw new Error("Error al obtener los datos de la API");
+        const data = await response.json();
+        // Tomar los primeros 8 productos que tengan imagen y nombre
+        const entries = (data?.data?.entries || [])
+          .filter(p => (p.bundle?.image && p.bundle?.name) || (p.brItems?.[0]?.images?.icon && p.brItems?.[0]?.name))
+          .slice(0, 8)
+          .map(p => {
+            if (p.bundle?.name) {
+              return {
+                id: p.offerId,
+                nombre: p.bundle.name,
+                precio: Math.round(p.finalPrice * 4.4),
+                imagen: p.bundle.image,
+                desc: p.bundle.info || 'Lote especial',
+              };
+            } else {
+              return {
+                id: p.offerId,
+                nombre: p.brItems[0].name,
+                precio: Math.round(p.finalPrice * 4.4),
+                imagen: p.brItems[0].images.icon || p.brItems[0].images.featured,
+                desc: p.brItems[0].description || '',
+              };
+            }
+          });
+        setDestacados(entries);
+      } catch (e) {
+        setDestacados([]);
+      }
+    };
+    fetchProducts();
+  }, []);
 
-  const clubItems = [
-    { 
-      id: 1, 
-      title: "1 Mes Fortnite Crew", 
-      desc: "Actívalo hoy mismo!", 
-      price: 6000, 
-      image: "/Imagenes/fn crew/fnmarzo.png" 
-    },
-    { 
-      id: 2, 
-      title: "2 Meses Fortnite Crew", 
-      desc: "Obtén 2 Meses del club de Fortnite!", 
-      price: 10000, 
-      image: "/Imagenes/fn crew/fnmarzo.png" 
-    },
-    { 
-      id: 3, 
-      title: "3 Meses Fortnite Crew", 
-      desc: "Obtén 3 Meses del club de Fortnite!", 
-      price: 15000, 
-      image: "/Imagenes/fn crew/fnmarzo.png" 
-    },
-    { 
-      id: 4, 
-      title: "6 Meses Fortnite Crew", 
-      desc: "Obtén 6 Meses del club de Fortnite!", 
-      price: 26000, 
-      image: "/Imagenes/fn crew/fnmarzo.png" 
-    }
+  // Beneficios rápidos
+  const beneficios = [
+    { icon: "💸", text: "Precios bajos garantizados" },
+    { icon: "⚡", text: "Entrega rápida" },
+    { icon: "🔒", text: "Compra 100% segura" },
+    { icon: "📱", text: "Soporte personalizado" },
+    { icon: "⭐", text: "Clientes felices" },
   ];
 
+
+
   const handleAddToCart = (item) => {
+    // Soporta tanto productos destacados de la API como clubItems
     const cartItem = {
-      nombre: item.title,
-      precio: item.price,
-      imagen: item.image,
-      descripcion: item.desc,
+      nombre: item.nombre || item.title || 'Producto',
+      precio: item.precio || item.price || 0,
+      imagen: item.imagen || item.image || '',
+      descripcion: item.desc || '',
     };
     addToCart(cartItem);
     showNotification();
@@ -65,9 +115,8 @@ const Home = () => {
         Producto agregado al carrito
       </div>
 
-      {/* PORTADA */}
-      <div className="relative flex items-center justify-center h-screen bg-gray-900 text-white overflow-hidden">
-        {/* Partículas sobre la imagen */}
+      {/* HERO llamativo */}
+      <div className="relative flex items-center justify-center h-screen bg-gray-900 text-white overflow-hidden animate-fade-in">
         <Particles 
           className="absolute inset-0 z-10 pointer-events-none" 
           quantity={250} 
@@ -78,18 +127,93 @@ const Home = () => {
         />
         <img src="/Imagenes/1076581.jpg" className="w-full h-full object-cover z-0" alt="Hero" />
         <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent z-10"></div>
-        <div className="absolute left-1/2 transform -translate-x-1/2 sm:left-6 sm:transform-none sm:-translate-x-0 top-1/2 -translate-y-1/2 z-20 text-center">
-          <h1 className="text-3xl md:text-5xl font-bold mb-4 italic">
+        <div className="absolute left-1/2 transform -translate-x-1/2 sm:left-6 sm:transform-none sm:-translate-x-0 top-1/2 -translate-y-1/2 z-20 text-center animate-fade-in">
+          <h1 className="text-3xl md:text-5xl font-bold mb-4 italic drop-shadow-xl">
             Bienvenido a <span className="bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500 bg-clip-text text-transparent">Tio Flashstore</span>
-          </h1><br />
+          </h1>
+          <p className="text-lg md:text-2xl mb-6 text-white/80 font-semibold">Tu tienda confiable de skins, lotes y pases de Fortnite</p>
           <Link 
             to="/shop"
-            className="bg-white text-gray-900 px-4 py-2 rounded-lg text-lg font-semibold shadow-lg hover:bg-gray-100 transition-colors"
+            className="bg-white text-gray-900 px-6 py-3 rounded-lg text-lg font-semibold shadow-lg hover:bg-gray-100 transition-colors animate-bounce"
           >
             Ver la tienda de hoy
           </Link>
         </div>
       </div>
+
+      {/* Beneficios rápidos */}
+      <section className="py-10 bg-gray-900">
+        <div className="max-w-8xl mx-auto flex flex-wrap justify-center gap-6">
+          {beneficios.map((b, i) => (
+            <div key={i} className="flex flex-col items-center  rounded-xl px-6 py-4  animate-fade-in">
+              <span className="text-3xl mb-2">{b.icon}</span>
+              <span className="text-white font-semibold text-base text-center">{b.text}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+      
+  {/* DESTACADOS - Slider */}
+  <section className="py-12 bg-gray-900">
+        <h2 className="text-3xl font-bold text-center mb-8 text-white drop-shadow-lg">Destacados de la semana</h2>
+        <div className="relative max-w-7xl mx-auto">
+          <button onClick={() => scrollSlider(-1)} className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-black/70 text-white rounded-full p-2 shadow-lg"><svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+          <div ref={sliderRef} className="flex gap-8 overflow-x-auto no-scrollbar scroll-smooth px-10 py-2">
+            {destacados.map((item) => (
+              <div key={item.id} className="min-w-[270px] max-w-[270px] bg-gray-800/90 rounded-2xl shadow-xl p-4 flex flex-col items-center hover:scale-105 transition-transform cursor-pointer animate-fade-in">
+                <div className="w-40 h-40 rounded-xl mb-3 shadow-lg flex items-center justify-center bg-gradient-to-br from-[#47fdfe] to-[#2b6fa1]">
+                  <img src={item.imagen} alt={item.nombre} className="object-contain max-h-36 max-w-36" />
+                </div>
+                <h3 className="font-bold text-lg text-white mb-1">{item.nombre}</h3>
+                
+                <span className="text-indigo-200 font-bold text-xl mb-2">${item.precio.toLocaleString('es-CL')}</span>
+                <button onClick={() => handleAddToCart(item)} className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-full font-semibold shadow-md transition-all">Añadir al carrito</button>
+              </div>
+            ))}
+          </div>
+          <button onClick={() => scrollSlider(1)} className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-black/70 text-white rounded-full p-2 shadow-lg"><svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+        </div>
+      </section>
+
+
+      {/* Testimonios */}
+      {/* 
+      <section className="py-12 bg-gradient-to-br from-[#2b6fa1] to-[#47fdfe]">
+        <h2 className="text-3xl font-bold text-center mb-8 text-white drop-shadow-lg">Lo que opinan nuestros clientes</h2>
+        <div className="max-w-4xl mx-auto flex flex-wrap justify-center gap-8">
+          {testimonios.map((t, i) => (
+            <div key={i} className="bg-white/90 rounded-xl shadow-lg p-6 min-w-[220px] max-w-[260px] animate-fade-in">
+              <p className="text-gray-700 italic mb-2">"{t.texto}"</p>
+              <span className="text-indigo-700 font-bold">{t.nombre}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+      */}
+      
+      {/* Botón flotante de WhatsApp verde */}
+      <a
+        href="https://wa.me/56930917730"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-8 right-8 z-50 bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-transform animate-fade-in"
+        title="Ir a WhatsApp"
+      >
+       <img width="24" height="24" src="https://img.icons8.com/color/48/whatsapp--v1.png" alt="whatsapp--v1"/>
+      </a>
+      
+      {/* Animaciones CSS */}
+      <style>{`
+        .animate-fade-in {
+          animation: fadeIn 1.2s ease;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(30px); }
+          to { opacity: 1; transform: none; }
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      `}</style>
 
       {/* ¿CÓMO FUNCIONA? */}
       <div className="container mx-auto p-4 text-white">
@@ -107,9 +231,7 @@ const Home = () => {
           {/* Pasos */}
           <div className="w-full md:w-2/3 space-y-6">
             <div className="flex items-start gap-4">
-              <div className="hidden md:block bg-blue-500 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-lg">
-                1
-              </div>
+              
               <div>
                 <h3 className="text-xl font-semibold">PASO 1</h3>
                 <p className="text-gray-400">
@@ -119,9 +241,7 @@ const Home = () => {
               </div>
             </div>
             <div className="flex items-start gap-4">
-              <div className="hidden md:block bg-blue-500 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-lg">
-                2
-              </div>
+              
               <div>
                 <h3 className="text-xl font-semibold">PASO 2</h3>
                 <p className="text-gray-400">
@@ -131,9 +251,7 @@ const Home = () => {
               </div>
             </div>
             <div className="flex items-start gap-4">
-              <div className="hidden md:block bg-blue-500 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-lg">
-                3
-              </div>
+              
               <div>
                 <h3 className="text-xl font-semibold">PASO 3</h3>
                 <p className="text-gray-400">

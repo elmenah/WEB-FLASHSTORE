@@ -9,6 +9,7 @@ const Checkout = () => {
   const [fortniteUsername, setFortniteUsername] = useState("");
   const [orderNotes, setOrderNotes] = useState("");
   const [acceptTerms, setAcceptTerms] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("");
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
@@ -30,37 +31,85 @@ const Checkout = () => {
 
   const validateForm = () => {
     const newErrors = {};
-
     if (!email.trim()) {
       newErrors.email = "Por favor introduce un email válido.";
     }
-
     if (!fortniteUsername.trim()) {
       newErrors.fortniteUsername = "Por favor introduce tu nombre de Fortnite.";
     }
-
     if (!acceptTerms) {
       newErrors.terms = "Debes aceptar los términos y condiciones.";
     }
-
+    if (!paymentMethod) {
+      newErrors.paymentMethod = "Selecciona un método de pago.";
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!validateForm()) return;
-
     if (cart.length === 0) {
       alert("Tu carrito está vacío.");
       return;
     }
-
     try {
-      // Simulación de envío de datos
+      // 1️⃣ Obtener el usuario logueado
+      const {
+        data: { user: currentUser },
+      } = await supabase.auth.getUser();
+      if (!currentUser) {
+        alert("Debes iniciar sesión para hacer un pedido.");
+        return;
+      }
+      // 2️⃣ Insertar pedido principal en Supabase
+      const { data: pedidoData, error: pedidoError } = await supabase
+        .from("pedidos")
+        .insert([
+          {
+            user_id: currentUser.id,
+            correo: email.trim(),
+            username_fortnite: fortniteUsername.trim(),
+            estado: "No Pagado",
+            
+            
+          },
+        ])
+        .select()
+        .single();
+      if (pedidoError) throw pedidoError;
+      // 3️⃣ Insertar ítems del carrito
+      const itemsToInsert = cart.map((item) => ({
+        pedido_id: pedidoData.id,
+        nombre_producto: item.nombre,
+        precio_unitario: item.precio,
+        cantidad: item.cantidad || 1,
+        imagen_url: item.imagen,
+      }));
+      const { error: itemsError } = await supabase
+        .from("pedido_items")
+        .insert(itemsToInsert);
+      if (itemsError) throw itemsError;
+      // Generar mensaje para WhatsApp
+      let mensaje = `¡Hola! Quiero comprar en Tio Flashstore:%0A`;
+      mensaje += `------------------------------------%0A`;
+      cart.forEach((item, idx) => {
+        mensaje += `• ${item.nombre} x${item.cantidad || 1} - ${CLP.format(item.precio)}%0A`;
+      });
+      mensaje += `------------------------------------%0A`;
+      mensaje += `Total: ${CLP.format(getTotal())}%0A`;
+      mensaje += `------------------------------------%0A`;
+      mensaje += `Email: ${email}%0A`;
+      mensaje += `Usuario Fortnite: ${fortniteUsername}%0A`;
+      mensaje += `Método de pago: ${paymentMethod}%0A`;
+      if (orderNotes) mensaje += `Notas: ${orderNotes}%0A`;
+      mensaje += `%0A`;
+      mensaje += `Acepto los términos y condiciones.`;
+      // Redirigir a WhatsApp
+      const wspUrl = `https://wa.me/56930917730?text=${mensaje}`;
       clearCart();
-      navigate("/micuenta");
+      window.location.href = wspUrl;
     } catch (err) {
       console.error(err);
       alert("Ocurrió un error al crear tu pedido.");
@@ -83,75 +132,36 @@ const Checkout = () => {
   }, []);
 
   return (
-    <div className="min-h-screen pt-24 bg-gray-900">
-      <div className="w-full max-w-6xl mx-auto flex flex-col md:flex-row bg-gray-800 rounded-lg shadow-lg overflow-hidden">
-        {/* Resumen del pedido */}
-        <div className="w-full md:w-1/2 p-4 md:p-8 bg-gray-800 text-white">
-          <h2 className="text-xl md:text-2xl font-bold mb-4 text-center md:text-left">
-            Resumen del pedido
-          </h2>
-          <div className="space-y-2 md:space-y-4">
-            {cart.length === 0 ? (
-              <p className="text-gray-400 text-center">
-                No hay productos en el carrito.
-              </p>
-            ) : (
-              cart.map((item, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between gap-2 md:gap-4 py-2 md:py-4 border-b border-gray-700"
-                >
-                  <img
-                    src={item.imagen}
-                    alt={item.nombre}
-                    className="w-12 h-12 md:w-16 md:h-16 rounded-md object-cover"
-                  />
-                  <div className="flex-1 text-left">
-                    <h4 className="font-medium text-sm md:text-base">
-                      {item.nombre}
-                    </h4>
-                    <p className="text-xs md:text-sm text-gray-400">
-                      Cantidad: {item.cantidad || 1}
-                    </p>
-                    <p className="text-xs md:text-sm text-gray-400">
-                      {CLP.format(item.precio)}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => removeFromCart(index)}
-                    className="text-gray-400 hover:text-white text-sm md:text-base"
-                  >
-                    ❌
-                  </button>
-                </div>
-              ))
-            )}
-          </div>
-          <div className="mt-4 md:mt-6">
-            <div className="flex justify-between py-2">
-              <span className="text-gray-300 text-sm md:text-base">
-                Subtotal
-              </span>
-              <span className="font-medium text-sm md:text-base">
-                {CLP.format(getSubtotal())}
-              </span>
-            </div>
-            <div className="flex justify-between py-4 border-t border-gray-700 text-base md:text-lg font-semibold">
-              <span>Total</span>
-              <span>{CLP.format(getTotal())}</span>
-            </div>
-          </div>
-        </div>
+    <div className="min-h-screen pt-24 bg-gradient-to-br min-h-screen pt-24 bg-gray-900 flex flex-col items-center justify-center animate-fade-in">
+      {/* Barra de pasos */}
 
+      {/* 
+      
+      <div className="w-full max-w-2xl mx-auto flex items-center justify-center gap-4 mb-8">
+        <div className="flex flex-col items-center flex-1">
+          <div className="w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center font-bold text-lg shadow-lg">1</div>
+          <span className="text-xs mt-2 font-semibold text-white-700">Datos</span>
+        </div>
+        <div className="h-1 w-10 bg-green-400 rounded-full"></div>
+        <div className="flex flex-col items-center flex-1">
+          <div className="w-10 h-10 rounded-full bg-gray-300 text-gray-500 flex items-center justify-center font-bold text-lg shadow">2</div>
+          <span className="text-xs mt-2 font-semibold text-white-400">Pago</span>
+        </div>
+        <div className="h-1 w-10 bg-gray-300 rounded-full"></div>
+        <div className="flex flex-col items-center flex-1">
+          <div className="w-10 h-10 rounded-full bg-gray-300 text-gray-500 flex items-center justify-center font-bold text-lg shadow">3</div>
+          <span className="text-xs mt-2 font-semibold text-white-400">Confirmación</span>
+        </div>
+      </div>
+      */}
+
+      <div className="w-full max-w-5xl mx-auto flex flex-col md:flex-row gap-8 md:gap-12 bg-white/90 rounded-3xl shadow-2xl p-4 md:p-10 border border-gray-200">
         {/* Formulario */}
-        <div className="w-full md:w-1/2 p-4 md:p-8 bg-gray-700 text-white">
-          <h2 className="text-xl md:text-2xl font-bold mb-4 text-center md:text-left">
-            Finaliza tu compra
-          </h2>
+        <div className="w-full md:w-2/3 flex flex-col gap-6">
+          <h2 className="text-2xl font-bold mb-2 text-gray-800">Finaliza tu compra</h2>
           <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
             <div>
-              <label htmlFor="email" className="block text-sm text-gray-300">
+              <label htmlFor="email" className="block text-sm text-gray-700 font-semibold">
                 Correo electrónico
               </label>
               <input
@@ -160,17 +170,14 @@ const Checkout = () => {
                 placeholder="tuemail@ejemplo.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-2 w-full rounded-lg bg-gray-700 border border-gray-600 p-2 md:p-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`mt-2 w-full rounded-xl bg-white border-2 p-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400 transition ${errors.email ? 'border-red-400' : 'border-gray-300'}`}
               />
               {errors.email && (
-                <p className="text-xs mt-1 text-red-400">{errors.email}</p>
+                <p className="text-xs mt-1 text-red-500">{errors.email}</p>
               )}
             </div>
             <div>
-              <label
-                htmlFor="fortniteusername"
-                className="block text-sm text-gray-300"
-              >
+              <label htmlFor="fortniteusername" className="block text-sm text-gray-700 font-semibold">
                 Nombre en Fortnite
               </label>
               <input
@@ -179,19 +186,14 @@ const Checkout = () => {
                 placeholder="TuNombreEnFortnite"
                 value={fortniteUsername}
                 onChange={(e) => setFortniteUsername(e.target.value)}
-                className="mt-2 w-full rounded-lg bg-gray-700 border border-gray-600 p-2 md:p-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`mt-2 w-full rounded-xl bg-white border-2 p-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400 transition ${errors.fortniteUsername ? 'border-red-400' : 'border-gray-300'}`}
               />
               {errors.fortniteUsername && (
-                <p className="text-xs mt-1 text-red-400">
-                  {errors.fortniteUsername}
-                </p>
+                <p className="text-xs mt-1 text-red-500">{errors.fortniteUsername}</p>
               )}
             </div>
             <div>
-              <label
-                htmlFor="orderNotes"
-                className="block text-sm text-gray-300"
-              >
+              <label htmlFor="orderNotes" className="block text-sm text-gray-700 font-semibold">
                 Notas para el pedido (opcional)
               </label>
               <textarea
@@ -200,37 +202,106 @@ const Checkout = () => {
                 placeholder="Ej: estoy conectado de 20:00 a 22:00…"
                 value={orderNotes}
                 onChange={(e) => setOrderNotes(e.target.value)}
-                className="mt-2 w-full rounded-lg bg-gray-700 border border-gray-600 p-2 md:p-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="mt-2 w-full rounded-xl bg-white border-2 border-gray-300 p-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400 transition"
               />
             </div>
-            <label className="flex items-start gap-2 md:gap-3 text-sm text-gray-300">
+            {/* Método de pago */}
+            <div>
+              <label className="block text-sm text-gray-700 font-semibold mb-1">Método de pago</label>
+              <select
+                value={paymentMethod}
+                onChange={e => setPaymentMethod(e.target.value)}
+                className={`w-full rounded-xl bg-white border-2 p-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-400 transition ${errors.paymentMethod ? 'border-red-400' : 'border-gray-300'}`}
+              >
+                <option value="">Selecciona un método</option>
+                <option value="Transferencia">Transferencia</option>
+                
+              </select>
+              {errors.paymentMethod && (
+                <p className="text-xs mt-1 text-red-500">{errors.paymentMethod}</p>
+              )}
+            </div>
+            <label className="flex items-start gap-3 text-sm text-gray-700 font-semibold">
               <input
                 type="checkbox"
                 checked={acceptTerms}
                 onChange={(e) => setAcceptTerms(e.target.checked)}
-                className="mt-1 rounded border-gray-600 bg-gray-700 text-blue-500 focus:ring-blue-500"
+                className="mt-1 rounded border-gray-400 bg-white text-green-500 focus:ring-green-400"
               />
               <span>
-                Acepto los{" "}
-                <Link to="/terminos" className="underline hover:no-underline">
+                Acepto los{' '}
+                <Link to="/terminos" className="underline hover:no-underline text-green-600">
                   términos y condiciones
-                </Link>{" "}
+                </Link>{' '}
                 y confirmo que mi nombre de Fortnite es correcto.
               </span>
             </label>
             {errors.terms && (
-              <p className="text-xs mt-1 text-red-400">{errors.terms}</p>
+              <p className="text-xs mt-1 text-red-500">{errors.terms}</p>
             )}
             <button
               type="submit"
               disabled={!email.trim() || !fortniteUsername.trim() || !acceptTerms}
-              className="mt-4 md:mt-6 w-full py-2 md:py-3 rounded-lg bg-green-500 hover:bg-green-600 font-semibold transition disabled:opacity-60 disabled:cursor-not-allowed"
+              className="mt-4 w-full py-3 rounded-xl bg-gradient-to-r from-green-500 to-cyan-500 hover:from-green-600 hover:to-cyan-600 text-white font-bold text-lg shadow-lg transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24"><path stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M5 12l5 5L20 7"/></svg>
               Finalizar pedido
             </button>
+            <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#22c55e" strokeWidth="2"/><path stroke="#22c55e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M8 12l2 2 4-4"/></svg>
+              Pago 100% seguro y protegido
+            </div>
           </form>
+          {/* Ayuda WhatsApp */}
+          <div className="mt-8 flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl p-4">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path fill="#25D366" d="M17.472 14.382c-.297-.149-1.758-.867-2.031-.967-.273-.099-.472-.148-.67.15-.198.297-.767.967-.94 1.164-.173.198-.347.223-.644.075-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.151-.174.2-.298.3-.497.099-.198.05-.372-.025-.52-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.5-.669-.51-.173-.008-.372-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.099 3.2 5.077 4.363.71.306 1.263.489 1.694.626.712.227 1.36.195 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.288.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 5.421h-.001a8.933 8.933 0 0 1-4.548-1.252l-.326-.194-3.377.892.902-3.292-.213-.337a8.922 8.922 0 0 1-1.37-4.788c.001-4.936 4.011-8.946 8.949-8.946 2.389 0 4.637.93 6.324 2.617a8.862 8.862 0 0 1 2.624 6.323c-.003 4.936-4.013 8.946-8.949 8.946m7.437-16.384A10.92 10.92 0 0 0 12.05 1.933C6.477 1.933 1.93 6.479 1.928 12.05c0 2.123.555 4.199 1.607 6.032l-1.7 6.191a1.003 1.003 0 0 0 1.223 1.223l6.193-1.7a10.888 10.888 0 0 0 4.799 1.146h.005c5.572 0 10.119-4.547 10.121-10.118a10.86 10.86 0 0 0-3.184-7.924"/></svg>
+            <span className="text-green-700 font-semibold text-sm">¿Dudas? <a href="https://wa.me/56930917730" target="_blank" rel="noopener noreferrer" className="underline">Habla con soporte</a></span>
+          </div>
+        </div>
+        {/* Resumen del pedido */}
+        <div className="w-full md:w-1/3 bg-white/80 rounded-2xl shadow-lg p-6 flex flex-col gap-4 border border-gray-200 h-fit self-start">
+          <h2 className="text-xl font-bold mb-2 text-gray-800">Resumen del pedido</h2>
+          <div className="space-y-3">
+            {cart.length === 0 ? (
+              <p className="text-gray-400 text-center">No hay productos en el carrito.</p>
+            ) : (
+              cart.map((item, index) => (
+                <div key={index} className="flex items-center gap-3 border-b border-gray-200 pb-3 last:border-b-0">
+                  <div className="w-14 h-14 rounded-xl flex items-center justify-center bg-gradient-to-br from-[#47fdfe] to-[#2b6fa1]">
+                    <img src={item.imagen} alt={item.nombre} className="object-contain max-h-12 max-w-12" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-gray-800 truncate">{item.nombre}</p>
+                    <p className="text-xs text-gray-500">Cantidad: {item.cantidad || 1}</p>
+                  </div>
+                  <span className="font-bold text-green-600">{CLP.format(item.precio)}</span>
+                  <button type="button" onClick={() => removeFromCart(index)} className="ml-2 text-red-500 hover:text-white bg-red-500/10 hover:bg-red-500/80 rounded-full w-8 h-8 flex items-center justify-center transition-all" aria-label="Eliminar producto">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M18 6 6 18M6 6l12 12"/></svg>
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+          <div className="mt-2 flex justify-between text-gray-700 font-semibold">
+            <span>Subtotal</span>
+            <span>{CLP.format(getSubtotal())}</span>
+          </div>
+          <div className="flex justify-between text-lg font-bold text-gray-900 border-t border-gray-200 pt-3">
+            <span>Total</span>
+            <span>{CLP.format(getTotal())}</span>
+          </div>
         </div>
       </div>
+      {/* Animación fade-in */}
+      <style>{`
+        .animate-fade-in {
+          animation: fadeInCheckout 0.7s cubic-bezier(.4,2,.6,1) both;
+        }
+        @keyframes fadeInCheckout {
+          from { opacity: 0; transform: translateY(40px); }
+          to { opacity: 1; transform: none; }
+        }
+      `}</style>
     </div>
   );
 };

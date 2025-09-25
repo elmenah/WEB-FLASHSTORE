@@ -28,7 +28,19 @@ export const CartProvider = ({ children }) => {
   }, [cart]);
 
   const addToCart = (product) => {
-    setCart(prevCart => [...prevCart, product]);
+    // Corrige el nombre si no viene bien seteado
+    let nombre = product.nombre;
+    if (!nombre) {
+      // Intenta obtener el nombre de otras propiedades comunes
+      nombre = product.bundleName || product.itemName || product.title || 'Producto';
+    }
+    setCart(prevCart => [
+      ...prevCart,
+      {
+        ...product,
+        nombre,
+      }
+    ]);
   };
 
   const removeFromCart = (index) => {

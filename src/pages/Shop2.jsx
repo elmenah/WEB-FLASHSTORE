@@ -43,16 +43,24 @@ const Shop2 = () => {
     };
 
     const handleAddToCart = (product) => {
-        // Accede al primer elemento de brItems si existe 
-        const mainItem = product.brItems?.[0];
-        if (!mainItem) return;
-
+        // Si es bundle, usa el nombre e imagen del bundle; si no, del item principal
+        let nombre = '';
+        let imagen = '';
+        if (product.bundle && product.bundle.name) {
+            nombre = product.bundle.name;
+            imagen = product.bundle.image;
+        } else if (product.brItems?.[0]) {
+            nombre = product.brItems[0].name;
+            imagen = product.brItems[0].images?.icon || product.brItems[0].images?.featured;
+        } else {
+            nombre = 'Producto';
+            imagen = '';
+        }
         const cartProduct = {
-            nombre: mainItem.name,
-            precio: product.finalPrice * 4.4, 
-            imagen: mainItem.images?.icon || mainItem.images?.featured,
+            nombre,
+            precio: product.finalPrice * 4.4,
+            imagen,
         };
-
         addToCart(cartProduct);
         showNotification();
     };
@@ -118,19 +126,25 @@ const Shop2 = () => {
         setTimeout(() => setNotification(false), 2000);
     };
 
+    // Devuelve { categoria: { color: string, productos: [], layoutColor: string } }, omitiendo 'Pistas de improvisación'
     const organizeProductsByCategory = () => {
         const categorias = {};
         products.forEach((item) => {
-            // Usa el nombre del layout como categoría
             const categoria = item.layout?.name || "Otros";
-            if (!categorias[categoria]) categorias[categoria] = [];
-            categorias[categoria].push(item);
+            if (categoria === "Pistas de improvisación") return; // Omitir esa categoría
+            // El color de layout puede venir en item.layout.background o item.colors.color1
+            const layoutColor = item.layout?.background || item.colors?.color1 || '#111115';
+            if (!categorias[categoria]) categorias[categoria] = { color: layoutColor, productos: [] };
+            categorias[categoria].productos.push(item);
         });
         return categorias;
     };
 
     const filteredProducts = () => {
         let filtered = products;
+
+        // Filtrar productos cuya categoría sea 'Pistas de improvisación'
+        filtered = filtered.filter(product => (product.layout?.name || "Otros") !== "Pistas de improvisación");
 
         if (searchTerm) {
             filtered = filtered.filter(product => {
@@ -211,7 +225,7 @@ const Shop2 = () => {
                             <h2 className="text-2xl font-semibold text-white border-b-2 border-blue-500 pb-2 mb-4">
                                 {selectedCategory}
                             </h2>
-                            <div className="flex flex-wrap gap-[25px] justify-center items-start p-5">
+                            <div className="flex flex-wrap gap-[20px] justify-center items-start p-5">
                                 {filtered.slice(0, 20).map((product, index) => (
                                     <ProductCard
                                         key={product.offerId}
@@ -223,18 +237,19 @@ const Shop2 = () => {
                             </div>
                         </div>
                     ) : (
-                        Object.entries(categorizedProducts).map(([categoria, productos]) => (
+                        Object.entries(categorizedProducts).map(([categoria, { color, productos }]) => (
                             <div key={categoria} className="mb-12">
                                 <h2 className="text-2xl font-semibold text-white border-b-2 border-blue-500 pb-2 mb-4">
                                     {categoria}
                                 </h2>
-                                <div className="flex flex-wrap gap-[25px] justify-center items-start p-5">
+                                <div className="flex flex-wrap gap-[20px] justify-center items-start p-5">
                                     {productos.slice(0, 20).map((product) => (
                                         <ProductCard
                                             key={product.offerId}
                                             product={product}
                                             onAddToCart={handleAddToCart}
                                             onClick={handleProductClick}
+                                            fallbackColor={color}
                                         />
                                     ))}
                                 </div>

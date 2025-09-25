@@ -88,6 +88,80 @@ const Club = () => {
         </div>
       </section>
 
+      {/* BENEFICIOS - Carrusel animado */}
+      <section className="py-16 px-6 max-w-6xl mx-auto">
+        <h2 className="text-3xl font-bold text-center mb-12">Beneficios Incluidos</h2>
+
+        <div className="relative overflow-x-hidden w-full">
+          <div
+            className="flex gap-6 animate-benefits-marquee"
+            style={{
+              width: 'max-content',
+              animation: 'benefits-marquee 24s linear infinite',
+            }}
+          >
+            {/* Duplicamos los beneficios para loop infinito visual */}
+            {[
+              {
+                img: "/Imagenes/es-mx-15br-subs-followup-social-1920x1080-1920x1080-e7c9efe33d4f.jpg", title: "Paquete de Club", desc: "Contenido exclusivo mensual"
+              },
+              {
+                img: "/Imagenes/pasebatalla.jpg", title: "Pase de Batalla", desc: "Acceso completo incluido"
+              },
+              {
+                img: "/Imagenes/paseog.jpg", title: "Pase de Orígenes", desc: "Experiencias únicas"
+              },
+              {
+                img: "/Imagenes/paselego.jpg", title: "Pase de LEGO", desc: "Construcción creativa"
+              },
+              {
+                img: "/Imagenes/pasemusical.jpg", title: "Pase Musical", desc: "Ritmos y melodías"
+              },
+              {
+                img: "/Imagenes/vbucks.jpg", title: "1000 Pavos", desc: "Cada mes automáticamente"
+              },
+            ].concat([
+              {
+                img: "/Imagenes/es-mx-15br-subs-followup-social-1920x1080-1920x1080-e7c9efe33d4f.jpg", title: "Paquete de Club", desc: "Contenido exclusivo mensual"
+              },
+              {
+                img: "/Imagenes/pasebatalla.jpg", title: "Pase de Batalla", desc: "Acceso completo incluido"
+              },
+              {
+                img: "/Imagenes/paseog.jpg", title: "Pase de Orígenes", desc: "Experiencias únicas"
+              },
+              {
+                img: "/Imagenes/paselego.jpg", title: "Pase de LEGO", desc: "Construcción creativa"
+              },
+              {
+                img: "/Imagenes/pasemusical.jpg", title: "Pase Musical", desc: "Ritmos y melodías"
+              },
+              {
+                img: "/Imagenes/vbucks.jpg", title: "1000 Pavos", desc: "Cada mes automáticamente"
+              },
+            ]).map((benefit, index) => (
+              <div key={index} className="rounded-xl overflow-hidden relative min-w-[220px] max-w-[220px] bg-gray-900 shadow-lg">
+                <img src={benefit.img} alt={benefit.title} className="w-full h-40 object-cover" />
+                <div className="relative bottom-0 p-3 text-white">
+                  <h3 className="font-semibold">{benefit.title}</h3>
+                  <p className="text-sm text-gray-300">{benefit.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Animación CSS para el carrusel */}
+        <style>{`
+          @keyframes benefits-marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+          }
+          .animate-benefits-marquee {
+            will-change: transform;
+          }
+        `}</style>
+      </section>
       {/* CLUB FORTNITE */}
       <section className="py-16 px-6 max-w-6xl mx-auto">
         <h2 className="text-3xl font-bold text-center mb-12">Planes del Club Fortnite</h2>
@@ -121,34 +195,6 @@ const Club = () => {
         </div>
       </section>
 
-      {/* BENEFICIOS */}
-      <section className="py-16 px-6 max-w-6xl mx-auto">
-        <h2 className="text-3xl font-bold text-center mb-12">Beneficios Incluidos</h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          {[{
-            img: "/Imagenes/es-mx-15br-subs-followup-social-1920x1080-1920x1080-e7c9efe33d4f.jpg", title: "Paquete de Club", desc: "Contenido exclusivo mensual"
-          }, {
-            img: "/Imagenes/pasebatalla.jpg", title: "Pase de Batalla", desc: "Acceso completo incluido"
-          }, {
-            img: "/Imagenes/paseog.jpg", title: "Pase de Orígenes", desc: "Experiencias únicas"
-          }, {
-            img: "/Imagenes/paselego.jpg", title: "Pase de LEGO", desc: "Construcción creativa"
-          }, {
-            img: "/Imagenes/pasemusical.jpg", title: "Pase Musical", desc: "Ritmos y melodías"
-          }, {
-            img: "/Imagenes/vbucks.jpg", title: "1000 Pavos", desc: "Cada mes automáticamente"
-          }].map((benefit, index) => (
-            <div key={index} className="rounded-xl overflow-hidden relative">
-              <img src={benefit.img} alt={benefit.title} className="w-full h-40 object-cover" />
-              <div className="relative bottom-0 p-3 text-white">
-                <h3 className="font-semibold">{benefit.title}</h3>
-                <p className="text-sm text-gray-300">{benefit.desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
     </div>
   );
 };

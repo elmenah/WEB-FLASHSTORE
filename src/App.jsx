@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import Home from "./pages/Home";
 import Shop from "./pages/Shop";
+import Shop2 from "./pages/Shop2";
 import Club from "./pages/Club";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -35,7 +36,7 @@ const App = () => {
             <Route path="/" element={ <AuthGuard> <Home /> </AuthGuard>} />
             <Route path="/terminos" element={  <TermsAndConditions /> } />
             <Route path="product/:id" element={<AuthGuard><ProductDetail /></AuthGuard>} />
-            <Route path="/shop" element={ <AuthGuard> <Shop /> </AuthGuard>} />
+            <Route path="/shop" element={ <AuthGuard> <Shop2 /> </AuthGuard>} />
             <Route path="/club" element={ <AuthGuard> <Club /> </AuthGuard>} />
             {/* Rutas protegidas */}
             <Route
