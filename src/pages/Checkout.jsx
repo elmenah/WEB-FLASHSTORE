@@ -116,7 +116,7 @@ const Checkout = () => {
         const subject = cart.length === 1 ? cart[0].nombre : `Pedido ${pedidoData.id}`;
         const amount = getTotal();
         // Llamar a backend
-        const response = await fetch("http://localhost:4000/api/flow-order", {
+        const response = await fetch("https://backendflash.onrender.com/api/flow-order", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
