@@ -61,6 +61,11 @@ app.post('/api/flow-order', async (req, res) => {
   }
 });
 
+app.get('/flow-redirect', (req, res) => {
+  // Puedes pasar parámetros si lo necesitas, por ejemplo ?status=success
+  res.redirect('https://tioflashstore.netlify.app/pago-exitoso');
+});
+
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log('Backend FLOW escuchando en puerto', PORT);
