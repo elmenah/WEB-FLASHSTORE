@@ -116,7 +116,8 @@ const Home = () => {
       </div>
 
       {/* HERO llamativo */}
-      <div className="relative flex items-center justify-center h-screen bg-gray-900 text-white overflow-hidden animate-fade-in">
+
+      <div className="relative flex items-center justify-center h-[70vh] sm:h-screen bg-gray-900 text-white overflow-hidden animate-fade-in">
         <Particles 
           className="absolute inset-0 z-10 pointer-events-none" 
           quantity={250} 
@@ -127,14 +128,14 @@ const Home = () => {
         />
         <img src="/Imagenes/1076581.jpg" className="w-full h-full object-cover z-0" alt="Hero" />
         <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent z-10"></div>
-        <div className="absolute left-1/2 transform -translate-x-1/2 sm:left-6 sm:transform-none sm:-translate-x-0 top-1/2 -translate-y-1/2 z-20 text-center animate-fade-in">
-          <h1 className="text-3xl md:text-5xl font-bold mb-4 italic drop-shadow-xl">
+  <div className="absolute left-0 top-1/2 transform -translate-y-1/2 z-20 w-11/12 sm:w-auto pl-4 sm:pl-10 pr-4 text-left animate-fade-in">
+          <h1 className="text-2xl xs:text-3xl md:text-5xl font-bold mb-3 sm:mb-4 italic drop-shadow-xl leading-tight">
             Bienvenido a <span className="bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500 bg-clip-text text-transparent">Tio Flashstore</span>
           </h1>
-          <p className="text-lg md:text-2xl mb-6 text-white/80 font-semibold">Tu tienda confiable de skins, lotes y pases de Fortnite</p>
+          <p className="text-base xs:text-lg md:text-2xl mb-4 sm:mb-6 text-white/80 font-semibold">Tu tienda confiable de skins, lotes y pases de Fortnite</p>
           <Link 
             to="/shop"
-            className="bg-white text-gray-900 px-6 py-3 rounded-lg text-lg font-semibold shadow-lg hover:bg-gray-100 transition-colors animate-bounce"
+            className="bg-white text-gray-900 px-4 py-2 sm:px-6 sm:py-3 rounded-lg text-base sm:text-lg font-semibold shadow-lg hover:bg-gray-100 transition-colors animate-bounce"
           >
             Ver la tienda de hoy
           </Link>
@@ -142,36 +143,35 @@ const Home = () => {
       </div>
 
       {/* Beneficios rápidos */}
-      <section className="py-10 bg-gray-900">
-        <div className="max-w-8xl mx-auto flex flex-wrap justify-center gap-6">
+      <section className="py-6 sm:py-10 bg-gray-900">
+        <div className="max-w-8xl mx-auto flex flex-wrap justify-center gap-4 sm:gap-6 px-2">
           {beneficios.map((b, i) => (
-            <div key={i} className="flex flex-col items-center  rounded-xl px-6 py-4  animate-fade-in">
-              <span className="text-3xl mb-2">{b.icon}</span>
-              <span className="text-white font-semibold text-base text-center">{b.text}</span>
+            <div key={i} className="flex flex-col items-center rounded-xl px-4 py-3 sm:px-6 sm:py-4 animate-fade-in min-w-[120px]">
+              <span className="text-2xl sm:text-3xl mb-1 sm:mb-2">{b.icon}</span>
+              <span className="text-white font-semibold text-xs sm:text-base text-center">{b.text}</span>
             </div>
           ))}
         </div>
       </section>
       
   {/* DESTACADOS - Slider */}
-  <section className="py-12 bg-gray-900">
-        <h2 className="text-3xl font-bold text-center mb-8 text-white drop-shadow-lg">Destacados de la semana</h2>
-        <div className="relative max-w-7xl mx-auto">
-          <button onClick={() => scrollSlider(-1)} className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-black/70 text-white rounded-full p-2 shadow-lg"><svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
-          <div ref={sliderRef} className="flex gap-8 overflow-x-auto no-scrollbar scroll-smooth px-10 py-2">
+  <section className="py-8 sm:py-12 bg-gray-900">
+        <h2 className="text-2xl sm:text-3xl font-bold text-center mb-5 sm:mb-8 text-white drop-shadow-lg">Destacados de la semana</h2>
+        <div className="relative max-w-full sm:max-w-7xl mx-auto">
+          <button onClick={() => scrollSlider(-1)} className="hidden sm:flex absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-black/70 text-white rounded-full p-2 shadow-lg"><svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+          <div ref={sliderRef} className="flex gap-4 sm:gap-8 overflow-x-auto no-scrollbar scroll-smooth px-2 sm:px-10 py-2">
             {destacados.map((item) => (
-              <div key={item.id} className="min-w-[270px] max-w-[270px] bg-gray-800/90 rounded-2xl shadow-xl p-4 flex flex-col items-center hover:scale-105 transition-transform cursor-pointer animate-fade-in">
-                <div className="w-40 h-40 rounded-xl mb-3 shadow-lg flex items-center justify-center bg-gradient-to-br from-[#47fdfe] to-[#2b6fa1]">
-                  <img src={item.imagen} alt={item.nombre} className="object-contain max-h-36 max-w-36" />
+              <div key={item.id} className="min-w-[80vw] max-w-[80vw] sm:min-w-[270px] sm:max-w-[270px] bg-gray-800/90 rounded-2xl shadow-xl p-3 sm:p-4 flex flex-col items-center hover:scale-105 transition-transform cursor-pointer animate-fade-in">
+                <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-xl mb-2 sm:mb-3 shadow-lg flex items-center justify-center bg-gradient-to-br from-[#47fdfe] to-[#2b6fa1]">
+                  <img src={item.imagen} alt={item.nombre} className="object-contain max-h-28 max-w-28 sm:max-h-36 sm:max-w-36" />
                 </div>
-                <h3 className="font-bold text-lg text-white mb-1">{item.nombre}</h3>
-                
-                <span className="text-indigo-200 font-bold text-xl mb-2">${item.precio.toLocaleString('es-CL')}</span>
-                <button onClick={() => handleAddToCart(item)} className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-full font-semibold shadow-md transition-all">Añadir al carrito</button>
+                <h3 className="font-bold text-base sm:text-lg text-white mb-1">{item.nombre}</h3>
+                <span className="text-indigo-200 font-bold text-lg sm:text-xl mb-1 sm:mb-2">${item.precio.toLocaleString('es-CL')}</span>
+                <button onClick={() => handleAddToCart(item)} className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full font-semibold shadow-md transition-all text-sm sm:text-base">Añadir al carrito</button>
               </div>
             ))}
           </div>
-          <button onClick={() => scrollSlider(1)} className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-black/70 text-white rounded-full p-2 shadow-lg"><svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+          <button onClick={() => scrollSlider(1)} className="hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-black/70 text-white rounded-full p-2 shadow-lg"><svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
         </div>
       </section>
 

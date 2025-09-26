@@ -72,8 +72,6 @@ const Checkout = () => {
             correo: email.trim(),
             username_fortnite: fortniteUsername.trim(),
             estado: "No Pagado",
-            
-            
           },
         ])
         .select()
@@ -91,25 +89,51 @@ const Checkout = () => {
         .from("pedido_items")
         .insert(itemsToInsert);
       if (itemsError) throw itemsError;
-      // Generar mensaje para WhatsApp
-      let mensaje = `¡Hola! Quiero comprar en Tio Flashstore:%0A`;
-      mensaje += `------------------------------------%0A`;
-      cart.forEach((item, idx) => {
-        mensaje += `• ${item.nombre} x${item.cantidad || 1} - ${CLP.format(item.precio)}%0A`;
-      });
-      mensaje += `------------------------------------%0A`;
-      mensaje += `Total: ${CLP.format(getTotal())}%0A`;
-      mensaje += `------------------------------------%0A`;
-      mensaje += `Email: ${email}%0A`;
-      mensaje += `Usuario Fortnite: ${fortniteUsername}%0A`;
-      mensaje += `Método de pago: ${paymentMethod}%0A`;
-      if (orderNotes) mensaje += `Notas: ${orderNotes}%0A`;
-      mensaje += `%0A`;
-      mensaje += `Acepto los términos y condiciones.`;
-      // Redirigir a WhatsApp
-      const wspUrl = `https://wa.me/56930917730?text=${mensaje}`;
-      clearCart();
-      window.location.href = wspUrl;
+
+      if (paymentMethod === "Transferencia") {
+        // Flujo WhatsApp (igual que antes)
+        let mensaje = `¡Hola! Quiero comprar en Tio Flashstore:%0A`;
+        mensaje += `------------------------------------%0A`;
+        cart.forEach((item, idx) => {
+          mensaje += `• ${item.nombre} x${item.cantidad || 1} - ${CLP.format(item.precio)}%0A`;
+        });
+        mensaje += `------------------------------------%0A`;
+        mensaje += `Total: ${CLP.format(getTotal())}%0A`;
+        mensaje += `------------------------------------%0A`;
+        mensaje += `Email: ${email}%0A`;
+        mensaje += `Usuario Fortnite: ${fortniteUsername}%0A`;
+        mensaje += `Método de pago: ${paymentMethod}%0A`;
+        if (orderNotes) mensaje += `Notas: ${orderNotes}%0A`;
+        mensaje += `%0A`;
+        mensaje += `Acepto los términos y condiciones.`;
+        // Redirigir a WhatsApp
+        const wspUrl = `https://wa.me/56930917730?text=${mensaje}`;
+        clearCart();
+        window.location.href = wspUrl;
+      } else if (paymentMethod === "FLOW") {
+        // Flujo FLOW
+        // Tomar el primer producto o armar un nombre genérico
+        const subject = cart.length === 1 ? cart[0].nombre : `Pedido ${pedidoData.id}`;
+        const amount = getTotal();
+        // Llamar a backend
+        const response = await fetch("http://localhost:4000/api/flow-order", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            orderId: pedidoData.id,
+            subject,
+            amount,
+            email,
+          }),
+        });
+        const data = await response.json();
+        if (data.url && data.token) {
+          // Redirigir a FLOW
+          window.location.href = `${data.url}?token=${data.token}`;
+        } else {
+          alert("No se pudo iniciar el pago con FLOW. Intenta nuevamente.");
+        }
+      }
     } catch (err) {
       console.error(err);
       alert("Ocurrió un error al crear tu pedido.");
@@ -155,9 +179,9 @@ const Checkout = () => {
       </div>
       */}
 
-      <div className="w-full max-w-5xl mx-auto flex flex-col md:flex-row gap-8 md:gap-12 bg-white/90 rounded-3xl shadow-2xl p-4 md:p-10 border border-gray-200">
+  <div className="w-full max-w-5xl mx-auto flex flex-col md:flex-row gap-8 md:gap-12 bg-white/90 rounded-3xl shadow-2xl p-4 md:p-10 border border-gray-200 flex-col md:flex-row">
         {/* Formulario */}
-        <div className="w-full md:w-2/3 flex flex-col gap-6">
+  <div className="w-full md:w-2/3 flex flex-col gap-6 order-1 md:order-1">
           <h2 className="text-2xl font-bold mb-2 text-gray-800">Finaliza tu compra</h2>
           <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
             <div>
@@ -215,11 +239,46 @@ const Checkout = () => {
               >
                 <option value="">Selecciona un método</option>
                 <option value="Transferencia">Transferencia</option>
-                
+                <option value="FLOW">FLOW (Tarjeta, Webpay, etc)</option>
               </select>
               {errors.paymentMethod && (
                 <p className="text-xs mt-1 text-red-500">{errors.paymentMethod}</p>
               )}
+              {/* Resumen del pedido SOLO en móvil */}
+              <div className="block md:hidden mt-6">
+                <div className="w-full bg-white/80 rounded-2xl shadow-lg p-6 flex flex-col gap-4 border border-gray-200 h-fit self-start">
+                  <h2 className="text-xl font-bold mb-2 text-gray-800">Resumen del pedido</h2>
+                  <div className="space-y-3">
+                    {cart.length === 0 ? (
+                      <p className="text-gray-400 text-center">No hay productos en el carrito.</p>
+                    ) : (
+                      cart.map((item, index) => (
+                        <div key={index} className="flex items-center gap-3 border-b border-gray-200 pb-3 last:border-b-0">
+                          <div className="w-14 h-14 rounded-xl flex items-center justify-center bg-gradient-to-br from-[#47fdfe] to-[#2b6fa1]">
+                            <img src={item.imagen} alt={item.nombre} className="object-contain max-h-12 max-w-12" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-gray-800 truncate">{item.nombre}</p>
+                            <p className="text-xs text-gray-500">Cantidad: {item.cantidad || 1}</p>
+                          </div>
+                          <span className="font-bold text-green-600">{CLP.format(item.precio)}</span>
+                          <button type="button" onClick={() => removeFromCart(index)} className="ml-2 text-red-500 hover:text-white bg-red-500/10 hover:bg-red-500/80 rounded-full w-8 h-8 flex items-center justify-center transition-all" aria-label="Eliminar producto">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M18 6 6 18M6 6l12 12"/></svg>
+                          </button>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                  <div className="mt-2 flex justify-between text-gray-700 font-semibold">
+                    <span>Subtotal</span>
+                    <span>{CLP.format(getSubtotal())}</span>
+                  </div>
+                  <div className="flex justify-between text-lg font-bold text-gray-900 border-t border-gray-200 pt-3">
+                    <span>Total</span>
+                    <span>{CLP.format(getTotal())}</span>
+                  </div>
+                </div>
+              </div>
             </div>
             <label className="flex items-start gap-3 text-sm text-gray-700 font-semibold">
               <input
@@ -258,8 +317,8 @@ const Checkout = () => {
             <span className="text-green-700 font-semibold text-sm">¿Dudas? <a href="https://wa.me/56930917730" target="_blank" rel="noopener noreferrer" className="underline">Habla con soporte</a></span>
           </div>
         </div>
-        {/* Resumen del pedido */}
-        <div className="w-full md:w-1/3 bg-white/80 rounded-2xl shadow-lg p-6 flex flex-col gap-4 border border-gray-200 h-fit self-start">
+        {/* Resumen del pedido SOLO en escritorio */}
+        <div className="hidden md:block w-full md:w-1/3 bg-white/80 rounded-2xl shadow-lg p-6 flex flex-col gap-4 border border-gray-200 h-fit self-start order-2 md:order-2">
           <h2 className="text-xl font-bold mb-2 text-gray-800">Resumen del pedido</h2>
           <div className="space-y-3">
             {cart.length === 0 ? (

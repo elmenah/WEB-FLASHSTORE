@@ -114,7 +114,7 @@ const MiCuenta = () => {
                       <tr>
                         <th className="border-b border-gray-700 py-2 text-gray-300">Producto</th>
                         <th className="border-b border-gray-700 py-2 text-gray-300">Cantidad</th>
-                        <th className="border-b border-gray-700 py-2 text-gray-300">Precio Unitario</th>
+                        <th className="border-b border-gray-700 py-2 text-gray-300">Precio</th>
                         <th className="border-b border-gray-700 py-2 text-gray-300">Subtotal</th>
                       </tr>
                     </thead>

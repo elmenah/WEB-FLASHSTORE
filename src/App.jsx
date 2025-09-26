@@ -8,6 +8,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import MiCuenta from "./pages/MiCuenta";
 import Checkout from "./pages/Checkout";
+import PagoExitoso from "./pages/PagoExitoso";
 import AuthGuard from "./components/AuthGuard";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -38,6 +39,7 @@ const App = () => {
             <Route path="product/:id" element={<AuthGuard><ProductDetail /></AuthGuard>} />
             <Route path="/shop" element={ <AuthGuard> <Shop2 /> </AuthGuard>} />
             <Route path="/club" element={ <AuthGuard> <Club /> </AuthGuard>} />
+            <Route path="/pago-exitoso" element={ <AuthGuard> <PagoExitoso /> </AuthGuard>} />
             {/* Rutas protegidas */}
             <Route
               path="/micuenta"

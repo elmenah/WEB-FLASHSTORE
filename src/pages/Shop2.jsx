@@ -7,6 +7,14 @@ import '../css/Shop.css';
 const Shop2 = () => {
     const [products, setProducts] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [searchInput, setSearchInput] = useState('');
+    // Debounce para el buscador
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setSearchTerm(searchInput);
+        }, 400);
+        return () => clearTimeout(handler);
+    }, [searchInput]);
     const [selectedCategory, setSelectedCategory] = useState('');
     const [loading, setLoading] = useState(true);
     const [notification, setNotification] = useState(false);
@@ -197,10 +205,21 @@ const Shop2 = () => {
                 Producto agregado al carrito
             </div>
 
+
             <div className="pt-20 pb-8">
-                <div className="text-center mt-8">
+                <div className="text-center mt-4">
                     <h1 className="text-4xl font-bold">Tienda</h1>
                     <p className="text-gray-400 mt-2">{new Date().toLocaleString('es-ES')}</p>
+                </div>
+                {/* Buscador */}
+                <div className="flex justify-center items-center mt-4 mb-2 px-4">
+                    <input
+                        type="text"
+                        value={searchInput}
+                        onChange={e => setSearchInput(e.target.value)}
+                        placeholder="Buscar skins, lotes, rarezas..."
+                        className="w-full max-w-md p-2 rounded-lg border border-gray-700 bg-gray-900 text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
+                    />
                 </div>
 
                 {/* Dropdown de categorías */}
@@ -237,24 +256,37 @@ const Shop2 = () => {
                             </div>
                         </div>
                     ) : (
-                        Object.entries(categorizedProducts).map(([categoria, { color, productos }]) => (
-                            <div key={categoria} className="mb-12">
-                                <h2 className="text-2xl font-semibold text-white border-b-2 border-blue-500 pb-2 mb-4">
-                                    {categoria}
-                                </h2>
-                                <div className="flex flex-wrap gap-[20px] justify-center items-start p-5">
-                                    {productos.slice(0, 20).map((product) => (
-                                        <ProductCard
-                                            key={product.offerId}
-                                            product={product}
-                                            onAddToCart={handleAddToCart}
-                                            onClick={handleProductClick}
-                                            fallbackColor={color}
-                                        />
-                                    ))}
+                        Object.entries(categorizedProducts).map(([categoria, { color, productos }]) => {
+                            // Filtrar productos por el término de búsqueda
+                            const productosFiltrados = searchTerm
+                                ? productos.filter(product => {
+                                    const mainItem = product.brItems?.[0];
+                                    return (
+                                        (mainItem?.name?.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                                        (mainItem?.rarity?.displayValue?.toLowerCase().includes(searchTerm.toLowerCase()))
+                                    );
+                                })
+                                : productos;
+                            if (productosFiltrados.length === 0) return null;
+                            return (
+                                <div key={categoria} className="mb-12">
+                                    <h2 className="text-2xl font-semibold text-white border-b-2 border-blue-500 pb-2 mb-4">
+                                        {categoria}
+                                    </h2>
+                                    <div className="flex flex-wrap gap-[20px] justify-center items-start p-5">
+                                        {productosFiltrados.slice(0, 20).map((product) => (
+                                            <ProductCard
+                                                key={product.offerId}
+                                                product={product}
+                                                onAddToCart={handleAddToCart}
+                                                onClick={handleProductClick}
+                                                fallbackColor={color}
+                                            />
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
-                        ))
+                            );
+                        })
                     )}
                 </section>
             </div>
