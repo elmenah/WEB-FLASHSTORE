@@ -39,7 +39,7 @@ const App = () => {
             <Route path="product/:id" element={<AuthGuard><ProductDetail /></AuthGuard>} />
             <Route path="/shop" element={ <AuthGuard> <Shop2 /> </AuthGuard>} />
             <Route path="/club" element={ <AuthGuard> <Club /> </AuthGuard>} />
-            <Route path="/pago-exitoso" element={ <AuthGuard> <PagoExitoso /> </AuthGuard>} />
+            <Route path="/pago-exitoso" element={<PagoExitoso />} />
             {/* Rutas protegidas */}
             <Route
               path="/micuenta"
