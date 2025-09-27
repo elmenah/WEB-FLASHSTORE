@@ -226,7 +226,7 @@ const Shop2 = () => {
                 <div className="flex justify-center my-6">
                     <button
           onClick={() => {
-            clearCart();
+            
             addToCart({
               id: "test-100",
               nombre: "Producto de prueba $100",
