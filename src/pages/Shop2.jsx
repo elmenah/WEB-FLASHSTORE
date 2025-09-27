@@ -224,6 +224,21 @@ const Shop2 = () => {
 
                 {/* Dropdown de categorías */}
                 <div className="flex justify-center my-6">
+                    <button
+          onClick={() => {
+            clearCart();
+            addToCart({
+              id: "test-100",
+              nombre: "Producto de prueba $100",
+              precio: 100,
+              cantidad: 1,
+              imagen: "https://via.placeholder.com/150",
+            });
+          }}
+          className="p-2 bg-green-500 text-white rounded mt-4"
+        >
+          Agregar producto de prueba $100
+        </button>
                     <select
                         value={selectedCategory}
                         onChange={(e) => setSelectedCategory(e.target.value)}
