@@ -3,6 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { supabase } from "../supabaseCliente";
 
+
+
 const Checkout = () => {
   const { cart, removeFromCart, clearCart } = useCart();
   const [email, setEmail] = useState("");
@@ -47,14 +49,6 @@ const Checkout = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Objeto de prueba de $100
-const testProduct = {
-  id: 'test-100',
-  nombre: 'Producto de prueba $100',
-  precio: 100, // CLP
-  cantidad: 1,
-  imagen: 'https://via.placeholder.com/150', // Imagen de prueba
-};
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
@@ -172,6 +166,27 @@ const testProduct = {
     fetchUserEmail();
   }, []);
 
+  const TestAddProductButton = ({ addToCart, clearCart }) => {
+  const addTestProduct = () => {
+    clearCart(); // opcional: limpiar carrito antes
+    addToCart({
+      id: 'test-100',
+      nombre: 'Producto de prueba $100',
+      precio: 100,
+      cantidad: 1,
+      imagen: 'https://via.placeholder.com/150',
+    });
+  };
+
+  return (
+    <button
+      onClick={addTestProduct}
+      className="p-2 bg-green-500 text-white rounded mt-4"
+    >
+      Agregar producto de prueba $100
+    </button>
+  );
+};
   return (
     <div className="min-h-screen pt-24 bg-gradient-to-br min-h-screen pt-24 bg-gray-900 flex flex-col items-center justify-center animate-fade-in">
       {/* Barra de pasos */}
@@ -401,6 +416,7 @@ const testProduct = {
               </svg>
               Finalizar pedido
             </button>
+            <TestAddProductButton addToCart={addToCart} clearCart={clearCart} />
             <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
