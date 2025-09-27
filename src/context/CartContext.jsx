@@ -43,7 +43,7 @@ export const CartProvider = ({ children }) => {
     ]);
   };
 
-  addToCart(testProduct);
+  
 
   const removeFromCart = (index) => {
     setCart(prevCart => prevCart.filter((_, i) => i !== index));
