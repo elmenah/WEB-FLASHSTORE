@@ -148,7 +148,27 @@ const Shop = () => {
 
   const categorizedProducts = organizeProductsByCategory();
   const filtered = filteredProducts();
+const TestAddProductButton = ({ addToCart, clearCart }) => {
+  const addTestProduct = () => {
+    clearCart(); // opcional: limpiar carrito antes
+    addToCart({
+      id: 'test-100',
+      nombre: 'Producto de prueba $100',
+      precio: 100,
+      cantidad: 1,
+      imagen: 'https://via.placeholder.com/150',
+    });
+  };
 
+  return (
+    <button
+      onClick={addTestProduct}
+      className="p-2 bg-green-500 text-white rounded mt-4"
+    >
+      Agregar producto de prueba $100
+    </button>
+  );
+};
   return (
     <>
       {/* Notification */}
@@ -161,7 +181,7 @@ const Shop = () => {
           <h1 className="text-4xl font-bold">Tienda</h1>
           <p className="text-gray-400 mt-2">{new Date().toLocaleString('es-ES')}</p>
         </div>
-
+    <TestAddProductButton addToCart={addToCart} clearCart={clearCart} />
         {/* Dropdown de categorías */}
         <div className="flex justify-center my-6">
           <select

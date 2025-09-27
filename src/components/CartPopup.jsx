@@ -18,27 +18,6 @@ const CartPopup = () => {
     }).format(price);
   };
 
-  const TestAddProductButton = ({ addToCart, clearCart }) => {
-  const addTestProduct = () => {
-    clearCart(); // opcional: limpiar carrito antes
-    addToCart({
-      id: 'test-100',
-      nombre: 'Producto de prueba $100',
-      precio: 100,
-      cantidad: 1,
-      imagen: 'https://via.placeholder.com/150',
-    });
-  };
-
-  return (
-    <button
-      onClick={addTestProduct}
-      className="p-2 bg-green-500 text-white rounded mt-4"
-    >
-      Agregar producto de prueba $100
-    </button>
-  );
-};
   return (
     <div className={`fixed right-0 top-0 w-full max-w-[420px] h-full bg-gradient-to-br from-[#23243aee] to-[#1a1b2bfa] backdrop-blur-xl shadow-2xl transform transition-transform duration-400 ease-out p-0 z-50 border-l border-[#3ad7ff33] ${isCartOpen ? 'translate-x-0 animate-fade-in' : 'translate-x-full'} `}
       style={{borderTopLeftRadius: '2rem', borderBottomLeftRadius: '2rem'}}>
@@ -88,8 +67,6 @@ const CartPopup = () => {
           >
             Vaciar carrito
           </button>
-
-          <TestAddProductButton addToCart={addToCart} clearCart={clearCart} />
 
           <div className="my-6 border-t border-[#3ad7ff33]"></div>
 
