@@ -12,7 +12,7 @@ app.use(cors());
 // Configura tus credenciales FLOW en un archivo .env
 const API_KEY = process.env.FLOW_API_KEY;
 const SECRET_KEY = process.env.FLOW_SECRET_KEY;
-const FLOW_URL = 'https://sandbox.flow.cl/api/payment/create'; // Usa sandbox si es necesario
+const FLOW_URL = 'https://www.flow.cl/api/payment/create'; // Usa sandbox si es necesario
 
 // Utilidad para firmar los parámetros
 function signParams(params, secretKey) {

@@ -47,6 +47,14 @@ const Checkout = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Objeto de prueba de $100
+const testProduct = {
+  id: 'test-100',
+  nombre: 'Producto de prueba $100',
+  precio: 100, // CLP
+  cantidad: 1,
+  imagen: 'https://via.placeholder.com/150', // Imagen de prueba
+};
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
