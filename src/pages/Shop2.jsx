@@ -136,17 +136,41 @@ const Shop2 = () => {
 
     // Devuelve { categoria: { color: string, productos: [], layoutColor: string } }, omitiendo 'Pistas de improvisación'
     const organizeProductsByCategory = () => {
-        const categorias = {};
-        products.forEach((item) => {
-            const categoria = item.layout?.name || "Otros";
-            if (categoria === "Pistas de improvisación") return; // Omitir esa categoría
-            // El color de layout puede venir en item.layout.background o item.colors.color1
-            const layoutColor = item.layout?.background || item.colors?.color1 || '#111115';
-            if (!categorias[categoria]) categorias[categoria] = { color: layoutColor, productos: [] };
-            categorias[categoria].productos.push(item);
-        });
-        return categorias;
-    };
+    const categorias = {};
+    products.forEach((item) => {
+        const categoria = item.layout?.name || "Otros";
+        if (categoria === "Pistas de improvisación") return;
+        const layoutColor = item.layout?.background || item.colors?.color1 || '#111115';
+        if (!categorias[categoria]) {
+            categorias[categoria] = { color: layoutColor, productos: [] };
+        }
+        categorias[categoria].productos.push(item);
+    });
+
+    // Ordenar: lotes primero, luego el resto
+    Object.keys(categorias).forEach((cat) => {
+        categorias[cat].productos = [
+            // Lotes primero
+            ...categorias[cat].productos.filter(
+                prod =>
+                    prod.bundle?.name ||
+                    (prod.layout?.name?.toLowerCase().includes("lote")) ||
+                    (prod.brItems?.[0]?.name?.toLowerCase().includes("lote"))
+            ),
+            // Luego el resto
+            ...categorias[cat].productos.filter(
+                prod =>
+                    !(
+                        prod.bundle?.name ||
+                        (prod.layout?.name?.toLowerCase().includes("lote")) ||
+                        (prod.brItems?.[0]?.name?.toLowerCase().includes("lote"))
+                    )
+            ),
+        ];
+    });
+
+    return categorias;
+};
 
     const filteredProducts = () => {
         let filtered = products;
@@ -224,21 +248,6 @@ const Shop2 = () => {
 
                 {/* Dropdown de categorías */}
                 <div className="flex justify-center my-6">
-                    <button
-          onClick={() => {
-            
-            addToCart({
-              id: "test-100",
-              nombre: "Producto de prueba $100",
-              precio: 100,
-              cantidad: 1,
-              imagen: "https://via.placeholder.com/150",
-            });
-          }}
-          className="p-2 bg-green-500 text-white rounded mt-4"
-        >
-          Agregar producto de prueba $100
-        </button>
                     <select
                         value={selectedCategory}
                         onChange={(e) => setSelectedCategory(e.target.value)}

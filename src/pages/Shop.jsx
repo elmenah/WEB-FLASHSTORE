@@ -219,6 +219,8 @@ const Shop = () => {
             ))}
           </select>
         </div>
+        {/* 
+        
         <button
           onClick={() => {
             clearCart();
@@ -234,6 +236,7 @@ const Shop = () => {
         >
           Agregar producto de prueba $100
         </button>
+        */}
         <section className="px-4">
           {selectedCategory ? (
             <div>
