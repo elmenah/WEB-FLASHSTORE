@@ -126,7 +126,7 @@ const Home = () => {
           size={1.5} 
           color="#ffffff" 
         />
-        <img src="/Imagenes/1076581.jpg" className="w-full h-full object-cover z-0" alt="Hero" />
+        <img src="/Imagenes/Demonhunters.jpg" className="w-full h-full object-cover z-0" alt="Hero" />
         <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent z-10"></div>
   <div className="absolute left-0 top-1/2 transform -translate-y-1/2 z-20 w-11/12 sm:w-auto pl-4 sm:pl-10 pr-4 text-left animate-fade-in">
           <h1 className="text-2xl xs:text-3xl md:text-5xl font-bold mb-3 sm:mb-4 italic drop-shadow-xl leading-tight">
