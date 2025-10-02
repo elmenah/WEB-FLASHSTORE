@@ -14,7 +14,7 @@ const ProductCard = ({ product, onAddToCart, onClick }) => {
   const itemSet = mainItem?.set?.text;
   const itemRarity = mainItem?.rarity?.displayValue;
   const price = product.finalPrice;
-  const priceCLP = (price * 4.4).toLocaleString("es-CL");
+  const priceCLP = (price * 4).toLocaleString("es-CL");
   const handleCartClick = (e) => {
     e.stopPropagation();
     // Si es bundle, usa el nombre del bundle; si no, el del item principal
@@ -81,7 +81,7 @@ const ProductCard = ({ product, onAddToCart, onClick }) => {
   </span>
   {product.regularPrice && product.regularPrice > price && (
     <span className={`${!isBundle ? 'text-[10px] sm:text-xs' : 'text-xs'} text-[#bbbbbb] line-through`}>
-      ${(product.regularPrice * 4.4).toLocaleString("es-CL")} clp
+      ${(product.regularPrice * 4).toLocaleString("es-CL")} clp
     </span>
   )}
 </div>
