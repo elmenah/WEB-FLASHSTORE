@@ -66,7 +66,7 @@ const Shop2 = () => {
         }
         const cartProduct = {
             nombre,
-            precio: product.finalPrice * 4,
+            precio: product.finalPrice * 4.4,
             imagen,
         };
         addToCart(cartProduct);

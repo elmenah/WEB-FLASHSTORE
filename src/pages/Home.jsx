@@ -54,7 +54,7 @@ const Home = () => {
               return {
                 id: p.offerId,
                 nombre: p.bundle.name,
-                precio: Math.round(p.finalPrice * 4),
+                precio: Math.round(p.finalPrice * 4.4),
                 imagen: p.bundle.image,
                 desc: p.bundle.info || 'Lote especial',
               };
@@ -62,7 +62,7 @@ const Home = () => {
               return {
                 id: p.offerId,
                 nombre: p.brItems[0].name,
-                precio: Math.round(p.finalPrice * 4),
+                precio: Math.round(p.finalPrice * 4.4),
                 imagen: p.brItems[0].images.icon || p.brItems[0].images.featured,
                 desc: p.brItems[0].description || '',
               };
