@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { supabase } from "../supabaseCliente";
-
-
+import MercadoPagoCheckout from "../components/MercadoPagoCheckout";
 
 const Checkout = () => {
   const { cart, removeFromCart, clearCart } = useCart();
@@ -13,6 +12,8 @@ const Checkout = () => {
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("");
   const [errors, setErrors] = useState({});
+  const [showMPCheckout, setShowMPCheckout] = useState(false);
+  const [currentOrderId, setCurrentOrderId] = useState(null);
   const navigate = useNavigate();
 
   const CLP = new Intl.NumberFormat("es-CL", {
@@ -56,6 +57,7 @@ const Checkout = () => {
       alert("Tu carrito está vacío.");
       return;
     }
+
     try {
       // 1️⃣ Obtener el usuario logueado
       const {
@@ -65,6 +67,7 @@ const Checkout = () => {
         alert("Debes iniciar sesión para hacer un pedido.");
         return;
       }
+
       // 2️⃣ Insertar pedido principal en Supabase
       const { data: pedidoData, error: pedidoError } = await supabase
         .from("pedidos")
@@ -79,6 +82,7 @@ const Checkout = () => {
         .select()
         .single();
       if (pedidoError) throw pedidoError;
+
       // 3️⃣ Insertar ítems del carrito
       const itemsToInsert = cart.map((item) => ({
         pedido_id: pedidoData.id,
@@ -92,8 +96,9 @@ const Checkout = () => {
         .insert(itemsToInsert);
       if (itemsError) throw itemsError;
 
+      // 4️⃣ Manejar método de pago
       if (paymentMethod === "Transferencia") {
-        // Flujo WhatsApp (igual que antes)
+        // Flujo WhatsApp
         let mensaje = `¡Hola! Quiero comprar en Tio Flashstore:%0A`;
         mensaje += `------------------------------------%0A`;
         cart.forEach((item, idx) => {
@@ -110,24 +115,28 @@ const Checkout = () => {
         if (orderNotes) mensaje += `Notas: ${orderNotes}%0A`;
         mensaje += `%0A`;
         mensaje += `Acepto los términos y condiciones.`;
-        // Redirigir a WhatsApp
+        
         const wspUrl = `https://wa.me/56930917730?text=${mensaje}`;
         clearCart();
         window.location.href = wspUrl;
+        
+      } else if (paymentMethod === "MercadoPago") {
+        // Flujo Mercado Pago con componente React
+        setCurrentOrderId(pedidoData.id);
+        setShowMPCheckout(true);
+        
       } else if (paymentMethod === "FLOW") {
-        // Flujo FLOW
-        const subject =
-          cart.length === 1 ? cart[0].nombre : `Pedido #${pedidoData.id}`;
+        // Mantener flujo FLOW existente
+        const subject = cart.length === 1 ? cart[0].nombre : `Pedido #${pedidoData.id}`;
         const amount = getTotal();
 
-        // Llamar al backend
         const response = await fetch(
           "https://backendflash.onrender.com/api/flow-order",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              orderId: String(pedidoData.id), // 👈 importante: mandarlo como string
+              orderId: String(pedidoData.id),
               subject,
               amount,
               email,
@@ -136,10 +145,7 @@ const Checkout = () => {
         );
 
         const data = await response.json();
-        console.log("FLOW response:", data);
-
         if (data.url && data.token) {
-          // Redirigir a FLOW
           window.location.href = `${data.url}?token=${data.token}`;
         } else {
           alert("No se pudo iniciar el pago con FLOW. Intenta nuevamente.");
@@ -149,6 +155,18 @@ const Checkout = () => {
       console.error(err);
       alert("Ocurrió un error al crear tu pedido.");
     }
+  };
+
+  const handleMPSuccess = (paymentData) => {
+    console.log('Pago exitoso:', paymentData);
+    clearCart();
+    
+  };
+
+  const handleMPError = (error) => {
+    console.error('Error en pago:', error);
+    alert('Error al procesar el pago con Mercado Pago');
+    setShowMPCheckout(false);
   };
 
   useEffect(() => {
@@ -166,31 +184,40 @@ const Checkout = () => {
     fetchUserEmail();
   }, []);
 
-  
-  return (
-    <div className="min-h-screen pt-24 bg-gradient-to-br min-h-screen pt-24 bg-gray-900 flex flex-col items-center justify-center animate-fade-in">
-      {/* Barra de pasos */}
-
-      {/* 
-      
-      <div className="w-full max-w-2xl mx-auto flex items-center justify-center gap-4 mb-8">
-        <div className="flex flex-col items-center flex-1">
-          <div className="w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center font-bold text-lg shadow-lg">1</div>
-          <span className="text-xs mt-2 font-semibold text-white-700">Datos</span>
-        </div>
-        <div className="h-1 w-10 bg-green-400 rounded-full"></div>
-        <div className="flex flex-col items-center flex-1">
-          <div className="w-10 h-10 rounded-full bg-gray-300 text-gray-500 flex items-center justify-center font-bold text-lg shadow">2</div>
-          <span className="text-xs mt-2 font-semibold text-white-400">Pago</span>
-        </div>
-        <div className="h-1 w-10 bg-gray-300 rounded-full"></div>
-        <div className="flex flex-col items-center flex-1">
-          <div className="w-10 h-10 rounded-full bg-gray-300 text-gray-500 flex items-center justify-center font-bold text-lg shadow">3</div>
-          <span className="text-xs mt-2 font-semibold text-white-400">Confirmación</span>
+  // Si está mostrando el checkout de Mercado Pago
+  if (showMPCheckout && currentOrderId) {
+    const subject = cart.length === 1 ? cart[0].nombre : `Pedido #${currentOrderId}`;
+    
+    return (
+      <div className="min-h-screen pt-24 bg-gradient-to-br bg-gray-900 flex flex-col items-center justify-center">
+        <div className="w-full max-w-2xl mx-auto bg-white/90 rounded-3xl shadow-2xl p-8">
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">Finalizar Pago</h2>
+            <p className="text-gray-600">Total: {CLP.format(getTotal())}</p>
+          </div>
+          
+          <MercadoPagoCheckout
+            orderId={currentOrderId.toString()}
+            subject={subject}
+            amount={getTotal()}
+            email={email}
+            onSuccess={handleMPSuccess}
+            onError={handleMPError}
+          />
+          
+          <button 
+            onClick={() => setShowMPCheckout(false)}
+            className="mt-4 w-full px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
+          >
+            Volver atrás
+          </button>
         </div>
       </div>
-      */}
+    );
+  }
 
+  return (
+    <div className="min-h-screen pt-24 bg-gradient-to-br min-h-screen pt-24 bg-gray-900 flex flex-col items-center justify-center animate-fade-in">
       <div className="w-full max-w-5xl mx-auto flex flex-col md:flex-row gap-8 md:gap-12 bg-white/90 rounded-3xl shadow-2xl p-4 md:p-10 border border-gray-200 flex-col md:flex-row">
         {/* Formulario */}
         <div className="w-full md:w-2/3 flex flex-col gap-6 order-1 md:order-1">
@@ -219,6 +246,7 @@ const Checkout = () => {
                 <p className="text-xs mt-1 text-red-500">{errors.email}</p>
               )}
             </div>
+
             <div>
               <label
                 htmlFor="fortniteusername"
@@ -242,6 +270,7 @@ const Checkout = () => {
                 </p>
               )}
             </div>
+
             <div>
               <label
                 htmlFor="orderNotes"
@@ -258,6 +287,7 @@ const Checkout = () => {
                 className="mt-2 w-full rounded-xl bg-white border-2 border-gray-300 p-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400 transition"
               />
             </div>
+
             {/* Método de pago */}
             <div>
               <label className="block text-sm text-gray-700 font-semibold mb-1">
@@ -272,6 +302,7 @@ const Checkout = () => {
               >
                 <option value="">Selecciona un método</option>
                 <option value="Transferencia">Transferencia</option>
+                <option value="MercadoPago">Mercado Pago (Tarjeta, Webpay, etc)</option>
                 <option value="FLOW">FLOW (Tarjeta, Webpay, etc)</option>
               </select>
               {errors.paymentMethod && (
@@ -279,6 +310,7 @@ const Checkout = () => {
                   {errors.paymentMethod}
                 </p>
               )}
+
               {/* Resumen del pedido SOLO en móvil */}
               <div className="block md:hidden mt-6">
                 <div className="w-full bg-white/80 rounded-2xl shadow-lg p-6 flex flex-col gap-4 border border-gray-200 h-fit self-start">
@@ -351,6 +383,7 @@ const Checkout = () => {
                 </div>
               </div>
             </div>
+
             <label className="flex items-start gap-3 text-sm text-gray-700 font-semibold">
               <input
                 type="checkbox"
@@ -372,6 +405,7 @@ const Checkout = () => {
             {errors.terms && (
               <p className="text-xs mt-1 text-red-500">{errors.terms}</p>
             )}
+
             <button
               type="submit"
               disabled={
@@ -396,6 +430,7 @@ const Checkout = () => {
               </svg>
               Finalizar pedido
             </button>
+
             <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -422,6 +457,7 @@ const Checkout = () => {
               Pago 100% seguro y protegido
             </div>
           </form>
+
           {/* Ayuda WhatsApp */}
           <div className="mt-8 flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl p-4">
             <svg
@@ -449,6 +485,7 @@ const Checkout = () => {
             </span>
           </div>
         </div>
+
         {/* Resumen del pedido SOLO en escritorio */}
         <div className="hidden md:block w-full md:w-1/3 bg-white/80 rounded-2xl shadow-lg p-6 flex flex-col gap-4 border border-gray-200 h-fit self-start order-2 md:order-2">
           <h2 className="text-xl font-bold mb-2 text-gray-800">
@@ -519,7 +556,7 @@ const Checkout = () => {
           </div>
         </div>
       </div>
-      {/* Animación fade-in */}
+
       <style>{`
         .animate-fade-in {
           animation: fadeInCheckout 0.7s cubic-bezier(.4,2,.6,1) both;
