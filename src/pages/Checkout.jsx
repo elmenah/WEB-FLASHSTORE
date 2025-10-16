@@ -14,6 +14,8 @@ const Checkout = () => {
   const [errors, setErrors] = useState({});
   const [showMPCheckout, setShowMPCheckout] = useState(false);
   const [currentOrderId, setCurrentOrderId] = useState(null);
+  // ✅ Guardar datos del pedido para el WhatsApp posterior
+  const [orderData, setOrderData] = useState(null);
   const navigate = useNavigate();
 
   const CLP = new Intl.NumberFormat("es-CL", {
@@ -48,6 +50,31 @@ const Checkout = () => {
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  // ✅ Función para enviar WhatsApp con resumen de pago exitoso
+  const enviarWhatsAppPagoExitoso = (pedidoId, cartItems, total, email, username, metodoPago) => {
+    let mensaje = `🎉 ¡PAGO EXITOSO! - Tio Flashstore%0A`;
+    mensaje += `========================================%0A`;
+    mensaje += `Pedido #${pedidoId} - PAGADO ✅%0A`;
+    mensaje += `========================================%0A`;
+    
+    cartItems.forEach((item, idx) => {
+      mensaje += `• ${item.nombre} x${item.cantidad || 1} - ${CLP.format(item.precio)}%0A`;
+    });
+    
+    mensaje += `========================================%0A`;
+    mensaje += `💰 Total pagado: ${CLP.format(total)}%0A`;
+    mensaje += `💳 Método: ${metodoPago}%0A`;
+    mensaje += `========================================%0A`;
+    mensaje += `📧 Email: ${email}%0A`;
+    mensaje += `🎮 Usuario Fortnite: ${username}%0A`;
+    mensaje += `%0A`;
+    mensaje += `✨ ¡Gracias por tu compra!%0A`;
+    mensaje += `Procesaremos tu pedido lo antes posible.`;
+    
+    const wspUrl = `https://wa.me/56930917730?text=${mensaje}`;
+    window.open(wspUrl, '_blank');
   };
 
   const handleSubmit = async (e) => {
@@ -96,9 +123,19 @@ const Checkout = () => {
         .insert(itemsToInsert);
       if (itemsError) throw itemsError;
 
+      // ✅ Guardar datos del pedido para usar después
+      setOrderData({
+        id: pedidoData.id,
+        items: cart,
+        total: getTotal(),
+        email: email.trim(),
+        username: fortniteUsername.trim(),
+        metodoPago: paymentMethod
+      });
+
       // 4️⃣ Manejar método de pago
       if (paymentMethod === "Transferencia") {
-        // Flujo WhatsApp
+        // Flujo WhatsApp (mantener igual)
         let mensaje = `¡Hola! Quiero comprar en Tio Flashstore:%0A`;
         mensaje += `------------------------------------%0A`;
         cart.forEach((item, idx) => {
@@ -159,8 +196,23 @@ const Checkout = () => {
 
   const handleMPSuccess = (paymentData) => {
     console.log('Pago exitoso:', paymentData);
-    clearCart();
     
+    // ✅ Enviar WhatsApp automáticamente cuando el pago es exitoso
+    if (orderData) {
+      setTimeout(() => {
+        enviarWhatsAppPagoExitoso(
+          orderData.id,
+          orderData.items,
+          orderData.total,
+          orderData.email,
+          orderData.username,
+          orderData.metodoPago
+        );
+      }, 1000); // Esperar 1 segundo para que se procese todo
+    }
+    
+    clearCart();
+    navigate('/pago-exitoso');
   };
 
   const handleMPError = (error) => {
@@ -194,6 +246,10 @@ const Checkout = () => {
           <div className="text-center mb-6">
             <h2 className="text-2xl font-bold text-gray-800 mb-2">Finalizar Pago</h2>
             <p className="text-gray-600">Total: {CLP.format(getTotal())}</p>
+            {/* ✅ Agregar información sobre WhatsApp */}
+            <p className="text-sm text-blue-600 mt-2">
+              💬 Al completar el pago, se enviará automáticamente un WhatsApp con el resumen
+            </p>
           </div>
           
           <MercadoPagoCheckout
@@ -308,6 +364,20 @@ const Checkout = () => {
                 <p className="text-xs mt-1 text-red-500">
                   {errors.paymentMethod}
                 </p>
+              )}
+
+              {/* ✅ Mostrar información sobre WhatsApp automático */}
+              {paymentMethod === "MercadoPago" && (
+                <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="flex items-center gap-2 text-blue-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                    <span className="text-sm font-medium">
+                      Al completar el pago, se enviará automáticamente un WhatsApp con el resumen del pedido
+                    </span>
+                  </div>
+                </div>
               )}
 
               {/* Resumen del pedido SOLO en móvil */}
