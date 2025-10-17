@@ -3,7 +3,7 @@ import { initMercadoPago, Wallet } from '@mercadopago/sdk-react';
 import { useState, useEffect } from 'react';
 
 // ⚠️ Usa tu PUBLIC KEY de prueba
-initMercadoPago('APP_USR-af20dcba-663f-48af-ab40-cfef01e96f65');
+initMercadoPago('APP_USR-e95099e2-30e0-4a75-8139-96d4daf49d08');
 
 const MercadoPagoCheckout = ({ orderId, subject, amount, email, onSuccess, onError }) => {
     const [preferenceId, setPreferenceId] = useState(null);
@@ -89,8 +89,12 @@ const MercadoPagoCheckout = ({ orderId, subject, amount, email, onSuccess, onErr
                         valueProp: 'smart_option',
                     },
                 }}
-                onSubmit={onSuccess}
-                onError={onError}
+                // ❌ NO usar onSubmit aquí - se ejecuta al crear, no al pagar
+                // onSubmit={onSuccess}
+                onError={(error) => {
+                    console.error('Error en Wallet:', error);
+                    onError?.(error);
+                }}
             />
         </div>
     );

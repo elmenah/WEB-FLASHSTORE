@@ -14,8 +14,6 @@ const Checkout = () => {
   const [errors, setErrors] = useState({});
   const [showMPCheckout, setShowMPCheckout] = useState(false);
   const [currentOrderId, setCurrentOrderId] = useState(null);
-  // ✅ Guardar datos del pedido para el WhatsApp posterior
-  const [orderData, setOrderData] = useState(null);
   const navigate = useNavigate();
 
   const CLP = new Intl.NumberFormat("es-CL", {
@@ -50,31 +48,6 @@ const Checkout = () => {
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
-
-  // ✅ Función para enviar WhatsApp con resumen de pago exitoso
-  const enviarWhatsAppPagoExitoso = (pedidoId, cartItems, total, email, username, metodoPago) => {
-    let mensaje = `🎉 ¡PAGO EXITOSO! - Tio Flashstore%0A`;
-    mensaje += `========================================%0A`;
-    mensaje += `Pedido #${pedidoId} - PAGADO ✅%0A`;
-    mensaje += `========================================%0A`;
-    
-    cartItems.forEach((item, idx) => {
-      mensaje += `• ${item.nombre} x${item.cantidad || 1} - ${CLP.format(item.precio)}%0A`;
-    });
-    
-    mensaje += `========================================%0A`;
-    mensaje += `💰 Total pagado: ${CLP.format(total)}%0A`;
-    mensaje += `💳 Método: ${metodoPago}%0A`;
-    mensaje += `========================================%0A`;
-    mensaje += `📧 Email: ${email}%0A`;
-    mensaje += `🎮 Usuario Fortnite: ${username}%0A`;
-    mensaje += `%0A`;
-    mensaje += `✨ ¡Gracias por tu compra!%0A`;
-    mensaje += `Procesaremos tu pedido lo antes posible.`;
-    
-    const wspUrl = `https://wa.me/56930917730?text=${mensaje}`;
-    window.open(wspUrl, '_blank');
   };
 
   const handleSubmit = async (e) => {
@@ -122,16 +95,6 @@ const Checkout = () => {
         .from("pedido_items")
         .insert(itemsToInsert);
       if (itemsError) throw itemsError;
-
-      // ✅ Guardar datos del pedido para usar después
-      setOrderData({
-        id: pedidoData.id,
-        items: cart,
-        total: getTotal(),
-        email: email.trim(),
-        username: fortniteUsername.trim(),
-        metodoPago: paymentMethod
-      });
 
       // 4️⃣ Manejar método de pago
       if (paymentMethod === "Transferencia") {
@@ -194,27 +157,6 @@ const Checkout = () => {
     }
   };
 
-  const handleMPSuccess = (paymentData) => {
-    console.log('Pago exitoso:', paymentData);
-    
-    // ✅ Enviar WhatsApp automáticamente cuando el pago es exitoso
-    if (orderData) {
-      setTimeout(() => {
-        enviarWhatsAppPagoExitoso(
-          orderData.id,
-          orderData.items,
-          orderData.total,
-          orderData.email,
-          orderData.username,
-          orderData.metodoPago
-        );
-      }, 1000); // Esperar 1 segundo para que se procese todo
-    }
-    
-    clearCart();
-    navigate('/pago-exitoso');
-  };
-
   const handleMPError = (error) => {
     console.error('Error en pago:', error);
     alert('Error al procesar el pago con Mercado Pago');
@@ -257,7 +199,10 @@ const Checkout = () => {
             subject={subject}
             amount={getTotal()}
             email={email}
-            onSuccess={handleMPSuccess}
+            onSuccess={() => {
+              clearCart();
+              // ❌ NO redirigir aquí - Mercado Pago manejará la redirección
+            }}
             onError={handleMPError}
           />
           
