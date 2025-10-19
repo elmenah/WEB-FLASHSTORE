@@ -34,16 +34,24 @@ export const CartProvider = ({ children }) => {
       // Intenta obtener el nombre de otras propiedades comunes
       nombre = product.bundleName || product.itemName || product.title || 'Producto';
     }
+
+    // ✅ Calcular pavos basado en el producto
+    let pavos = product.pavos;
+    if (!pavos) {
+      // Si no tiene pavos definidos, calcular basado en cantidad
+      const cantidad = product.cantidad || 1;
+      pavos = cantidad * 1000; // Asumiendo 1000 pavos por item
+    }
+
     setCart(prevCart => [
       ...prevCart,
       {
         ...product,
         nombre,
+        pavos // ✅ Agregar pavos al producto en el carrito
       }
     ]);
   };
-
-  
 
   const removeFromCart = (index) => {
     setCart(prevCart => prevCart.filter((_, i) => i !== index));
@@ -57,6 +65,11 @@ export const CartProvider = ({ children }) => {
     return cart.reduce((total, item) => total + (item.precio * (item.cantidad || 1)), 0);
   };
 
+  // ✅ Nueva función para obtener total de pavos
+  const getCartPavos = () => {
+    return cart.reduce((total, item) => total + (item.pavos || (item.cantidad || 1) * 1000), 0);
+  };
+
   const openCart = () => setIsCartOpen(true);
   const closeCart = () => setIsCartOpen(false);
 
@@ -66,6 +79,7 @@ export const CartProvider = ({ children }) => {
     removeFromCart,
     clearCart,
     getCartTotal,
+    getCartPavos, // ✅ Agregar función de pavos
     isCartOpen,
     openCart,
     closeCart

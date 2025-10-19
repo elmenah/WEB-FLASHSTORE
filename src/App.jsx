@@ -9,6 +9,7 @@ import Register from "./pages/Register";
 import MiCuenta from "./pages/MiCuenta";
 import Checkout from "./pages/Checkout";
 import PagoExitoso from "./pages/PagoExitoso";
+import Dashboard from "./pages/Dashboard"; // ✅ Importar Dashboard
 import AuthGuard from "./components/AuthGuard";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -31,7 +32,6 @@ const App = () => {
         <main className="flex-grow">
           <Routes>
             {/* Rutas públicas */}
-            
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/" element={ <AuthGuard> <Home /> </AuthGuard>} />
@@ -40,6 +40,7 @@ const App = () => {
             <Route path="/shop" element={ <AuthGuard> <Shop2 /> </AuthGuard>} />
             <Route path="/club" element={ <AuthGuard> <Club /> </AuthGuard>} />
             <Route path="/pago-exitoso" element={<PagoExitoso />} />
+            
             {/* Rutas protegidas */}
             <Route
               path="/micuenta"
@@ -57,12 +58,20 @@ const App = () => {
                 </AuthGuard>
               }
             />
+            {/* ✅ Agregar ruta del Dashboard aquí */}
+            <Route
+              path="/dashboard"
+              element={
+                <AuthGuard>
+                  <Dashboard />
+                </AuthGuard>
+              }
+            />
           </Routes>
         </main>
 
-        
-    {/* 👇 Carrito montado aquí */}
-    <CartPopup />
+        {/* 👇 Carrito montado aquí */}
+        <CartPopup />
         {/* Mostrar el footer solo si no estamos en login o register */}
         {!hideHeaderFooter.includes(location.pathname) && <Footer />}
       </div>

@@ -76,13 +76,26 @@ const Shop2 = () => {
     const handleProductClick = (product) => {
         const isBundle = product.bundle?.name;
 
-        const colors = isBundle
-            ? [
-                product.colors?.color1 || "#111115",
-                product.colors?.color2 || product.colors?.color1 || "#111115",
-                product.colors?.color3 || product.colors?.color2 || product.colors?.color1 || "#111115",
-            ]
-            : product.brItems?.[0]?.series?.colors.map((color) => `#${color.slice(0, 6)}`) || ["#111115", "#111115"];
+        // 🎨 OBTENER COLORES DINÁMICOS IGUAL QUE EN PRODUCTCARD
+        let color1 = "#475569";
+        let color2 = "#334155"; 
+        let color3 = "#1e293b";
+
+        if (product.colors) {
+            let colorArray = [];
+            
+            if (typeof product.colors === 'object' && !Array.isArray(product.colors) && product.colors !== null) {
+                colorArray = Object.values(product.colors);
+            } else if (Array.isArray(product.colors)) {
+                colorArray = product.colors;
+            }
+
+            if (colorArray.length > 0) {
+                color1 = colorArray[0] ? `#${colorArray[0].slice(0, 6)}` : color1;
+                color2 = colorArray[1] ? `#${colorArray[1].slice(0, 6)}` : color1;
+                color3 = colorArray[2] ? `#${colorArray[2].slice(0, 6)}` : color2;
+            }
+        }
 
         const productData = isBundle
             ? {
@@ -90,16 +103,15 @@ const Shop2 = () => {
                 precio: product.finalPrice,
                 imagen: product.bundle.image || "URL_IMAGEN_DEFAULT",
                 descripcion: product.bundle.info || "Sin descripción disponible",
-                
                 grupo: "Lote",
                 tipo: "Lote",
                 rareza: product.rarity?.displayValue || "Sin rareza",
                 banner: product.banner?.value || null,
                 inicio: product.inDate || null,
                 fin: product.outDate || null,
-                color1: colors[0],
-                color2: colors[1],
-                color3: colors[2],
+                color1,
+                color2,
+                color3,
             }
             : {
                 nombre: product.brItems?.[0]?.name || "Sin nombre",
@@ -116,9 +128,9 @@ const Shop2 = () => {
                 banner: product.banner?.value || null,
                 inicio: product.inDate || null,
                 fin: product.outDate || null,
-                color1: colors[0],
-                color2: colors[1],
-                color3: colors[2],
+                color1,
+                color2,
+                color3,
             };
 
         const params = new URLSearchParams();
@@ -147,26 +159,24 @@ const Shop2 = () => {
         categorias[categoria].productos.push(item);
     });
 
-    // Ordenar: lotes primero, luego el resto
+    // ✅ Ordenar: lotes primero, luego el resto (PARA TODAS LAS PANTALLAS)
     Object.keys(categorias).forEach((cat) => {
-        categorias[cat].productos = [
-            // Lotes primero
-            ...categorias[cat].productos.filter(
-                prod =>
-                    prod.bundle?.name ||
-                    (prod.layout?.name?.toLowerCase().includes("lote")) ||
-                    (prod.brItems?.[0]?.name?.toLowerCase().includes("lote"))
-            ),
-            // Luego el resto
-            ...categorias[cat].productos.filter(
-                prod =>
-                    !(
-                        prod.bundle?.name ||
-                        (prod.layout?.name?.toLowerCase().includes("lote")) ||
-                        (prod.brItems?.[0]?.name?.toLowerCase().includes("lote"))
-                    )
-            ),
-        ];
+        categorias[cat].productos.sort((a, b) => {
+            const aEsLote = a.bundle?.name || 
+                           (a.layout?.name?.toLowerCase().includes("lote")) ||
+                           (a.brItems?.[0]?.name?.toLowerCase().includes("lote"));
+            
+            const bEsLote = b.bundle?.name || 
+                           (b.layout?.name?.toLowerCase().includes("lote")) ||
+                           (b.brItems?.[0]?.name?.toLowerCase().includes("lote"));
+            
+            // Si A es lote y B no, A va primero (-1)
+            if (aEsLote && !bEsLote) return -1;
+            // Si B es lote y A no, B va primero (1)
+            if (!aEsLote && bEsLote) return 1;
+            // Si ambos son lotes o ambos no son lotes, mantener orden original
+            return 0;
+        });
     });
 
     return categorias;
@@ -235,6 +245,30 @@ const Shop2 = () => {
                     <h1 className="text-4xl font-bold">Tienda</h1>
                     <p className="text-gray-400 mt-2">{new Date().toLocaleString('es-ES')}</p>
                 </div>
+
+                <div className="text-center mt-6 mb-4">
+                    <div className="inline-flex items-center gap-6 bg-gray-800/50 rounded-lg px-6 py-3 border border-gray-700">
+                        {/* Epic Games Precio */}
+                        <div className="text-center">
+                            <p className="text-xs text-gray-400 mb-1">Epic Games:</p>
+                            <p className="text-red-400 font-bold text-lg">$6.7 CLP/V-Buck</p>
+                        </div>
+                        
+                        {/* VS */}
+                        <div className="text-2xl text-gray-500 font-bold">VS</div>
+                        
+                        {/* Nuestros Precios */}
+                        <div className="text-center">
+                            <p className="text-xs text-gray-400 mb-1">Nosotros:</p>
+                            <p className="text-green-400 font-bold text-lg">$4.4 CLP/V-Buck</p>
+                        </div>
+                        
+                        
+                    </div>
+                    
+                    
+                </div>
+
                 {/* Buscador */}
                 <div className="flex justify-center items-center mt-4 mb-2 px-4">
                     <input
@@ -246,20 +280,25 @@ const Shop2 = () => {
                     />
                 </div>
 
-                {/* Dropdown de categorías */}
+                {/* Dropdown mejorado */}
                 <div className="flex justify-center my-6">
-                    <select
-                        value={selectedCategory}
-                        onChange={(e) => setSelectedCategory(e.target.value)}
-                        className="w-1/2 p-2 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
-                    >
-                        <option value="">Todas las categorías</option>
-                        {Object.keys(categorizedProducts).map((categoria) => (
-                            <option key={categoria} value={categoria}>
-                                {categoria}
-                            </option>
-                        ))}
-                    </select>
+                    <div className="relative w-full max-w-md">
+                        <select
+                            value={selectedCategory}
+                            onChange={(e) => setSelectedCategory(e.target.value)}
+                            className="w-full p-3 pr-10 rounded-lg bg-gray-800/50 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none cursor-pointer"
+                        >
+                            <option value="">🌟 Todas las categorías</option>
+                            {Object.entries(categorizedProducts).map(([categoria, {productos}]) => (
+                                <option key={categoria} value={categoria}>
+                                    {categoria} ({productos.length})
+                                </option>
+                            ))}
+                        </select>
+                        <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </div>
                 </div>
 
                 <section className="px-4">
@@ -285,13 +324,17 @@ const Shop2 = () => {
                             const productosFiltrados = searchTerm
                                 ? productos.filter(product => {
                                     const mainItem = product.brItems?.[0];
+                                    const bundleName = product.bundle?.name || '';
                                     return (
                                         (mainItem?.name?.toLowerCase().includes(searchTerm.toLowerCase())) ||
-                                        (mainItem?.rarity?.displayValue?.toLowerCase().includes(searchTerm.toLowerCase()))
+                                        (mainItem?.rarity?.displayValue?.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                                        (bundleName.toLowerCase().includes(searchTerm.toLowerCase()))
                                     );
                                 })
                                 : productos;
+                            
                             if (productosFiltrados.length === 0) return null;
+                            
                             return (
                                 <div key={categoria} className="mb-12">
                                     <h2 className="text-2xl font-semibold text-white border-b-2 border-blue-500 pb-2 mb-4">

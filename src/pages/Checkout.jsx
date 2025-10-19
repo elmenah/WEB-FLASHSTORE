@@ -83,14 +83,16 @@ const Checkout = () => {
         .single();
       if (pedidoError) throw pedidoError;
 
-      // 3️⃣ Insertar ítems del carrito
+      // 3️⃣ Insertar ítems del carrito con pavos
       const itemsToInsert = cart.map((item) => ({
         pedido_id: pedidoData.id,
         nombre_producto: item.nombre,
         precio_unitario: item.precio,
         cantidad: item.cantidad || 1,
         imagen_url: item.imagen,
+        pavos: item.pavos || (item.cantidad || 1) * 1000, // ✅ Agregar pavos del producto
       }));
+
       const { error: itemsError } = await supabase
         .from("pedido_items")
         .insert(itemsToInsert);
@@ -98,16 +100,21 @@ const Checkout = () => {
 
       // 4️⃣ Manejar método de pago
       if (paymentMethod === "Transferencia") {
-        // Flujo WhatsApp (mantener igual)
+        // Flujo WhatsApp con pavos incluidos
         let mensaje = `¡Hola! Quiero comprar en Tio Flashstore:%0A`;
         mensaje += `------------------------------------%0A`;
         cart.forEach((item, idx) => {
+          const pavosItem = item.pavos || (item.cantidad || 1) * 1000;
           mensaje += `• ${item.nombre} x${item.cantidad || 1} - ${CLP.format(
             item.precio
-          )}%0A`;
+          )} (${pavosItem.toLocaleString()} pavos)%0A`;
         });
         mensaje += `------------------------------------%0A`;
-        mensaje += `Total: ${CLP.format(getTotal())}%0A`;
+        const totalPavos = cart.reduce(
+          (total, item) => total + (item.pavos || (item.cantidad || 1) * 1000),
+          0
+        );
+        mensaje += `Total: ${CLP.format(getTotal())} (${totalPavos.toLocaleString()} pavos)%0A`;
         mensaje += `------------------------------------%0A`;
         mensaje += `Email: ${email}%0A`;
         mensaje += `Usuario Fortnite: ${fortniteUsername}%0A`;
@@ -115,19 +122,18 @@ const Checkout = () => {
         if (orderNotes) mensaje += `Notas: ${orderNotes}%0A`;
         mensaje += `%0A`;
         mensaje += `Acepto los términos y condiciones.`;
-        
+
         const wspUrl = `https://wa.me/56930917730?text=${mensaje}`;
         clearCart();
         window.location.href = wspUrl;
-        
       } else if (paymentMethod === "MercadoPago") {
         // Flujo Mercado Pago con componente React
         setCurrentOrderId(pedidoData.id);
         setShowMPCheckout(true);
-        
       } else if (paymentMethod === "FLOW") {
         // Mantener flujo FLOW existente
-        const subject = cart.length === 1 ? cart[0].nombre : `Pedido #${pedidoData.id}`;
+        const subject =
+          cart.length === 1 ? cart[0].nombre : `Pedido #${pedidoData.id}`;
         const amount = getTotal();
 
         const response = await fetch(
@@ -158,8 +164,8 @@ const Checkout = () => {
   };
 
   const handleMPError = (error) => {
-    console.error('Error en pago:', error);
-    alert('Error al procesar el pago con Mercado Pago');
+    console.error("Error en pago:", error);
+    alert("Error al procesar el pago con Mercado Pago");
     setShowMPCheckout(false);
   };
 
@@ -180,20 +186,24 @@ const Checkout = () => {
 
   // Si está mostrando el checkout de Mercado Pago
   if (showMPCheckout && currentOrderId) {
-    const subject = cart.length === 1 ? cart[0].nombre : `Pedido #${currentOrderId}`;
-    
+    const subject =
+      cart.length === 1 ? cart[0].nombre : `Pedido #${currentOrderId}`;
+
     return (
       <div className="min-h-screen pt-24 bg-gradient-to-br bg-gray-900 flex flex-col items-center justify-center">
         <div className="w-full max-w-2xl mx-auto bg-white/90 rounded-3xl shadow-2xl p-8">
           <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Finalizar Pago</h2>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">
+              Finalizar Pago
+            </h2>
             <p className="text-gray-600">Total: {CLP.format(getTotal())}</p>
             {/* ✅ Agregar información sobre WhatsApp */}
             <p className="text-sm text-blue-600 mt-2">
-              💬 Al completar el pago, se enviará automáticamente un WhatsApp con el resumen
+              💬 Al completar el pago, se enviará automáticamente un WhatsApp con el
+              resumen
             </p>
           </div>
-          
+
           <MercadoPagoCheckout
             orderId={currentOrderId.toString()}
             subject={subject}
@@ -205,8 +215,8 @@ const Checkout = () => {
             }}
             onError={handleMPError}
           />
-          
-          <button 
+
+          <button
             onClick={() => setShowMPCheckout(false)}
             className="mt-4 w-full px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
           >
@@ -315,11 +325,18 @@ const Checkout = () => {
               {paymentMethod === "MercadoPago" && (
                 <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                   <div className="flex items-center gap-2 text-blue-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                     </svg>
                     <span className="text-sm font-medium">
-                      Al completar el pago, se enviará automáticamente un WhatsApp con el resumen del pedido
+                      Al completar el pago, se enviará automáticamente un WhatsApp
+                      con el resumen del pedido
                     </span>
                   </div>
                 </div>
@@ -414,6 +431,12 @@ const Checkout = () => {
                   términos y condiciones
                 </Link>{" "}
                 y confirmo que mi nombre de Fortnite es correcto.
+              </span>
+            </label>
+            <label className="flex items-start gap-3 text-sm text-gray-700 font-semibold">
+              
+              <span>
+                Antes de finalizar, asegúrate de tener agregado como amigo a Reydelosvbucks en Fortnite.
               </span>
             </label>
             {errors.terms && (

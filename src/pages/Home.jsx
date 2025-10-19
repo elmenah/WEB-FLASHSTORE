@@ -1,9 +1,9 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { Particles } from "@/components/magicui/particles";
-
+import { AnimatedBeam } from "@/components/ui/animated-beam"
+import { AnimatedBeamDemo } from "@/components/AnimatedBeamDemo"
 const Home = () => {
   const { addToCart } = useCart();
   const [notification, setNotification] = useState(false);
@@ -37,40 +37,138 @@ const Home = () => {
     }, 2000);
     return () => clearInterval(interval);
   }, []);
-  // Productos destacados reales desde la API
-  const [destacados, setDestacados] = useState([]);
+  // Productos que se van hoy de la tienda
+  const [productosPesadillas, setProductosPesadillas] = useState([]);
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const response = await fetch("https://fortnite-api.com/v2/shop?language=es");
         if (!response.ok) throw new Error("Error al obtener los datos de la API");
         const data = await response.json();
-        // Tomar los primeros 8 productos que tengan imagen y nombre
-        const entries = (data?.data?.entries || [])
-          .filter(p => (p.bundle?.image && p.bundle?.name) || (p.brItems?.[0]?.images?.icon && p.brItems?.[0]?.name))
-          .slice(0, 8)
-          .map(p => {
-            if (p.bundle?.name) {
+        
+        // ✅ NUEVA LÓGICA: Buscar TODOS los productos de Fortnite Pesadillas
+        let productosPesadillas = (data?.data?.entries || [])
+          .filter(entry => {
+            // Verificar si tiene contenido válido
+            const tieneContenido = (entry.bundle?.image && entry.bundle?.name) || 
+                                  (entry.brItems?.[0]?.images?.icon && entry.brItems?.[0]?.name);
+            
+            if (!tieneContenido) return false;
+            
+            // ✅ Función para buscar "Fortnite Pesadillas" en CUALQUIER parte del objeto
+            const buscarEnTexto = (texto) => {
+              if (!texto) return false;
+              const textoLower = texto.toLowerCase();
+              return textoLower.includes('fortnite pesadillas') ||
+                     textoLower.includes('pesadillas') ||
+                     textoLower.includes('fortnitemares') ||
+                     textoLower.includes('nightmare');
+            };
+            
+            // Buscar en TODOS los campos posibles
+            const esPesadillas = 
+              // Section
+              buscarEnTexto(entry.section?.name) ||
+              buscarEnTexto(entry.section?.id) ||
+              
+              // Layout
+              buscarEnTexto(entry.layout?.name) ||
+              buscarEnTexto(entry.layout?.id) ||
+              
+              // DisplayAssetPath
+              buscarEnTexto(entry.displayAssetPath?.name) ||
+              buscarEnTexto(entry.displayAssetPath?.id) ||
+              
+              // Categories (si es array)
+              (entry.categories && entry.categories.some(cat => buscarEnTexto(cat))) ||
+              
+              // Tags (si es array)
+              (entry.tags && entry.tags.some(tag => buscarEnTexto(tag))) ||
+              
+              // ✅ NOMBRES ESPECÍFICOS que veo en las imágenes:
+              entry.bundle?.name?.toLowerCase().includes("ravemello") ||
+              entry.bundle?.name?.toLowerCase().includes("captor") ||
+              entry.bundle?.name?.toLowerCase().includes("malhechor") ||
+              entry.bundle?.name?.toLowerCase().includes("ghost face") ||
+              entry.bundle?.name?.toLowerCase().includes("guiff") ||
+              entry.bundle?.name?.toLowerCase().includes("jason") ||
+              entry.bundle?.name?.toLowerCase().includes("fiesta espectral") ||
+              entry.bundle?.name?.toLowerCase().includes("calabaza") ||
+              entry.bundle?.name?.toLowerCase().includes("alas rojas") ||
+              entry.bundle?.name?.toLowerCase().includes("maniocillas") ||
+              entry.bundle?.name?.toLowerCase().includes("limpiaparabrisas") ||
+              entry.bundle?.name?.toLowerCase().includes("garra de lucian") ||
+              entry.bundle?.name?.toLowerCase().includes("crea classic") ||
+              entry.bundle?.name?.toLowerCase().includes("roma mortal") ||
+              
+              // También buscar en brItems
+              entry.brItems?.[0]?.name?.toLowerCase().includes("ravemello") ||
+              entry.brItems?.[0]?.name?.toLowerCase().includes("captor") ||
+              entry.brItems?.[0]?.name?.toLowerCase().includes("malhechor") ||
+              entry.brItems?.[0]?.name?.toLowerCase().includes("ghost face") ||
+              entry.brItems?.[0]?.name?.toLowerCase().includes("guiff") ||
+              entry.brItems?.[0]?.name?.toLowerCase().includes("jason") ||
+              entry.brItems?.[0]?.name?.toLowerCase().includes("fiesta espectral") ||
+              entry.brItems?.[0]?.name?.toLowerCase().includes("calabaza") ||
+              entry.brItems?.[0]?.name?.toLowerCase().includes("alas rojas") ||
+              entry.brItems?.[0]?.name?.toLowerCase().includes("maniocillas") ||
+              entry.brItems?.[0]?.name?.toLowerCase().includes("limpiaparabrisas") ||
+              entry.brItems?.[0]?.name?.toLowerCase().includes("garra de lucian") ||
+              entry.brItems?.[0]?.name?.toLowerCase().includes("crea classic") ||
+              entry.brItems?.[0]?.name?.toLowerCase().includes("roma mortal");
+            
+            return esPesadillas;
+          })
+          .slice(0, 20) // ✅ Aumentar a 20 productos máximo
+          .map(entry => {
+            if (entry.bundle?.name) {
               return {
-                id: p.offerId,
-                nombre: p.bundle.name,
-                precio: Math.round(p.finalPrice * 4.4),
-                imagen: p.bundle.image,
-                desc: p.bundle.info || 'Lote especial',
+                id: entry.offerId,
+                nombre: entry.bundle.name,
+                precio: Math.round(entry.finalPrice * 4.4),
+                imagen: entry.bundle.image,
+                desc: entry.bundle.info || 'Lote especial de Fortnite Pesadillas',
+                categoria: 'Fortnite Pesadillas',
               };
             } else {
               return {
-                id: p.offerId,
-                nombre: p.brItems[0].name,
-                precio: Math.round(p.finalPrice * 4.4),
-                imagen: p.brItems[0].images.icon || p.brItems[0].images.featured,
-                desc: p.brItems[0].description || '',
+                id: entry.offerId,
+                nombre: entry.brItems[0].name,
+                precio: Math.round(entry.finalPrice * 4.4),
+                imagen: entry.brItems[0].images.icon || entry.brItems[0].images.featured,
+                desc: entry.brItems[0].description || 'Skin especial de Fortnite Pesadillas',
+                categoria: 'Fortnite Pesadillas',
               };
             }
           });
-        setDestacados(entries);
+
+        // ✅ Log mejorado para debug
+        console.log('Productos de Pesadillas encontrados:', productosPesadillas);
+        console.log('Total de entries en la API:', data?.data?.entries?.length);
+        
+        // ✅ Log para ver TODAS las sections y layouts disponibles
+        const sections = [...new Set(data?.data?.entries?.map(e => e.section?.name).filter(Boolean))];
+        const layouts = [...new Set(data?.data?.entries?.map(e => e.layout?.name).filter(Boolean))];
+        console.log('Sections disponibles:', sections);
+        console.log('Layouts disponibles:', layouts);
+        
+        // ✅ Log específico para productos que contienen palabras clave
+        const productosConPalabras = data?.data?.entries?.filter(e => {
+          const nombreBundle = e.bundle?.name?.toLowerCase() || '';
+          const nombreItem = e.brItems?.[0]?.name?.toLowerCase() || '';
+          return nombreBundle.includes('ravemello') || nombreBundle.includes('captor') || 
+                 nombreBundle.includes('malhechor') || nombreBundle.includes('ghost') ||
+                 nombreItem.includes('ravemello') || nombreItem.includes('captor') || 
+                 nombreItem.includes('malhechor') || nombreItem.includes('ghost');
+        });
+        console.log('Productos con palabras clave específicas:', productosConPalabras);
+        
+        setProductosPesadillas(productosPesadillas);
+        
       } catch (e) {
-        setDestacados([]);
+        console.error('Error fetching products:', e);
+        setProductosPesadillas([]);
       }
     };
     fetchProducts();
@@ -126,7 +224,7 @@ const Home = () => {
           size={1.5} 
           color="#ffffff" 
         />
-        <img src="/Imagenes/Doja.jpeg" className="w-full h-full object-cover z-0" alt="Hero" />
+        <img src="/Imagenes/jason.png" className="w-full h-full object-cover z-0" alt="Hero" />
         <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent z-10"></div>
   <div className="absolute left-0 top-1/2 transform -translate-y-1/2 z-20 w-11/12 sm:w-auto pl-4 sm:pl-10 pr-4 text-left animate-fade-in">
           <h1 className="text-2xl xs:text-3xl md:text-5xl font-bold mb-3 sm:mb-4 italic drop-shadow-xl leading-tight">
@@ -155,26 +253,77 @@ const Home = () => {
         
       </section>
       
-  {/* DESTACADOS - Slider */}
+  {/* FORTNITE PESADILLAS - Slider */}
   <section className="py-8 sm:py-12 bg-gray-900">
-        <h2 className="text-2xl sm:text-3xl font-bold text-center mb-5 sm:mb-8 text-white drop-shadow-lg">Destacados de la semana</h2>
-        <div className="relative max-w-full sm:max-w-7xl mx-auto">
-          <button onClick={() => scrollSlider(-1)} className="hidden sm:flex absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-black/70 text-white rounded-full p-2 shadow-lg"><svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
-          <div ref={sliderRef} className="flex gap-4 sm:gap-8 overflow-x-auto no-scrollbar scroll-smooth px-2 sm:px-10 py-2">
-            {destacados.map((item) => (
-              <div key={item.id} className="min-w-[80vw] max-w-[80vw] sm:min-w-[270px] sm:max-w-[270px] bg-gray-800/90 rounded-2xl shadow-xl p-3 sm:p-4 flex flex-col items-center hover:scale-105 transition-transform cursor-pointer animate-fade-in">
-                <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-xl mb-2 sm:mb-3 shadow-lg flex items-center justify-center bg-gradient-to-br from-[#47fdfe] to-[#2b6fa1]">
-                  <img src={item.imagen} alt={item.nombre} className="object-contain max-h-28 max-w-28 sm:max-h-36 sm:max-w-36" />
-                </div>
-                <h3 className="font-bold text-base sm:text-lg text-white mb-1">{item.nombre}</h3>
-                <span className="text-indigo-200 font-bold text-lg sm:text-xl mb-1 sm:mb-2">${item.precio.toLocaleString('es-CL')}</span>
-                <button onClick={() => handleAddToCart(item)} className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full font-semibold shadow-md transition-all text-sm sm:text-base">Añadir al carrito</button>
-              </div>
-            ))}
+  <div className="text-center mb-5 sm:mb-8">
+    <h2 className="text-2xl sm:text-3xl font-bold text-white drop-shadow-lg mb-2">
+      🎃 Fortnite Pesadillas
+    </h2>
+    <p className="text-lg text-orange-400 font-semibold">
+      Skins y lotes especiales de terror
+    </p>
+  </div>
+  
+  {productosPesadillas.length > 0 ? (
+    <div className="relative max-w-full sm:max-w-7xl mx-auto">
+      <button onClick={() => scrollSlider(-1)} className="hidden sm:flex absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-black/70 text-white rounded-full p-2 shadow-lg">
+        <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+      </button>
+      
+      <div ref={sliderRef} className="flex gap-4 sm:gap-8 overflow-x-auto no-scrollbar scroll-smooth px-2 sm:px-10 py-2">
+        {productosPesadillas.map((item) => (
+          <div key={item.id} className="min-w-[80vw] max-w-[80vw] sm:min-w-[270px] sm:max-w-[270px] bg-gray-800/90 rounded-2xl shadow-xl p-3 sm:p-4 flex flex-col items-center hover:scale-105 transition-transform cursor-pointer animate-fade-in relative">
+            
+          
+            
+            <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-xl mb-2 sm:mb-3 shadow-lg flex items-center justify-center bg-gradient-to-br from-[#ff6b35] to-[#8b0000] overflow-hidden">
+              <img src={item.imagen} alt={item.nombre} className="object-contain max-h-28 max-w-28 sm:max-h-36 sm:max-w-36" />
+            </div>
+            
+            <h3 className="font-bold text-base sm:text-lg text-white mb-1 text-center">{item.nombre}</h3>
+            
+            <div className="text-center mb-2">
+              <span className="text-orange-400 font-bold text-lg sm:text-xl">${item.precio.toLocaleString('es-CL')}</span>
+              <p className="text-gray-400 text-xs mt-1">{item.desc}</p>
+            </div>
+            
+            <button 
+              onClick={() => handleAddToCart(item)} 
+              className="bg-orange-600 hover:bg-orange-700 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full font-semibold shadow-md transition-all text-sm sm:text-base border border-orange-400"
+            >
+              👻 ¡Comprar Ahora!
+            </button>
           </div>
-          <button onClick={() => scrollSlider(1)} className="hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-black/70 text-white rounded-full p-2 shadow-lg"><svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
-        </div>
-      </section>
+        ))}
+      </div>
+      
+      <button onClick={() => scrollSlider(1)} className="hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-black/70 text-white rounded-full p-2 shadow-lg">
+        <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path d="M9 6l6 6-6 6"/>
+        </svg>
+      </button>
+    </div>
+  ) : (
+    <div className="text-center py-12">
+      <div className="bg-gray-800/50 rounded-lg p-8 max-w-md mx-auto">
+        <span className="text-4xl mb-4 block">🎃</span>
+        <h3 className="text-xl font-bold text-white mb-2">¡Pronto habrá pesadillas!</h3>
+        <p className="text-gray-400">
+          No hay productos de Fortnite Pesadillas disponibles en este momento.
+        </p>
+        <Link 
+          to="/shop" 
+          className="inline-block mt-4 bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-full font-semibold transition-colors"
+        >
+          Ver tienda completa
+        </Link>
+      </div>
+    </div>
+  )}
+</section>
+
 
 
       {/* Testimonios */}
@@ -192,16 +341,7 @@ const Home = () => {
       </section>
       */}
       
-      {/* Botón flotante de WhatsApp verde */}
-      <a
-        href="https://wa.me/56930917730"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="fixed bottom-8 right-8 z-50 bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-transform animate-fade-in"
-        title="Ir a WhatsApp"
-      >
-       <img width="24" height="24" src="https://img.icons8.com/color/48/whatsapp--v1.png" alt="whatsapp--v1"/>
-      </a>
+      
       
       {/* Animaciones CSS */}
       <style>{`
@@ -214,7 +354,7 @@ const Home = () => {
         }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-      `}</style>
+        `}</style>
 
       {/* ¿CÓMO FUNCIONA? */}
       <div className="container mx-auto p-4 text-white">
@@ -263,6 +403,62 @@ const Home = () => {
           </div>
         </div>
       </div>
+        {/* MÉTODOS DE PAGO */}
+        <section className="py-12 bg-gray-900">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-bold text-center mb-2 text-white">PAGOS SEGUROS PROCESADOS POR</h2>
+            
+            
+            <div className="flex flex-wrap justify-center items-center gap-8 opacity-80 hover:opacity-100 transition-opacity">
+              {/* MercadoPago */}
+              <div className="bg-white rounded-lg p-4 shadow-lg hover:scale-105 transition-transform">
+                <img 
+                  src="/Imagenes/Mercado_Pago.svg.png" 
+                  alt="MercadoPago" 
+                  className="h-10 w-auto object-contain"
+                />
+              </div>
+              
+              {/* Visa */}
+              <div className="bg-white rounded-lg p-4 shadow-lg hover:scale-105 transition-transform">
+                <img 
+                  src="/Imagenes/Visa_Logo.png" 
+                  alt="Visa" 
+                  className="h-10 w-auto object-contain"
+                />
+              </div>
+              
+              {/* Mastercard */}
+              <div className="bg-white rounded-lg p-4 shadow-lg hover:scale-105 transition-transform">
+                <img 
+                  src="/Imagenes/MasterCard_early_1990s_logo.png" 
+                  alt="Mastercard" 
+                  className="h-10 w-auto object-contain"
+                />
+              </div>
+              
+              {/* Webpay */}
+              
+              <div className="bg-white rounded-lg p-4 shadow-lg hover:scale-105 transition-transform">
+                <img 
+                  src="/Imagenes/logo-web-pay-plus.png" 
+                  alt="Transferecia bancaria" 
+                  className="h-10 w-auto object-contain"
+                />
+              </div>
+            </div>
+            
+            {/* Mensaje de seguridad */}
+            <div className="text-center mt-8">
+              <div className="inline-flex items-center gap-2 bg-green-600/20 text-green-400 px-4 py-2 rounded-full">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd"/>
+                </svg>
+                <span className="font-semibold">Transacciones 100% seguras y cifradas</span>
+              </div>
+            </div>
+          </div>
+        </section>
 
 
       {/* FAQ */}
@@ -301,6 +497,10 @@ const Home = () => {
           </div>
         </div>
       </div>
+
+      
+      
+
       
       
       
