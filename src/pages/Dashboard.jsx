@@ -56,19 +56,15 @@ const Dashboard = () => {
     const verificarAdmin = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
-        
+
         if (!user) {
           navigate('/login');
           return;
         }
 
-        const { data: userData, error } = await supabase
-          .from('usuarios')
-          .select('es_admin, email')
-          .eq('id', user.id)
-          .single();
-
-        if (error || !userData?.es_admin) {
+        // Verifica si el correo coincide con el del admin
+        const correoAdmin = "menanicolas161@gmail.com";
+        if (user.email !== correoAdmin) {
           alert('No tienes permisos de administrador');
           navigate('/');
           return;

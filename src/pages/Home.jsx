@@ -274,7 +274,7 @@ const Home = () => {
       
       <div ref={sliderRef} className="flex gap-4 sm:gap-8 overflow-x-auto no-scrollbar scroll-smooth px-2 sm:px-10 py-2">
         {productosPesadillas.map((item) => (
-          <div key={item.id} className="min-w-[80vw] max-w-[80vw] sm:min-w-[270px] sm:max-w-[270px] bg-gray-800/90 rounded-2xl shadow-xl p-3 sm:p-4 flex flex-col items-center hover:scale-105 transition-transform cursor-pointer animate-fade-in relative">
+          <div key={item.id} className="min-w-[50vw] max-w-[50vw] sm:min-w-[270px] sm:max-w-[270px] bg-gray-800/90 rounded-2xl shadow-xl p-3 sm:p-4 flex flex-col items-center hover:scale-105 transition-transform cursor-pointer animate-fade-in relative">
             
           
             
