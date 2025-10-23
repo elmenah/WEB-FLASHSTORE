@@ -92,7 +92,7 @@ const Home = () => {
       {/* 🎃 Fortnite Pesadillas (nuevo componente modular) */}
       <FortnitePesadillas />
         {/* Hero, Fortnite Pesadillas, etc */}
-      <Testimonios />
+      {/* <Testimonios /> */}
       {/* Secciones siguientes */}
       {/* ❓ Cómo funciona */}
       <div className="container mx-auto p-4 text-white">
