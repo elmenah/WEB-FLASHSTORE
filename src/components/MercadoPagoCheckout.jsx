@@ -5,10 +5,11 @@ import { useState, useEffect } from 'react';
 // ⚠️ Usa tu PUBLIC KEY de prueba
 initMercadoPago('APP_USR-af20dcba-663f-48af-ab40-cfef01e96f65');
 
-const MercadoPagoCheckout = ({ orderId, subject, amount, email, onSuccess, onError }) => {
+const MercadoPagoCheckout = ({ orderId, subject, amount, email, onSuccess, onError, location, clearCart }) => {
     const [preferenceId, setPreferenceId] = useState(null);
     const [loading, setLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
+    const [wspMessage, setWspMessage] = useState('');
 
     const createPreference = async () => {
         setLoading(true);
@@ -52,6 +53,31 @@ const MercadoPagoCheckout = ({ orderId, subject, amount, email, onSuccess, onErr
             createPreference();
         }
     }, [orderId, subject, amount, email]);
+
+    useEffect(() => {
+        const urlParams = new URLSearchParams(location.search);
+        const mensaje = urlParams.get("wsp");
+        
+        // ✅ Si hay mensaje de WhatsApp, significa que el pago fue exitoso
+        if (mensaje) {
+          // ✅ NO decodificar - usar directamente (ya tiene %0A)
+          setWspMessage(mensaje);
+          
+          // ✅ Limpiar el carrito cuando se confirma el pago exitoso
+          console.log('Pago exitoso confirmado, limpiando carrito...');
+          clearCart();
+        }
+      }, [location, clearCart]);
+
+    const abrirWhatsApp = () => {
+        if (!wspMessage) return;
+        const numero = "56930917730";
+        
+        // ✅ Usar directamente sin re-codificar
+        const url = `https://wa.me/${numero}?text=${wspMessage}`;
+        
+        window.open(url, "_blank");
+    };
 
     if (loading) {
         return (
