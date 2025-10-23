@@ -31,16 +31,15 @@ export const CartProvider = ({ children }) => {
     // Corrige el nombre si no viene bien seteado
     let nombre = product.nombre;
     if (!nombre) {
-      // Intenta obtener el nombre de otras propiedades comunes
       nombre = product.bundleName || product.itemName || product.title || 'Producto';
     }
 
-    // ✅ Calcular pavos basado en el producto
+    // ✅ Calcular pavos correctamente basado en el precio
     let pavos = product.pavos;
     if (!pavos) {
-      // Si no tiene pavos definidos, calcular basado en cantidad
-      const cantidad = product.cantidad || 1;
-      pavos = cantidad * 1000; // Asumiendo 1000 pavos por item
+      // Calcular pavos basado en el precio: precio / 4.4
+      const precio = product.precio || product.finalPrice || 0;
+      pavos = Math.round(precio / 4.4);
     }
 
     setCart(prevCart => [
@@ -48,7 +47,7 @@ export const CartProvider = ({ children }) => {
       {
         ...product,
         nombre,
-        pavos // ✅ Agregar pavos al producto en el carrito
+        pavos // ✅ Pavos calculados correctamente
       }
     ]);
   };
@@ -65,9 +64,18 @@ export const CartProvider = ({ children }) => {
     return cart.reduce((total, item) => total + (item.precio * (item.cantidad || 1)), 0);
   };
 
-  // ✅ Nueva función para obtener total de pavos
+  // ✅ Función corregida para obtener total de pavos
   const getCartPavos = () => {
-    return cart.reduce((total, item) => total + (item.pavos || (item.cantidad || 1) * 1000), 0);
+    return cart.reduce((total, item) => {
+      // Si el item tiene pavos definidos, usarlos
+      if (item.pavos) {
+        return total + item.pavos;
+      }
+      // Si no, calcular basado en el precio
+      const precio = item.precio || item.finalPrice || 0;
+      const pavosCalculados = Math.round(precio / 4.4);
+      return total + pavosCalculados;
+    }, 0);
   };
 
   const openCart = () => setIsCartOpen(true);

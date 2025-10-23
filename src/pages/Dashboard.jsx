@@ -123,7 +123,9 @@ const Dashboard = () => {
       const { data, error } = await supabase
         .from('pavos_gastados')
         .select('*')
-        .single();
+        .order('id', { ascending: false })
+        .limit(1)
+        .maybeSingle(); // ✅ Cambiar .single() por .maybeSingle()
 
       if (error && error.code !== 'PGRST116') {
         console.error('Error cargando pavos gastados:', error);
@@ -144,7 +146,9 @@ const Dashboard = () => {
       const { data, error } = await supabase
         .from('ingresos_totales')
         .select('*')
-        .single();
+        .order('id', { ascending: false })
+        .limit(1)
+        .maybeSingle(); // ✅ Cambiar .single() por .maybeSingle()
 
       if (error && error.code !== 'PGRST116') {
         console.error('Error cargando ingresos totales:', error);
@@ -331,7 +335,13 @@ const Dashboard = () => {
   };
 
   const calcularPavos = (items) => {
-    return items.reduce((total, item) => total + (item.pavos || 0), 0);
+    return items.reduce((total, item) => {
+      // ✅ Excluir "1 Mes Fortnite Crew" del cálculo de pavos
+      if (item.nombre_producto.toLowerCase().includes('fortnite crew')) {
+        return total;
+      }
+      return total + (item.pavos || 0);
+    }, 0);
   };
 
   // Filtrar y ordenar pedidos
@@ -339,7 +349,8 @@ const Dashboard = () => {
     .filter(pedido => {
       const cumpleFiltros = 
         (pedido.correo.toLowerCase().includes(filtros.cliente.toLowerCase()) ||
-         pedido.username_fortnite?.toLowerCase().includes(filtros.cliente.toLowerCase())) &&
+         pedido.username_fortnite?.toLowerCase().includes(filtros.cliente.toLowerCase()) ||
+         pedido.telefono?.toLowerCase().includes(filtros.cliente.toLowerCase())) && // ✅ Búsqueda por teléfono
         pedido.pedido_items.some(item => 
           item.nombre_producto.toLowerCase().includes(filtros.productos.toLowerCase())
         ) &&
@@ -743,6 +754,9 @@ const Dashboard = () => {
                   >
                     Cliente <IconoOrden campo="cliente" />
                   </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    Teléfono
+                  </th>
                   <th 
                     className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-600"
                     onClick={() => manejarOrdenamiento('productos')}
@@ -798,6 +812,9 @@ const Dashboard = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-white">{pedido.correo}</div>
                       <div className="text-sm text-gray-400">🎮 {pedido.username_fortnite}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-white">{pedido.telefono || '-'}</div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="max-w-xs">

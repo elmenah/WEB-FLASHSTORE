@@ -14,6 +14,7 @@ const Checkout = () => {
   const [errors, setErrors] = useState({});
   const [showMPCheckout, setShowMPCheckout] = useState(false);
   const [currentOrderId, setCurrentOrderId] = useState(null);
+  const [telefono, setTelefono] = useState("");
   const navigate = useNavigate();
 
   const CLP = new Intl.NumberFormat("es-CL", {
@@ -46,6 +47,9 @@ const Checkout = () => {
     if (!paymentMethod) {
       newErrors.paymentMethod = "Selecciona un método de pago.";
     }
+    if (!telefono.trim()) {
+      newErrors.telefono = "Por favor introduce tu número de teléfono.";
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -76,6 +80,7 @@ const Checkout = () => {
             user_id: currentUser.id,
             correo: email.trim(),
             username_fortnite: fortniteUsername.trim(),
+            telefono: telefono.trim(),
             estado: "No Pagado",
           },
         ])
@@ -83,15 +88,25 @@ const Checkout = () => {
         .single();
       if (pedidoError) throw pedidoError;
 
-      // 3️⃣ Insertar ítems del carrito con pavos
-      const itemsToInsert = cart.map((item) => ({
-        pedido_id: pedidoData.id,
-        nombre_producto: item.nombre,
-        precio_unitario: item.precio,
-        cantidad: item.cantidad || 1,
-        imagen_url: item.imagen,
-        pavos: item.pavos || (item.cantidad || 1) * 1000, // ✅ Agregar pavos del producto
-      }));
+      // 3️⃣ Insertar ítems del carrito con pavos corregidos
+      const itemsToInsert = cart.map((item) => {
+        // Calcular pavos correctamente
+        let pavosItem = item.pavos;
+        if (!pavosItem) {
+          // Si no tiene pavos definidos, calcular basado en el precio
+          // Fórmula: precio_clp / 4.4 = pavos aproximados
+          pavosItem = Math.round(item.precio / 4.4);
+        }
+
+        return {
+          pedido_id: pedidoData.id,
+          nombre_producto: item.nombre,
+          precio_unitario: item.precio,
+          cantidad: item.cantidad || 1,
+          imagen_url: item.imagen,
+          pavos: pavosItem, // ✅ Pavos calculados correctamente
+        };
+      });
 
       const { error: itemsError } = await supabase
         .from("pedido_items")
@@ -104,16 +119,26 @@ const Checkout = () => {
         let mensaje = `¡Hola! Quiero comprar en Tio Flashstore:%0A`;
         mensaje += `------------------------------------%0A`;
         cart.forEach((item, idx) => {
-          const pavosItem = item.pavos || (item.cantidad || 1) * 1000;
+          // Calcular pavos correctamente para el mensaje
+          let pavosItem = item.pavos;
+          if (!pavosItem) {
+            pavosItem = Math.round(item.precio / 4.4);
+          }
           mensaje += `• ${item.nombre} x${item.cantidad || 1} - ${CLP.format(
             item.precio
           )} (${pavosItem.toLocaleString()} pavos)%0A`;
         });
         mensaje += `------------------------------------%0A`;
-        const totalPavos = cart.reduce(
-          (total, item) => total + (item.pavos || (item.cantidad || 1) * 1000),
-          0
-        );
+
+        // Calcular total de pavos correctamente
+        const totalPavos = cart.reduce((total, item) => {
+          let pavosItem = item.pavos;
+          if (!pavosItem) {
+            pavosItem = Math.round(item.precio / 4.4);
+          }
+          return total + pavosItem;
+        }, 0);
+
         mensaje += `Total: ${CLP.format(getTotal())} (${totalPavos.toLocaleString()} pavos)%0A`;
         mensaje += `------------------------------------%0A`;
         mensaje += `Email: ${email}%0A`;
@@ -279,6 +304,28 @@ const Checkout = () => {
                 <p className="text-xs mt-1 text-red-500">
                   {errors.fortniteUsername}
                 </p>
+              )}
+            </div>
+
+            <div>
+              <label
+                htmlFor="telefono"
+                className="block text-sm text-gray-700 font-semibold"
+              >
+                Número de teléfono
+              </label>
+              <input
+                id="telefono"
+                type="tel"
+                placeholder="Ej: +56912345678"
+                value={telefono}
+                onChange={(e) => setTelefono(e.target.value)}
+                className={`mt-2 w-full rounded-xl bg-white border-2 p-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400 transition ${
+                  errors.telefono ? "border-red-400" : "border-gray-300"
+                }`}
+              />
+              {errors.telefono && (
+                <p className="text-xs mt-1 text-red-500">{errors.telefono}</p>
               )}
             </div>
 
