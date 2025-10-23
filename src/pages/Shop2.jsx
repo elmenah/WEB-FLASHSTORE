@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import ProductCard from '../components/ProductCard';
 import '../css/Shop.css';
+import useScrollToTop from '../hooks/useScrollToTop';
 
 const Shop2 = () => {
+    useScrollToTop();
     const [products, setProducts] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [searchInput, setSearchInput] = useState('');

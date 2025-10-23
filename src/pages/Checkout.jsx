@@ -3,8 +3,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { supabase } from "../supabaseCliente";
 import MercadoPagoCheckout from "../components/MercadoPagoCheckout";
+import useScrollToTop from '../hooks/useScrollToTop';
 
 const Checkout = () => {
+  useScrollToTop();
   const { cart, removeFromCart, clearCart } = useCart();
   const [email, setEmail] = useState("");
   const [fortniteUsername, setFortniteUsername] = useState("");

@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import useScrollToTop from '../hooks/useScrollToTop';
 
 const ProductDetail = () => {
+  useScrollToTop(); // ✅ Agregar esta línea
+  
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const { addToCart } = useCart();
