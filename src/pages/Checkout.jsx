@@ -362,7 +362,7 @@ const Checkout = () => {
               >
                 <option value="">Selecciona un método</option>
                 <option value="MercadoPago">Mercado Pago (Tarjeta, Webpay, etc)</option>
-                <option value="Transferencia">Transferencia</option>
+                
               </select>
               {errors.paymentMethod && (
                 <p className="text-xs mt-1 text-red-500">
