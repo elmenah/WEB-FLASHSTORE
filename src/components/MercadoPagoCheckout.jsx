@@ -1,11 +1,12 @@
 // Crear archivo: src/components/MercadoPagoCheckout.jsx
 import { initMercadoPago, Wallet } from '@mercadopago/sdk-react';
 import { useState, useEffect } from 'react';
-
+import { useLocation } from 'react-router-dom';
 // ⚠️ Usa tu PUBLIC KEY de prueba
 initMercadoPago('APP_USR-af20dcba-663f-48af-ab40-cfef01e96f65');
 
-const MercadoPagoCheckout = ({ orderId, subject, amount, email, onSuccess, onError, location, clearCart }) => {
+const MercadoPagoCheckout = ({ orderId, subject, amount, email, onSuccess, onError, clearCart }) => {
+    const location = useLocation();
     const [preferenceId, setPreferenceId] = useState(null);
     const [loading, setLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
