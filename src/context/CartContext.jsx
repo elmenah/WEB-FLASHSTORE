@@ -39,7 +39,7 @@ export const CartProvider = ({ children }) => {
     if (!pavos) {
       // Calcular pavos basado en el precio: precio / 4.4
       const precio = product.precio || product.finalPrice || 0;
-      pavos = Math.round(precio / 4.4);
+      pavos = Math.round(precio / 4.0);
     }
 
     setCart(prevCart => [
@@ -73,7 +73,7 @@ export const CartProvider = ({ children }) => {
       }
       // Si no, calcular basado en el precio
       const precio = item.precio || item.finalPrice || 0;
-      const pavosCalculados = Math.round(precio / 4.4);
+      const pavosCalculados = Math.round(precio / 4.0);
       return total + pavosCalculados;
     }, 0);
   };

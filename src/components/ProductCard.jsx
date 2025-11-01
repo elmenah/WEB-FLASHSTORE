@@ -11,7 +11,7 @@ const ProductCard = ({ product, onAddToCart, onClick, fallbackColor }) => {
   const itemSet = mainItem?.set?.text;
   const itemRarity = mainItem?.rarity?.displayValue;
   const price = product.finalPrice;
-  const priceCLP = (price * 4.4).toLocaleString("es-CL");
+  const priceCLP = (price * 4.0).toLocaleString("es-CL");
 
   // 🎨 LÓGICA DE COLORES DINÁMICOS PARA EL FONDO
   const getCardColors = () => {
@@ -128,7 +128,7 @@ const ProductCard = ({ product, onAddToCart, onClick, fallbackColor }) => {
           </span>
           {product.regularPrice && product.regularPrice > price && (
             <span className={`${!isBundle ? 'text-[10px] sm:text-xs' : 'text-xs'} text-[#bbbbbb] line-through`}>
-              ${(product.regularPrice * 4.4).toLocaleString("es-CL")} clp
+              ${(product.regularPrice * 4).toLocaleString("es-CL")} clp
             </span>
           )}
         </div>

@@ -68,7 +68,7 @@ const Shop2 = () => {
         }
         const cartProduct = {
             nombre,
-            precio: product.finalPrice * 4.4,
+            precio: product.finalPrice * 4,
             imagen,
         };
         addToCart(cartProduct);
@@ -262,7 +262,7 @@ const Shop2 = () => {
                         {/* Nuestros Precios */}
                         <div className="text-center">
                             <p className="text-xs text-gray-400 mb-1">Nosotros:</p>
-                            <p className="text-green-400 font-bold text-lg">$4.4 CLP/V-Buck</p>
+                            <p className="text-green-400 font-bold text-lg">$4 CLP/V-Buck</p>
                         </div>
                         
                         

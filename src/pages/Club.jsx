@@ -5,34 +5,35 @@ const Club = () => {
   const { addToCart } = useCart();
   const [notification, setNotification] = useState(false);
 
+  let imagen = "https://cms-assets.unrealengine.com/cm6l5gfpm05kr07my04cqgy2x/output=format:webp/cmgz62quduq0o08n49dijcn54";
  const clubItems = [
     { 
       id: 1, 
       title: "1 Mes Fortnite Crew", 
       desc: "Actívalo hoy mismo!", 
       price: 6000, 
-      image: "https://cdn2.unrealengine.com/fortnite-september-2025-crew-pack-header-1920x1080-17d844e1d597.jpg?resize=1&w=1920" 
+      image: imagen 
     },
     { 
       id: 2, 
       title: "2 Meses Fortnite Crew", 
       desc: "Obtén 2 Meses del club de Fortnite!", 
       price: 10000, 
-      image: "https://cdn2.unrealengine.com/fortnite-september-2025-crew-pack-header-1920x1080-17d844e1d597.jpg?resize=1&w=1920" 
+      image: imagen 
     },
     { 
       id: 3, 
       title: "3 Meses Fortnite Crew", 
       desc: "Obtén 3 Meses del club de Fortnite!", 
       price: 15000, 
-      image: "https://cdn2.unrealengine.com/fortnite-september-2025-crew-pack-header-1920x1080-17d844e1d597.jpg?resize=1&w=1920" 
+      image: imagen 
     },
     { 
       id: 4, 
       title: "6 Meses Fortnite Crew", 
       desc: "Obtén 6 Meses del club de Fortnite!", 
       price: 26000, 
-      image: "https://cdn2.unrealengine.com/fortnite-september-2025-crew-pack-header-1920x1080-17d844e1d597.jpg?resize=1&w=1920" 
+      image: imagen 
     }
   ];
 
@@ -67,7 +68,7 @@ const Club = () => {
       <section
         className="relative pt-20 pb-16 px-6 text-left h-[500px] bg-cover bg-center flex items-center justify-center"
         style={{
-          backgroundImage: "url('https://cdn2.unrealengine.com/fortnite-september-2025-crew-pack-header-1920x1080-17d844e1d597.jpg?resize=1&w=1920')"
+          backgroundImage: "url('https://cms-assets.unrealengine.com/cm6l5gfpm05kr07my04cqgy2x/output=format:webp/cmgz62quduq0o08n49dijcn54')"
         }}
       >
         <div className="absolute inset-0 bg-black bg-opacity-70"></div>

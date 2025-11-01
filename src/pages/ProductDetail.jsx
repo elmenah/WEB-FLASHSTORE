@@ -53,7 +53,7 @@ const ProductDetail = () => {
   const handleAddToCart = () => {
     const product = {
       nombre: productData.nombre,
-      precio: productData.precio * 4.4,
+      precio: productData.precio * 4.0,
       imagen: productData.imagen,
     };
     addToCart(product);
@@ -212,7 +212,7 @@ const ProductDetail = () => {
                 </span>
               </div>
               <span className="text-3xl font-bold text-yellow-400">
-                ${(productData.precio * 4.4).toLocaleString("es-CL")} CLP
+                ${(productData.precio * 4).toLocaleString("es-CL")} CLP
               </span>
             </div>
 

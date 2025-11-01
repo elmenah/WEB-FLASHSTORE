@@ -47,7 +47,7 @@ const Home = () => {
           color="#ffffff"
         />
         <img
-          src="/Imagenes/HalloweenPortada.png"
+          src="/Imagenes/simpson.png"
           className="w-full h-full object-cover z-0"
           alt="Hero"
         />
@@ -102,8 +102,8 @@ const Home = () => {
         <div className="flex flex-col md:flex-row items-center justify-center gap-8">
           <div className="w-full md:w-1/3 flex justify-center">
             <img
-              src="/Imagenes/goku_ultra_instinto_2_0__fortnite__by_urielreyes05_dgo3i6b-414w-2x.png"
-              alt="Goku explicando cómo funciona"
+              src="/Imagenes/homero.png"
+              alt="Homero explicando cómo funciona"
               className="w-64 h-auto object-contain"
             />
           </div>

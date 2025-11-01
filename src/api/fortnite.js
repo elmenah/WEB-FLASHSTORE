@@ -26,7 +26,7 @@ export function filterFortnitemares(entries) {
       return {
         id: e.offerId,
         nombre: item?.name || "Skin misteriosa",
-        precio: Math.round(e.finalPrice * 4.4),
+        precio: Math.round(e.finalPrice * 4),
         imagen: item?.image || item?.images?.icon || "",
         desc: item?.description || "Colección de Fortnite Pesadillas",
       };

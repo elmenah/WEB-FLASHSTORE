@@ -50,7 +50,7 @@ const Shop = () => {
   const handleAddToCart = (product) => {
     const cartProduct = {
       nombre: product.displayName,
-      precio: product.price.finalPrice * 4.4,
+      precio: product.price.finalPrice * 4,
       imagen:
         product.displayAssets?.[0]?.url ||
         product.granted?.[0]?.images?.icon_background,

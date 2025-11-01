@@ -97,7 +97,7 @@ const Checkout = () => {
         if (!pavosItem) {
           // Si no tiene pavos definidos, calcular basado en el precio
           // Fórmula: precio_clp / 4.4 = pavos aproximados
-          pavosItem = Math.round(item.precio / 4.4);
+          pavosItem = Math.round(item.precio / 4);
         }
 
         return {
@@ -124,7 +124,7 @@ const Checkout = () => {
           // Calcular pavos correctamente para el mensaje
           let pavosItem = item.pavos;
           if (!pavosItem) {
-            pavosItem = Math.round(item.precio / 4.4);
+            pavosItem = Math.round(item.precio / 4);
           }
           mensaje += `• ${item.nombre} x${item.cantidad || 1} - ${CLP.format(
             item.precio
@@ -136,7 +136,7 @@ const Checkout = () => {
         const totalPavos = cart.reduce((total, item) => {
           let pavosItem = item.pavos;
           if (!pavosItem) {
-            pavosItem = Math.round(item.precio / 4.4);
+            pavosItem = Math.round(item.precio / 4.0);
           }
           return total + pavosItem;
         }, 0);
