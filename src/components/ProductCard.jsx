@@ -1,4 +1,5 @@
 import React from "react";
+import { formatPriceCLP, formatCLP, convertVBuckToCLP } from "../config/prices";
 
 const ProductCard = ({ product, onAddToCart, onClick, fallbackColor }) => {
   const isBundle = !!product.bundle;
@@ -11,7 +12,7 @@ const ProductCard = ({ product, onAddToCart, onClick, fallbackColor }) => {
   const itemSet = mainItem?.set?.text;
   const itemRarity = mainItem?.rarity?.displayValue;
   const price = product.finalPrice;
-  const priceCLP = (price * 4.0).toLocaleString("es-CL");
+  const priceCLP = formatCLP(convertVBuckToCLP(price));
 
   // 🎨 LÓGICA DE COLORES DINÁMICOS PARA EL FONDO
   const getCardColors = () => {

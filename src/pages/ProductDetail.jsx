@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import useScrollToTop from '../hooks/useScrollToTop';
+import { VBUCK_TO_CLP_RATE, formatCLP, convertVBuckToCLP, formatPriceCLP } from '../config/prices';
 
 const ProductDetail = () => {
   useScrollToTop(); // ✅ Agregar esta línea
@@ -53,7 +54,7 @@ const ProductDetail = () => {
   const handleAddToCart = () => {
     const product = {
       nombre: productData.nombre,
-      precio: productData.precio * 4.0,
+      precio: convertVBuckToCLP(productData.precio),
       imagen: productData.imagen,
     };
     addToCart(product);
@@ -212,7 +213,7 @@ const ProductDetail = () => {
                 </span>
               </div>
               <span className="text-3xl font-bold text-yellow-400">
-                ${(productData.precio * 4).toLocaleString("es-CL")} CLP
+                {formatPriceCLP(productData.precio)}
               </span>
             </div>
 

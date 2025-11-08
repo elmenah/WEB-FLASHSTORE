@@ -4,6 +4,7 @@ import { useCart } from "../context/CartContext";
 import { supabase } from "../supabaseCliente";
 import MercadoPagoCheckout from "../components/MercadoPagoCheckout";
 import useScrollToTop from '../hooks/useScrollToTop';
+import { VBUCK_TO_CLP_RATE, convertCLPToVBuck, convertVBuckToCLP, formatCLP } from '../config/prices';
 
 const Checkout = () => {
   useScrollToTop();
@@ -96,8 +97,7 @@ const Checkout = () => {
         let pavosItem = item.pavos;
         if (!pavosItem) {
           // Si no tiene pavos definidos, calcular basado en el precio
-          // Fórmula: precio_clp / 4.4 = pavos aproximados
-          pavosItem = Math.round(item.precio / 4);
+          pavosItem = convertCLPToVBuck(item.precio);
         }
 
         return {
@@ -124,7 +124,7 @@ const Checkout = () => {
           // Calcular pavos correctamente para el mensaje
           let pavosItem = item.pavos;
           if (!pavosItem) {
-            pavosItem = Math.round(item.precio / 4);
+            pavosItem = Math.round(item.precio / 4.4);
           }
           mensaje += `• ${item.nombre} x${item.cantidad || 1} - ${CLP.format(
             item.precio
@@ -136,7 +136,7 @@ const Checkout = () => {
         const totalPavos = cart.reduce((total, item) => {
           let pavosItem = item.pavos;
           if (!pavosItem) {
-            pavosItem = Math.round(item.precio / 4.0);
+            pavosItem = Math.round(item.precio / 4.4);
           }
           return total + pavosItem;
         }, 0);

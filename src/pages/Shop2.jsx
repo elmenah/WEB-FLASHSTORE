@@ -4,6 +4,7 @@ import { useCart } from '../context/CartContext';
 import ProductCard from '../components/ProductCard';
 import '../css/Shop.css';
 import useScrollToTop from '../hooks/useScrollToTop';
+import { VBUCK_TO_CLP_RATE } from '../config/prices';
 
 const Shop2 = () => {
     useScrollToTop();
@@ -68,7 +69,7 @@ const Shop2 = () => {
         }
         const cartProduct = {
             nombre,
-            precio: product.finalPrice * 4,
+            precio: product.finalPrice * VBUCK_TO_CLP_RATE,
             imagen,
         };
         addToCart(cartProduct);
@@ -262,7 +263,7 @@ const Shop2 = () => {
                         {/* Nuestros Precios */}
                         <div className="text-center">
                             <p className="text-xs text-gray-400 mb-1">Nosotros:</p>
-                            <p className="text-green-400 font-bold text-lg">$4 CLP/V-Buck</p>
+                            <p className="text-green-400 font-bold text-lg">${VBUCK_TO_CLP_RATE} CLP/V-Buck</p>
                         </div>
                         
                         
