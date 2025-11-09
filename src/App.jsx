@@ -16,6 +16,7 @@ import Footer from "./components/Footer";
 import CartPopup from "./components/CartPopup";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import ProductDetail from "./pages/ProductDetail";
+import PagoFallido from "./pages/PagoFallido";
 import { CartProvider } from './context/CartContext';
 
 const App = () => {
@@ -40,6 +41,7 @@ const App = () => {
             <Route path="/shop" element={ <AuthGuard> <Shop2 /> </AuthGuard>} />
             <Route path="/club" element={ <AuthGuard> <Club /> </AuthGuard>} />
             <Route path="/pago-exitoso" element={<PagoExitoso />} />
+            <Route path="/pago-fallido" element={<PagoFallido />} />
             
             {/* Rutas protegidas */}
             <Route

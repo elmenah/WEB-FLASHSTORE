@@ -6,6 +6,40 @@ import MercadoPagoCheckout from "../components/MercadoPagoCheckout";
 import useScrollToTop from '../hooks/useScrollToTop';
 import { VBUCK_TO_CLP_RATE, convertCLPToVBuck, convertVBuckToCLP, formatCLP } from '../config/prices';
 
+// Función para validar RUT chileno
+const validateRut = (rut) => {
+  // Limpiar el RUT de puntos y guión
+  const cleanRut = rut.replace(/[.-]/g, '');
+  
+  // Obtener dígito verificador
+  const dv = cleanRut.slice(-1).toUpperCase();
+  
+  // Obtener cuerpo del RUT
+  const rutBody = cleanRut.slice(0, -1);
+  
+  if (rutBody.length < 7) return false;
+  
+  // Calcular dígito verificador
+  let sum = 0;
+  let multiplier = 2;
+  
+  // Suma ponderada
+  for (let i = rutBody.length - 1; i >= 0; i--) {
+    sum += Number(rutBody[i]) * multiplier;
+    multiplier = multiplier === 7 ? 2 : multiplier + 1;
+  }
+  
+  // Calcular dígito verificador esperado
+  const expectedDV = 11 - (sum % 11);
+  let calculatedDV;
+  
+  if (expectedDV === 11) calculatedDV = '0';
+  else if (expectedDV === 10) calculatedDV = 'K';
+  else calculatedDV = String(expectedDV);
+  
+  return calculatedDV === dv;
+};
+
 const Checkout = () => {
   useScrollToTop();
   const { cart, removeFromCart, clearCart } = useCart();
@@ -18,6 +52,10 @@ const Checkout = () => {
   const [showMPCheckout, setShowMPCheckout] = useState(false);
   const [currentOrderId, setCurrentOrderId] = useState(null);
   const [telefono, setTelefono] = useState("");
+  const [xboxOption, setXboxOption] = useState("");
+  const [xboxEmail, setXboxEmail] = useState("");
+  const [xboxPassword, setXboxPassword] = useState("");
+  const [rut, setRut] = useState("");
   const navigate = useNavigate();
 
   const CLP = new Intl.NumberFormat("es-CL", {
@@ -53,6 +91,27 @@ const Checkout = () => {
     if (!telefono.trim()) {
       newErrors.telefono = "Por favor introduce tu número de teléfono.";
     }
+
+    // Validación para Fortnite Crew
+    const hasCrewItem = cart.some(item => item.nombre.toLowerCase().includes('crew'));
+    if (hasCrewItem) {
+      if (!xboxOption) {
+        newErrors.xboxOption = "Por favor selecciona una opción para Xbox.";
+      }
+      if (xboxOption === "cuenta-existente") {
+        if (!xboxEmail.trim()) {
+          newErrors.xboxEmail = "Por favor introduce el correo de tu cuenta de Xbox.";
+        }
+        if (!xboxPassword.trim()) {
+          newErrors.xboxPassword = "Por favor introduce la contraseña de tu cuenta de Xbox.";
+        }
+      }
+    }
+    if (!rut.trim()) {
+      newErrors.rut = "Por favor introduce tu RUT.";
+    } else if (!validateRut(rut)) {
+      newErrors.rut = "Por favor introduce un RUT válido.";
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -76,6 +135,14 @@ const Checkout = () => {
       }
 
       // 2️⃣ Insertar pedido principal en Supabase
+      // Preparar la información de Xbox si hay un producto Crew
+      const hasCrewItem = cart.some(item => item.nombre.toLowerCase().includes('crew'));
+      const xboxData = hasCrewItem ? {
+        xbox_option: xboxOption,
+        xbox_email: xboxOption === 'cuenta-existente' ? xboxEmail.trim() : null,
+        xbox_password: xboxOption === 'cuenta-existente' ? xboxPassword.trim() : null
+      } : {};
+
       const { data: pedidoData, error: pedidoError } = await supabase
         .from("pedidos")
         .insert([
@@ -84,7 +151,9 @@ const Checkout = () => {
             correo: email.trim(),
             username_fortnite: fortniteUsername.trim(),
             telefono: telefono.trim(),
+            rut: rut.trim(),
             estado: "No Pagado",
+            ...xboxData  // Incluir información de Xbox solo si existe
           },
         ])
         .select()
@@ -146,6 +215,18 @@ const Checkout = () => {
         mensaje += `Email: ${email}%0A`;
         mensaje += `Usuario Fortnite: ${fortniteUsername}%0A`;
         mensaje += `Método de pago: ${paymentMethod}%0A`;
+        
+        // Añadir información de Xbox si hay producto Crew
+        if (hasCrewItem) {
+          mensaje += `------------------------------------%0A`;
+          mensaje += `Información de Xbox:%0A`;
+          mensaje += `Opción seleccionada: ${xboxOption === 'cuenta-existente' ? 'Tiene cuenta Xbox' : 'Necesita cuenta Xbox'}%0A`;
+          if (xboxOption === 'cuenta-existente') {
+            mensaje += `Correo Xbox: ${xboxEmail}%0A`;
+            mensaje += `Contraseña Xbox: ${xboxPassword}%0A`;
+          }
+        }
+        
         if (orderNotes) mensaje += `Notas: ${orderNotes}%0A`;
         mensaje += `%0A`;
         mensaje += `Acepto los términos y condiciones.`;
@@ -197,18 +278,29 @@ const Checkout = () => {
   };
 
   useEffect(() => {
-    const fetchUserEmail = async () => {
+    const fetchUserData = async () => {
       try {
         const { data: userData } = await supabase.auth.getUser();
         if (userData?.user?.email) {
           setEmail(userData.user.email);
+          
+          // Intentar obtener el RUT del usuario desde la base de datos
+          const { data: userProfile } = await supabase
+            .from('usuarios')
+            .select('rut')
+            .eq('user_id', userData.user.id)
+            .single();
+            
+          if (userProfile?.rut) {
+            setRut(userProfile.rut);
+          }
         }
       } catch (err) {
-        console.error("Error al obtener el correo del usuario:", err.message);
+        console.error("Error al obtener los datos del usuario:", err.message);
       }
     };
 
-    fetchUserEmail();
+    fetchUserData();
   }, []);
 
   // Si está mostrando el checkout de Mercado Pago
@@ -333,6 +425,28 @@ const Checkout = () => {
 
             <div>
               <label
+                htmlFor="rut"
+                className="block text-sm text-gray-700 font-semibold"
+              >
+                RUT
+              </label>
+              <input
+                id="rut"
+                type="text"
+                placeholder="Ej: 12.345.678-9"
+                value={rut}
+                onChange={(e) => setRut(e.target.value)}
+                className={`mt-2 w-full rounded-xl bg-white border-2 p-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400 transition ${
+                  errors.rut ? "border-red-400" : "border-gray-300"
+                }`}
+              />
+              {errors.rut && (
+                <p className="text-xs mt-1 text-red-500">{errors.rut}</p>
+              )}
+            </div>
+
+            <div>
+              <label
                 htmlFor="orderNotes"
                 className="block text-sm text-gray-700 font-semibold"
               >
@@ -347,6 +461,99 @@ const Checkout = () => {
                 className="mt-2 w-full rounded-xl bg-white border-2 border-gray-300 p-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400 transition"
               />
             </div>
+
+            {/* Sección Fortnite Crew */}
+            {cart.some(item => item.nombre.toLowerCase().includes('crew')) && (
+              <div className="space-y-4 p-4 bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-700/50 shadow-lg">
+                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4" />
+                    <path d="M4 6v12c0 1.1.9 2 2 2h14v-4" />
+                    <path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4v-4h-4z" />
+                  </svg>
+                  Configuración de Fortnite Crew
+                </h3>
+                
+                <div className="space-y-3">
+                  <label className="block text-sm text-gray-300 font-semibold">
+                    Selecciona una opción:
+                  </label>
+                  
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="xboxOption"
+                        value="cuenta-existente"
+                        checked={xboxOption === "cuenta-existente"}
+                        onChange={(e) => setXboxOption(e.target.value)}
+                        className="text-green-500 focus:ring-green-400 bg-gray-800 border-gray-600"
+                      />
+                      <span>Tengo una cuenta de Xbox conectada a mi cuenta de Epic</span>
+                    </label>
+                    
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="xboxOption"
+                        value="sin-cuenta"
+                        checked={xboxOption === "sin-cuenta"}
+                        onChange={(e) => setXboxOption(e.target.value)}
+                        className="text-green-500 focus:ring-green-400 bg-gray-800 border-gray-600"
+                      />
+                      <span className="text-white">No tengo una cuenta de Xbox conectada</span>
+                    </label>
+                  </div>
+
+                  {errors.xboxOption && (
+                    <p className="text-xs text-red-500 mt-1">{errors.xboxOption}</p>
+                  )}
+
+                  {xboxOption === "cuenta-existente" && (
+                    <div className="space-y-3 mt-3">
+                      <div>
+                        <label className="block text-sm text-gray-300 font-semibold">
+                          Correo de Xbox
+                        </label>
+                        <input
+                          type="email"
+                          value={xboxEmail}
+                          onChange={(e) => setXboxEmail(e.target.value)}
+                          placeholder="correo@xbox.com"
+                          className="mt-1 w-full rounded-lg bg-gray-800 border border-gray-600 p-2 text-white placeholder-gray-400"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-300 font-semibold">
+                          Contraseña de Xbox
+                        </label>
+                        <input
+                          type="password"
+                          value={xboxPassword}
+                          onChange={(e) => setXboxPassword(e.target.value)}
+                          placeholder="••••••••"
+                          className="mt-1 w-full rounded-lg bg-gray-800 border border-gray-600 p-2 text-white placeholder-gray-400"
+                        />
+                      </div>
+                      {errors.xboxCredentials && (
+                        <p className="text-xs text-red-500">{errors.xboxCredentials}</p>
+                      )}
+                    </div>
+                  )}
+
+                  {xboxOption === "sin-cuenta" && (
+                    <div className="mt-3 p-3 bg-gray-800/50 rounded-lg border border-green-500/30">
+                      <p className="text-green-400 text-sm flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M20 6L9 17l-5-5"/>
+                        </svg>
+                        Nosotros te proporcionaremos una cuenta de Xbox
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Método de pago */}
             <div>
@@ -485,7 +692,7 @@ const Checkout = () => {
             <label className="flex items-start gap-3 text-sm text-gray-700 font-semibold">
               
               <span>
-                Antes de finalizar, asegúrate de tener agregado como amigo a Reydelosvbucks en Fortnite.
+                Antes de finalizar, asegúrate de tener agregado como amigo a Reydelosvbucks en Fortnite por minimo 48 Hrs.
               </span>
             </label>
             {errors.terms && (
@@ -495,7 +702,7 @@ const Checkout = () => {
             <button
               type="submit"
               disabled={
-                !email.trim() || !fortniteUsername.trim() || !acceptTerms
+                !email.trim() || !fortniteUsername.trim() || !acceptTerms || !rut.trim() || !validateRut(rut) || !telefono.trim() || !paymentMethod
               }
               className="mt-4 w-full py-3 rounded-xl bg-gradient-to-r from-green-500 to-cyan-500 hover:from-green-600 hover:to-cyan-600 text-white font-bold text-lg shadow-lg transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
@@ -540,7 +747,7 @@ const Checkout = () => {
                   d="M8 12l2 2 4-4"
                 />
               </svg>
-              Pago 100% seguro y protegido
+              Pago 100% seguro y protegido por Mercado Pago.
             </div>
           </form>
 
