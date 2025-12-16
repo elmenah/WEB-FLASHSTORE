@@ -47,7 +47,7 @@ const Home = () => {
           color="#ffffff"
         />
         <img
-          src="/Imagenes/simpson.png"
+          src="/Imagenes/kim.png"
           className="w-full h-full object-cover z-0"
           alt="Hero"
         />
@@ -89,8 +89,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* 🎃 Fortnite Pesadillas (nuevo componente modular) */}
-      <FortnitePesadillas />
+      
         {/* Hero, Fortnite Pesadillas, etc */}
       {/* <Testimonios /> */}
       {/* Secciones siguientes */}
