@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import useScrollToTop from '../hooks/useScrollToTop';
 import { VBUCK_TO_CLP_RATE, formatCLP, convertVBuckToCLP, formatPriceCLP } from '../config/prices';
@@ -8,7 +8,7 @@ const ProductDetail = () => {
   useScrollToTop(); // ✅ Agregar esta línea
   
   const { id } = useParams();
-  const [searchParams] = useSearchParams();
+  const { state } = useLocation();
   const { addToCart } = useCart();
   const [notification, setNotification] = useState(false);
 
