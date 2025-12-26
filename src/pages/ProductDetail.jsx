@@ -12,27 +12,15 @@ const ProductDetail = () => {
   const { addToCart } = useCart();
   const [notification, setNotification] = useState(false);
 
-  const productData = {
-    nombre: searchParams.get('nombre') || id,
-    precio: Number(searchParams.get('precio')) || 0,
-    imagen: searchParams.get('imagen') || '',
-    descripcion: searchParams.get('descripcion') || 'Descripción no disponible.',
-    tipo: searchParams.get('tipo') || 'No especificado',
-    rareza: searchParams.get('rareza') || 'Sin rareza',
-    partede: searchParams.get('partede') || '',
-    inicio: searchParams.get('inicio') || null,
-    fin: searchParams.get('fin') || null,
-    mensajeSalida: searchParams.get('mensajeSalida') || '',
-    bundle: searchParams.get('bundle') || '',
-    bundle2: searchParams.get('bundle2') || '',
-    bundle3: searchParams.get('bundle3') || '',
-    bundle4: searchParams.get('bundle4') || '',
-    colorfondo: searchParams.get('colorfondo') || '#ffffff',
-    // Nuevos parámetros para colores dinámicos
-    color1: searchParams.get('color1') || '#475569',
-    color2: searchParams.get('color2') || '#334155',
-    color3: searchParams.get('color3') || '#1e293b'
-  };
+  const productData = state?.product;
+
+  if (!productData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-white">
+        Producto no encontrado
+      </div>
+    );
+  }
 
   // 🎨 Crear gradiente dinámico igual que en Shop2
   const gradientStyle = {
