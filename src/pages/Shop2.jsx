@@ -24,6 +24,14 @@ const Shop2 = () => {
     const { addToCart } = useCart();
     const navigate = useNavigate();
 
+    const slugify = (text) =>
+        text
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/(^-|-$)/g, "");
+
     useEffect(() => {
         fetchProducts();
     }, []);
@@ -136,12 +144,11 @@ const Shop2 = () => {
                 color3,
             };
 
-        const params = new URLSearchParams();
-        Object.entries(productData).forEach(([key, value]) => {
-            if (value) params.append(key, value);
-        });
+        const slug = slugify(productData.nombre);
 
-        navigate(`/product/${encodeURIComponent(productData.nombre)}?${params.toString()}`);
+        navigate(`/product/${slug}`, {
+            state: { product: productData }
+        });
     };
 
     const showNotification = () => {
