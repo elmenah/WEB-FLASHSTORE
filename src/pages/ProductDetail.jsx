@@ -1,18 +1,24 @@
-import React, { useState } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
-import { useCart } from '../context/CartContext';
-import useScrollToTop from '../hooks/useScrollToTop';
-import { VBUCK_TO_CLP_RATE, formatCLP, convertVBuckToCLP, formatPriceCLP } from '../config/prices';
+import React, { useState } from "react";
+import { useParams, useLocation } from "react-router-dom";
+import { useCart } from "../context/CartContext";
+import useScrollToTop from "../hooks/useScrollToTop";
+import {
+  VBUCK_TO_CLP_RATE,
+  formatCLP,
+  convertVBuckToCLP,
+  formatPriceCLP,
+} from "../config/prices";
 
 const ProductDetail = () => {
   useScrollToTop(); // ✅ Agregar esta línea
-  
+
   const { id } = useParams();
   const { state } = useLocation();
   const { addToCart } = useCart();
   const [notification, setNotification] = useState(false);
 
   const productData = state?.product;
+  const isBundle = productData.tipo === "Lote";
 
   if (!productData) {
     return (
@@ -24,18 +30,18 @@ const ProductDetail = () => {
 
   // 🎨 Crear gradiente dinámico igual que en Shop2
   const gradientStyle = {
-    background: `linear-gradient(135deg, ${productData.color1} 0%, ${productData.color2} 50%, ${productData.color3} 100%)`
+    background: `linear-gradient(135deg, ${productData.color1} 0%, ${productData.color2} 50%, ${productData.color3} 100%)`,
   };
 
   const formatDate = (dateStr) => {
-    if (!dateStr) return 'Fecha no disponible';
+    if (!dateStr) return "Fecha no disponible";
     const fecha = new Date(dateStr);
-    const dia = String(fecha.getDate()).padStart(2, '0');
-    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+    const dia = String(fecha.getDate()).padStart(2, "0");
+    const mes = String(fecha.getMonth() + 1).padStart(2, "0");
     const año = fecha.getFullYear();
-    const horas = String(fecha.getHours()).padStart(2, '0');
-    const minutos = String(fecha.getMinutes()).padStart(2, '0');
-    const segundos = String(fecha.getSeconds()).padStart(2, '0');
+    const horas = String(fecha.getHours()).padStart(2, "0");
+    const minutos = String(fecha.getMinutes()).padStart(2, "0");
+    const segundos = String(fecha.getSeconds()).padStart(2, "0");
     return `${dia}-${mes}-${año} ${horas}:${minutos}:${segundos}`;
   };
 
@@ -58,8 +64,8 @@ const ProductDetail = () => {
     productData.bundle,
     productData.bundle2,
     productData.bundle3,
-    productData.bundle4
-  ].filter(img => img && img !== "undefined" && img !== "");
+    productData.bundle4,
+  ].filter((img) => img && img !== "undefined" && img !== "");
 
   const InfoCard = ({ icon, label, value }) => (
     <div className="bg-gray-700/50 rounded-lg p-3 border border-gray-600/50">
@@ -67,25 +73,31 @@ const ProductDetail = () => {
         <span>{icon}</span>
         <span>{label}:</span>
       </div>
-      <div className="text-white font-semibold">{value || 'No especificado'}</div>
+      <div className="text-white font-semibold">
+        {value || "No especificado"}
+      </div>
     </div>
   );
 
   const getRarityColor = (rarity) => {
     const colors = {
-      'legendario': 'bg-orange-500 text-white',
-      'épico': 'bg-purple-500 text-white',
-      'raro': 'bg-blue-500 text-white',
-      'poco común': 'bg-green-500 text-white',
-      'común': 'bg-gray-500 text-white'
+      legendario: "bg-orange-500 text-white",
+      épico: "bg-purple-500 text-white",
+      raro: "bg-blue-500 text-white",
+      "poco común": "bg-green-500 text-white",
+      común: "bg-gray-500 text-white",
     };
-    return colors[rarity?.toLowerCase()] || 'bg-gray-600 text-white';
+    return colors[rarity?.toLowerCase()] || "bg-gray-600 text-white";
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       {/* Notification */}
-      <div className={`fixed top-20 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg transition-opacity duration-500 z-50 ${notification ? 'opacity-100' : 'opacity-0 hidden'}`}>
+      <div
+        className={`fixed top-20 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg transition-opacity duration-500 z-50 ${
+          notification ? "opacity-100" : "opacity-0 hidden"
+        }`}
+      >
         Producto agregado al carrito
       </div>
 
@@ -93,9 +105,13 @@ const ProductDetail = () => {
       <div className="pt-20 pb-4 px-4">
         <div className="max-w-7xl mx-auto">
           <nav className="flex items-center gap-2 text-sm text-gray-400">
-            <a href="/" className="hover:text-white transition-colors">🏠 Inicio</a>
+            <a href="/" className="hover:text-white transition-colors">
+              🏠 Inicio
+            </a>
             <span>›</span>
-            <a href="/shop" className="hover:text-white transition-colors">🛒 Tienda</a>
+            <a href="/shop" className="hover:text-white transition-colors">
+              🛒 Tienda
+            </a>
             <span>›</span>
             <span className="text-white">{productData.nombre}</span>
           </nav>
@@ -106,22 +122,26 @@ const ProductDetail = () => {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Imagen del producto con gradiente dinámico */}
           <div className="relative flex-shrink-0 w-full lg:w-1/2">
-            <div 
+            <div
               className="relative w-full h-[400px] lg:h-[500px] rounded-2xl overflow-hidden shadow-xl border border-gray-700/50"
               style={gradientStyle}
             >
               {/* Imagen centrada y más pequeña */}
               <div className="absolute inset-0 flex items-center justify-center p-8">
-                <img 
-                  src={productData.imagen} 
+                <img
+                  src={productData.imagen}
                   alt={productData.nombre}
                   className="max-w-[80%] max-h-[80%] object-contain drop-shadow-2xl"
                 />
               </div>
-              
+
               {/* Badge de rareza */}
               {productData.rareza && (
-                <div className={`absolute top-4 right-4 py-2 px-3 rounded-lg text-xs font-bold shadow-lg ${getRarityColor(productData.rareza)}`}>
+                <div
+                  className={`absolute top-4 right-4 py-2 px-3 rounded-lg text-xs font-bold shadow-lg ${getRarityColor(
+                    productData.rareza
+                  )}`}
+                >
                   {productData.rareza.toUpperCase()}
                 </div>
               )}
@@ -133,27 +153,49 @@ const ProductDetail = () => {
 
           {/* Información del producto */}
           <div className="flex flex-col w-full lg:w-1/2 bg-gray-800/90 p-6 rounded-2xl shadow-xl border border-gray-700/50 backdrop-blur-sm">
-            <h1 className="text-3xl font-bold text-white mb-4">{productData.nombre}</h1>
+            <h1 className="text-3xl font-bold text-white mb-4">
+              {productData.nombre}
+            </h1>
             <p className="text-gray-400 mb-6">{productData.descripcion}</p>
 
             <div className="space-y-4">
-              <InfoCard 
-                icon={<i className="fas fa-tag"></i>} 
-                label="Tipo" 
-                value={productData.tipo} 
-              />
-              <InfoCard 
-                icon={<i className="fas fa-star"></i>} 
-                label="Rareza" 
-                value={productData.rareza} 
-              />
-              <InfoCard 
-                icon={<i className="fas fa-box"></i>} 
-                label="Parte del lote" 
-                value={productData.partede} 
-              />
               
+              <InfoCard
+                icon={<i className="fas fa-box"></i>}
+                label={isBundle ? "Contenido" : "Parte del conjunto"}
+                value={productData.partede}
+              />
             </div>
+            {/* 📦 Contenido del lote */}
+            {productData.tipo === "Lote" &&
+              productData.contenido?.length > 0 && (
+                <div className="mt-6">
+                  <h3 className="text-blue-400 font-semibold mb-4 flex items-center gap-2">
+                    <i className="fas fa-box-open"></i>
+                    Contenido del lote
+                  </h3>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                    {productData.contenido.map((item, index) => (
+                      <div
+                        key={index}
+                        className="bg-gray-700/50 rounded-lg p-3 border border-gray-600/50 flex flex-col items-center text-center hover:scale-105 transition-transform"
+                      >
+                        {item.imagen && (
+                          <img
+                            src={item.imagen}
+                            alt={item.nombre}
+                            className="w-6 h-6 object-contain mb-2"
+                          />
+                        )}
+                        <span className="text-sm text-white font-semibold">
+                          {item.nombre}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
             {bundleImages.length > 0 && (
               <div className="mt-6">
@@ -191,9 +233,9 @@ const ProductDetail = () => {
             {/* Precio destacado */}
             <div className="mt-6 text-center bg-gray-700/50 rounded-lg p-4 border border-gray-600/50">
               <div className="flex items-center justify-center gap-2 mb-2">
-                <img 
-                  src="https://fortnite-api.com/images/vbuck.png" 
-                  alt="V-Bucks" 
+                <img
+                  src="https://fortnite-api.com/images/vbuck.png"
+                  alt="V-Bucks"
                   className="w-6 h-6"
                 />
                 <span className="text-2xl font-bold text-white">
@@ -205,7 +247,7 @@ const ProductDetail = () => {
               </span>
             </div>
 
-            <button 
+            <button
               onClick={handleAddToCart}
               className="mt-6 w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl font-bold shadow-lg hover:from-blue-700 hover:to-purple-700 transition-all flex items-center justify-center gap-2 transform hover:scale-[1.02]"
             >
