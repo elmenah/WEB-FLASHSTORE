@@ -692,7 +692,7 @@ const Checkout = () => {
             <label className="flex items-start gap-3 text-sm text-gray-700 font-semibold">
               
               <span>
-                Antes de finalizar, asegúrate de tener agregado como amigo a Reydelosvbucks en Fortnite por minimo 48 Hrs.
+                Antes de finalizar, asegúrate de tener agregado como amigo a Reydelosvbucks y pavostioflash2 en Fortnite por minimo 48 Hrs.
               </span>
             </label>
             {errors.terms && (

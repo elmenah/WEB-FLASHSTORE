@@ -115,6 +115,7 @@ const Home = () => {
                 realizar una compra. <br />
                 Usuario:{" "}
                 <span className="font-bold text-white">Reydelosvbucks</span>
+                <span className="font-bold text-white">pavostioflash2</span>
               </p>
             </div>
 
