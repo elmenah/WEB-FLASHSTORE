@@ -47,7 +47,7 @@ const Home = () => {
           color="#ffffff"
         />
         <img
-          src="/Imagenes/kim.png"
+          src="/Imagenes/cap7.png"
           className="w-full h-full object-cover z-0"
           alt="Hero"
         />
@@ -114,8 +114,8 @@ const Home = () => {
                 Asegúrate de haber agregado nuestras cuentas 48 hrs antes de
                 realizar una compra. <br />
                 Usuario:{" "}
-                <span className="font-bold text-white">Reydelosvbucks</span>
-                <span className="font-bold text-white">pavostioflash2</span>
+                <span className="font-bold text-white">1. Reydelosvbucks </span> 
+                <span className="font-bold text-white">2. pavostioflash2</span>
               </p>
             </div>
 
