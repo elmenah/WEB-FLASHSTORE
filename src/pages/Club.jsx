@@ -5,7 +5,7 @@ const Club = () => {
   const { addToCart } = useCart();
   const [notification, setNotification] = useState(false);
 
-  let imagen = "https://cms-assets.unrealengine.com/cm6l5gfpm05kr07my04cqgy2x/output=format:webp/cmieyygiz63ie07my5nm3wsei";
+  let imagen = "https://cms-assets.unrealengine.com/cm6l5gfpm05kr07my04cqgy2x/output=format:webp/cmjboacji036807oed9uroy5r";
  const clubItems = [
     { 
       id: 1, 
@@ -68,7 +68,7 @@ const Club = () => {
       <section
         className="relative pt-20 pb-16 px-6 text-left h-[500px] bg-cover bg-center flex items-center justify-center"
         style={{
-          backgroundImage: "url('https://cms-assets.unrealengine.com/cm6l5gfpm05kr07my04cqgy2x/output=format:webp/cmieyygiz63ie07my5nm3wsei')"
+          backgroundImage: "url('https://cms-assets.unrealengine.com/cm6l5gfpm05kr07my04cqgy2x/output=format:webp/cmjboacji036807oed9uroy5r')"
         }}
       >
         <div className="absolute inset-0 bg-black bg-opacity-70"></div>
