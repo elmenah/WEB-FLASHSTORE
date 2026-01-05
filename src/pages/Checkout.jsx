@@ -55,6 +55,10 @@ const Checkout = () => {
   const [xboxOption, setXboxOption] = useState("");
   const [xboxEmail, setXboxEmail] = useState("");
   const [xboxPassword, setXboxPassword] = useState("");
+  const [crunchyrollOption, setCrunchyrollOption] = useState("");
+  const [chatgptOption, setChatgptOption] = useState("");
+  const [chatgptEmail, setChatgptEmail] = useState("");
+  const [iptvOption, setIptvOption] = useState("");
   const [rut, setRut] = useState("");
   const navigate = useNavigate();
 
@@ -76,10 +80,24 @@ const Checkout = () => {
 
   const validateForm = () => {
     const newErrors = {};
+    
+    // Detectar si solo tiene productos que no son de Fortnite (Crunchyroll, IPTV, ChatGPT, Office, Windows)
+    const hasFortniteProducts = cart.some(item => {
+      const nombre = item.nombre.toLowerCase();
+      return !nombre.includes('crunchyroll') && 
+             !nombre.includes('iptv') && 
+             !nombre.includes('chatgpt') && 
+             !nombre.includes('office') && 
+             !nombre.includes('windows') &&
+             !nombre.includes('streaming');
+    });
+
     if (!email.trim()) {
       newErrors.email = "Por favor introduce un email válido.";
     }
-    if (!fortniteUsername.trim()) {
+    
+    // Solo validar fortniteUsername si hay productos de Fortnite
+    if (hasFortniteProducts && !fortniteUsername.trim()) {
       newErrors.fortniteUsername = "Por favor introduce tu nombre de Fortnite.";
     }
     if (!acceptTerms) {
@@ -107,6 +125,35 @@ const Checkout = () => {
         }
       }
     }
+
+    // Validación para Crunchyroll
+    const hasCrunchyrollItem = cart.some(item => item.nombre.toLowerCase().includes('crunchyroll'));
+    if (hasCrunchyrollItem) {
+      if (!crunchyrollOption) {
+        newErrors.crunchyrollOption = "Por favor selecciona el tipo de cuenta de Crunchyroll.";
+      }
+    }
+
+    // Validación para ChatGPT
+    const hasChatgptItem = cart.some(item => item.nombre.toLowerCase().includes('chatgpt'));
+    if (hasChatgptItem) {
+      if (!chatgptOption) {
+        newErrors.chatgptOption = "Por favor selecciona el tipo de plan de ChatGPT.";
+      }
+      // Si es 1 mes (por invitación), requiere correo
+      if (chatgptOption === '1-mes' && !chatgptEmail.trim()) {
+        newErrors.chatgptEmail = "Por favor introduce el correo para la invitación.";
+      }
+    }
+
+    // Validación para IPTV
+    const hasIptvItem = cart.some(item => item.nombre.toLowerCase().includes('iptv'));
+    if (hasIptvItem) {
+      if (!iptvOption) {
+        newErrors.iptvOption = "Por favor selecciona el tipo de servicio de IPTV.";
+      }
+    }
+
     if (!rut.trim()) {
       newErrors.rut = "Por favor introduce tu RUT.";
     } else if (!validateRut(rut)) {
@@ -143,17 +190,50 @@ const Checkout = () => {
         xbox_password: xboxOption === 'cuenta-existente' ? xboxPassword.trim() : null
       } : {};
 
+      // Preparar la información de Crunchyroll si hay un producto Crunchyroll
+      const hasCrunchyrollItem = cart.some(item => item.nombre.toLowerCase().includes('crunchyroll'));
+      const crunchyrollData = hasCrunchyrollItem ? {
+        crunchyroll_option: crunchyrollOption
+      } : {};
+
+      // Preparar la información de ChatGPT si hay un producto ChatGPT
+      const hasChatgptItem = cart.some(item => item.nombre.toLowerCase().includes('chatgpt'));
+      const chatgptData = hasChatgptItem ? {
+        chatgpt_option: chatgptOption,
+        chatgpt_email: chatgptOption === '1-mes' ? chatgptEmail.trim() : null
+      } : {};
+
+      // Preparar la información de IPTV si hay un producto IPTV
+      const hasIptvItem = cart.some(item => item.nombre.toLowerCase().includes('iptv'));
+      const iptvData = hasIptvItem ? {
+        iptv_option: iptvOption
+      } : {};
+
+      // Detectar si hay productos de Fortnite
+      const hasFortniteProducts = cart.some(item => {
+        const nombre = item.nombre.toLowerCase();
+        return !nombre.includes('crunchyroll') && 
+               !nombre.includes('iptv') && 
+               !nombre.includes('chatgpt') && 
+               !nombre.includes('office') && 
+               !nombre.includes('windows') &&
+               !nombre.includes('streaming');
+      });
+
       const { data: pedidoData, error: pedidoError } = await supabase
         .from("pedidos")
         .insert([
           {
             user_id: currentUser.id,
             correo: email.trim(),
-            username_fortnite: fortniteUsername.trim(),
+            username_fortnite: hasFortniteProducts ? fortniteUsername.trim() : 'N/A',
             telefono: telefono.trim(),
             rut: rut.trim(),
             estado: "No Pagado",
-            ...xboxData  // Incluir información de Xbox solo si existe
+            ...xboxData,  // Incluir información de Xbox solo si existe
+            ...crunchyrollData,  // Incluir información de Crunchyroll solo si existe
+            ...chatgptData,  // Incluir información de ChatGPT solo si existe
+            ...iptvData  // Incluir información de IPTV solo si existe
           },
         ])
         .select()
@@ -213,7 +293,22 @@ const Checkout = () => {
         mensaje += `Total: ${CLP.format(getTotal())} (${totalPavos.toLocaleString()} pavos)%0A`;
         mensaje += `------------------------------------%0A`;
         mensaje += `Email: ${email}%0A`;
-        mensaje += `Usuario Fortnite: ${fortniteUsername}%0A`;
+        
+        // Solo incluir usuario de Fortnite si hay productos de Fortnite
+        const hasFortniteProducts = cart.some(item => {
+          const nombre = item.nombre.toLowerCase();
+          return !nombre.includes('crunchyroll') && 
+                 !nombre.includes('iptv') && 
+                 !nombre.includes('chatgpt') && 
+                 !nombre.includes('office') && 
+                 !nombre.includes('windows') &&
+                 !nombre.includes('streaming');
+        });
+        
+        if (hasFortniteProducts && fortniteUsername) {
+          mensaje += `Usuario Fortnite: ${fortniteUsername}%0A`;
+        }
+        
         mensaje += `Método de pago: ${paymentMethod}%0A`;
         
         // Añadir información de Xbox si hay producto Crew
@@ -225,6 +320,35 @@ const Checkout = () => {
             mensaje += `Correo Xbox: ${xboxEmail}%0A`;
             mensaje += `Contraseña Xbox: ${xboxPassword}%0A`;
           }
+        }
+
+        // Añadir información de Crunchyroll si hay producto Crunchyroll
+        const hasCrunchyrollItem = cart.some(item => item.nombre.toLowerCase().includes('crunchyroll'));
+        if (hasCrunchyrollItem) {
+          mensaje += `------------------------------------%0A`;
+          mensaje += `Información de Crunchyroll:%0A`;
+          mensaje += `Tipo de cuenta: ${crunchyrollOption === 'cuenta-nueva' ? 'Cuenta nueva' : 'Activación en cuenta propia'}%0A`;
+        }
+
+        // Añadir información de ChatGPT si hay producto ChatGPT
+        const hasChatgptItem = cart.some(item => item.nombre.toLowerCase().includes('chatgpt'));
+        if (hasChatgptItem) {
+          mensaje += `------------------------------------%0A`;
+          mensaje += `Información de ChatGPT Plus:%0A`;
+          if (chatgptOption === '1-mes') {
+            mensaje += `Plan: 1 Mes (Por invitación)%0A`;
+            mensaje += `Correo para invitación: ${chatgptEmail}%0A`;
+          } else {
+            mensaje += `Plan: 12 Meses (Activación en cuenta propia)%0A`;
+          }
+        }
+
+        // Añadir información de IPTV si hay producto IPTV
+        const hasIptvItem = cart.some(item => item.nombre.toLowerCase().includes('iptv'));
+        if (hasIptvItem) {
+          mensaje += `------------------------------------%0A`;
+          mensaje += `Información de IPTV:%0A`;
+          mensaje += `Tipo de servicio: ${iptvOption === 'cuenta-nueva' ? 'Cuenta nueva' : 'Renovación'}%0A`;
         }
         
         if (orderNotes) mensaje += `Notas: ${orderNotes}%0A`;
@@ -377,29 +501,40 @@ const Checkout = () => {
               )}
             </div>
 
-            <div>
-              <label
-                htmlFor="fortniteusername"
-                className="block text-sm text-gray-700 font-semibold"
-              >
-                Nombre en Fortnite
-              </label>
-              <input
-                id="fortniteusername"
-                type="text"
-                placeholder="TuNombreEnFortnite"
-                value={fortniteUsername}
-                onChange={(e) => setFortniteUsername(e.target.value)}
-                className={`mt-2 w-full rounded-xl bg-white border-2 p-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400 transition ${
-                  errors.fortniteUsername ? "border-red-400" : "border-gray-300"
-                }`}
-              />
-              {errors.fortniteUsername && (
-                <p className="text-xs mt-1 text-red-500">
-                  {errors.fortniteUsername}
-                </p>
-              )}
-            </div>
+            {/* Solo mostrar campo de Fortnite si hay productos de Fortnite */}
+            {cart.some(item => {
+              const nombre = item.nombre.toLowerCase();
+              return !nombre.includes('crunchyroll') && 
+                     !nombre.includes('iptv') && 
+                     !nombre.includes('chatgpt') && 
+                     !nombre.includes('office') && 
+                     !nombre.includes('windows') &&
+                     !nombre.includes('streaming');
+            }) && (
+              <div>
+                <label
+                  htmlFor="fortniteusername"
+                  className="block text-sm text-gray-700 font-semibold"
+                >
+                  Nombre en Fortnite
+                </label>
+                <input
+                  id="fortniteusername"
+                  type="text"
+                  placeholder="TuNombreEnFortnite"
+                  value={fortniteUsername}
+                  onChange={(e) => setFortniteUsername(e.target.value)}
+                  className={`mt-2 w-full rounded-xl bg-white border-2 p-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400 transition ${
+                    errors.fortniteUsername ? "border-red-400" : "border-gray-300"
+                  }`}
+                />
+                {errors.fortniteUsername && (
+                  <p className="text-xs mt-1 text-red-500">
+                    {errors.fortniteUsername}
+                  </p>
+                )}
+              </div>
+            )}
 
             <div>
               <label
@@ -461,6 +596,216 @@ const Checkout = () => {
                 className="mt-2 w-full rounded-xl bg-white border-2 border-gray-300 p-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400 transition"
               />
             </div>
+
+            {/* Sección Crunchyroll */}
+            {cart.some(item => item.nombre.toLowerCase().includes('crunchyroll')) && (
+              <div className="space-y-4 p-4 bg-gradient-to-br from-orange-800/50 to-orange-900/50 rounded-xl border border-orange-700/50 shadow-lg">
+                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polygon points="10 8 16 12 10 16 10 8"/>
+                  </svg>
+                  Configuración de Crunchyroll
+                </h3>
+                
+                <div className="space-y-3">
+                  <label className="block text-sm text-gray-300 font-semibold">
+                    Tipo de cuenta:
+                  </label>
+                  
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="crunchyrollOption"
+                        value="cuenta-nueva"
+                        checked={crunchyrollOption === "cuenta-nueva"}
+                        onChange={(e) => setCrunchyrollOption(e.target.value)}
+                        className="text-orange-500 focus:ring-orange-400 bg-gray-800 border-gray-600"
+                      />
+                      <span className="text-white">🆕 Cuenta nueva (nosotros la creamos)</span>
+                    </label>
+                    
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="crunchyrollOption"
+                        value="cuenta-propia"
+                        checked={crunchyrollOption === "cuenta-propia"}
+                        onChange={(e) => setCrunchyrollOption(e.target.value)}
+                        className="text-orange-500 focus:ring-orange-400 bg-gray-800 border-gray-600"
+                      />
+                      <span className="text-white">👤 Activación en mi cuenta existente</span>
+                    </label>
+                  </div>
+
+                  {errors.crunchyrollOption && (
+                    <p className="text-xs text-red-500 mt-1">{errors.crunchyrollOption}</p>
+                  )}
+
+                  {crunchyrollOption && (
+                    <div className="mt-3 p-3 bg-gray-800/50 rounded-lg border border-orange-500/30">
+                      <p className="text-orange-400 text-sm flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="10"/>
+                          <line x1="12" y1="16" x2="12" y2="12"/>
+                          <line x1="12" y1="8" x2="12.01" y2="8"/>
+                        </svg>
+                        {crunchyrollOption === 'cuenta-nueva' 
+                          ? 'Te crearemos una cuenta nueva de Crunchyroll' 
+                          : 'Activaremos el plan en tu cuenta existente de Crunchyroll'}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Sección ChatGPT Plus */}
+            {cart.some(item => item.nombre.toLowerCase().includes('chatgpt')) && (
+              <div className="space-y-4 p-4 bg-gradient-to-br from-green-800/50 to-emerald-900/50 rounded-xl border border-green-700/50 shadow-lg">
+                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 16v-4"/>
+                    <path d="M12 8h.01"/>
+                  </svg>
+                  Configuración de ChatGPT Plus
+                </h3>
+                
+                <div className="space-y-3">
+                  <label className="block text-sm text-gray-300 font-semibold">
+                    Selecciona tu plan:
+                  </label>
+                  
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="chatgptOption"
+                        value="1-mes"
+                        checked={chatgptOption === "1-mes"}
+                        onChange={(e) => setChatgptOption(e.target.value)}
+                        className="text-green-500 focus:ring-green-400 bg-gray-800 border-gray-600"
+                      />
+                      <span className="text-white">📧 1 Mes - Por invitación</span>
+                    </label>
+                    
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="chatgptOption"
+                        value="12-meses"
+                        checked={chatgptOption === "12-meses"}
+                        onChange={(e) => setChatgptOption(e.target.value)}
+                        className="text-green-500 focus:ring-green-400 bg-gray-800 border-gray-600"
+                      />
+                      <span className="text-white">👤 12 Meses - Activación en cuenta propia</span>
+                    </label>
+                  </div>
+
+                  {errors.chatgptOption && (
+                    <p className="text-xs text-red-500 mt-1">{errors.chatgptOption}</p>
+                  )}
+
+                  {/* Campo de correo si es 1 mes */}
+                  {chatgptOption === '1-mes' && (
+                    <div className="space-y-3 mt-3">
+                      <div>
+                        <label className="block text-sm text-gray-300 font-semibold">
+                          Correo para la invitación
+                        </label>
+                        <input
+                          type="email"
+                          value={chatgptEmail}
+                          onChange={(e) => setChatgptEmail(e.target.value)}
+                          placeholder="correo@ejemplo.com"
+                          className="mt-1 w-full rounded-lg bg-gray-800 border border-gray-600 p-2 text-white placeholder-gray-400"
+                        />
+                        {errors.chatgptEmail && (
+                          <p className="text-xs text-red-500 mt-1">{errors.chatgptEmail}</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {chatgptOption && (
+                    <div className="mt-3 p-3 bg-gray-800/50 rounded-lg border border-green-500/30">
+                      <p className="text-green-400 text-sm flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M20 6L9 17l-5-5"/>
+                        </svg>
+                        {chatgptOption === '1-mes' 
+                          ? 'Te enviaremos una invitación al correo proporcionado' 
+                          : 'Activaremos ChatGPT Plus directamente en tu cuenta'}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Sección IPTV */}
+            {cart.some(item => item.nombre.toLowerCase().includes('iptv')) && (
+              <div className="space-y-4 p-4 bg-gradient-to-br from-blue-800/50 to-blue-900/50 rounded-xl border border-blue-700/50 shadow-lg">
+                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="7" width="20" height="15" rx="2" ry="2"/>
+                    <polyline points="17 2 12 7 7 2"/>
+                  </svg>
+                  Configuración de IPTV
+                </h3>
+                
+                <div className="space-y-3">
+                  <label className="block text-sm text-gray-300 font-semibold">
+                    Tipo de servicio:
+                  </label>
+                  
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="iptvOption"
+                        value="cuenta-nueva"
+                        checked={iptvOption === "cuenta-nueva"}
+                        onChange={(e) => setIptvOption(e.target.value)}
+                        className="text-blue-500 focus:ring-blue-400 bg-gray-800 border-gray-600"
+                      />
+                      <span className="text-white">🆕 Cuenta nueva</span>
+                    </label>
+                    
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="iptvOption"
+                        value="renovacion"
+                        checked={iptvOption === "renovacion"}
+                        onChange={(e) => setIptvOption(e.target.value)}
+                        className="text-blue-500 focus:ring-blue-400 bg-gray-800 border-gray-600"
+                      />
+                      <span className="text-white">🔄 Renovación</span>
+                    </label>
+                  </div>
+
+                  {errors.iptvOption && (
+                    <p className="text-xs text-red-500 mt-1">{errors.iptvOption}</p>
+                  )}
+
+                  {iptvOption && (
+                    <div className="mt-3 p-3 bg-gray-800/50 rounded-lg border border-blue-500/30">
+                      <p className="text-blue-400 text-sm flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M20 6L9 17l-5-5"/>
+                        </svg>
+                        {iptvOption === 'cuenta-nueva' 
+                          ? 'Te crearemos una cuenta nueva de IPTV' 
+                          : 'Renovaremos tu cuenta existente de IPTV'}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Sección Fortnite Crew */}
             {cart.some(item => item.nombre.toLowerCase().includes('crew')) && (
@@ -685,16 +1030,37 @@ const Checkout = () => {
                   className="underline hover:no-underline text-green-600"
                 >
                   términos y condiciones
-                </Link>{" "}
-                y confirmo que mi nombre de Fortnite es correcto.
+                </Link>
+                {cart.some(item => {
+                  const nombre = item.nombre.toLowerCase();
+                  return !nombre.includes('crunchyroll') && 
+                         !nombre.includes('iptv') && 
+                         !nombre.includes('chatgpt') && 
+                         !nombre.includes('office') && 
+                         !nombre.includes('windows') &&
+                         !nombre.includes('streaming');
+                }) && " y confirmo que mi nombre de Fortnite es correcto"}
+                .
               </span>
             </label>
-            <label className="flex items-start gap-3 text-sm text-gray-700 font-semibold">
-              
-              <span>
-                Antes de finalizar, asegúrate de tener agregado como amigo a Reydelosvbucks y pavostioflash2 en Fortnite por minimo 48 Hrs.
-              </span>
-            </label>
+            
+            {/* Solo mostrar mensaje de agregar amigos si hay productos de Fortnite */}
+            {cart.some(item => {
+              const nombre = item.nombre.toLowerCase();
+              return !nombre.includes('crunchyroll') && 
+                     !nombre.includes('iptv') && 
+                     !nombre.includes('chatgpt') && 
+                     !nombre.includes('office') && 
+                     !nombre.includes('windows') &&
+                     !nombre.includes('streaming');
+            }) && (
+              <label className="flex items-start gap-3 text-sm text-gray-700 font-semibold">
+                <span>
+                  Antes de finalizar, asegúrate de tener agregado como amigo a Reydelosvbucks y pavostioflash2 en Fortnite por minimo 48 Hrs.
+                </span>
+              </label>
+            )}
+            
             {errors.terms && (
               <p className="text-xs mt-1 text-red-500">{errors.terms}</p>
             )}
@@ -702,7 +1068,22 @@ const Checkout = () => {
             <button
               type="submit"
               disabled={
-                !email.trim() || !fortniteUsername.trim() || !acceptTerms || !rut.trim() || !validateRut(rut) || !telefono.trim() || !paymentMethod
+                !email.trim() || 
+                !acceptTerms || 
+                !rut.trim() || 
+                !validateRut(rut) || 
+                !telefono.trim() || 
+                !paymentMethod ||
+                // Solo requerir fortniteUsername si hay productos de Fortnite
+                (cart.some(item => {
+                  const nombre = item.nombre.toLowerCase();
+                  return !nombre.includes('crunchyroll') && 
+                         !nombre.includes('iptv') && 
+                         !nombre.includes('chatgpt') && 
+                         !nombre.includes('office') && 
+                         !nombre.includes('windows') &&
+                         !nombre.includes('streaming');
+                }) && !fortniteUsername.trim())
               }
               className="mt-4 w-full py-3 rounded-xl bg-gradient-to-r from-green-500 to-cyan-500 hover:from-green-600 hover:to-cyan-600 text-white font-bold text-lg shadow-lg transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >

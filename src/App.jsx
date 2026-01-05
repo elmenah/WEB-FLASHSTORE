@@ -4,6 +4,8 @@ import Home from "./pages/Home";
 import Shop from "./pages/Shop";
 import Shop2 from "./pages/Shop2";
 import Club from "./pages/Club";
+import Streaming from "./pages/Streaming";
+import Activaciones from "./pages/Activaciones";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import MiCuenta from "./pages/MiCuenta";
@@ -40,6 +42,8 @@ const App = () => {
             <Route path="product/:id" element={<AuthGuard><ProductDetail /></AuthGuard>} />
             <Route path="/shop" element={ <AuthGuard> <Shop2 /> </AuthGuard>} />
             <Route path="/club" element={ <AuthGuard> <Club /> </AuthGuard>} />
+            <Route path="/streaming" element={ <AuthGuard> <Streaming /> </AuthGuard>} />
+            <Route path="/activaciones" element={ <AuthGuard> <Activaciones /> </AuthGuard>} />
             <Route path="/pago-exitoso" element={<PagoExitoso />} />
             <Route path="/pago-fallido" element={<PagoFallido />} />
             

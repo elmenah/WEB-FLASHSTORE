@@ -145,6 +145,30 @@ const Header = () => {
                   Club
                 </Link>
               </li>
+              <li
+                className={`nav-link ${
+                  isActive("/streaming")
+                    ? "text-yellow-500"
+                    : "text-white hover:text-yellow-500"
+                }`}
+              >
+                <Link to="/streaming" className="flex items-center gap-2">
+                  <span className="material-icons">play_circle</span>
+                  Streaming
+                </Link>
+              </li>
+              <li
+                className={`nav-link ${
+                  isActive("/activaciones")
+                    ? "text-yellow-500"
+                    : "text-white hover:text-yellow-500"
+                }`}
+              >
+                <Link to="/activaciones" className="flex items-center gap-2">
+                  <span className="material-icons">vpn_key</span>
+                  Activaciones
+                </Link>
+              </li>
             </ul>
 
             {/* Derecha: Opciones de usuario */}
@@ -267,6 +291,24 @@ const Header = () => {
                   onClick={closeMobileMenu}
                 >
                   Club
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/streaming"
+                  className="text-white hover:text-yellow-500"
+                  onClick={closeMobileMenu}
+                >
+                  Streaming
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/activaciones"
+                  className="text-white hover:text-yellow-500"
+                  onClick={closeMobileMenu}
+                >
+                  Activaciones
                 </Link>
               </li>
               {session ? (
