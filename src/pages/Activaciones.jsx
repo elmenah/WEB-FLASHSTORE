@@ -256,7 +256,7 @@ const Activaciones = () => {
                   </div>
                   <p className="text-gray-400 text-sm mb-3">{item.desc}</p>
                   <div className="flex flex-wrap gap-2">
-                    <span className="px-2 py-1 bg-green-600/30 text-green-300 rounded text-xs">⚡ GPT-4</span>
+                    <span className="px-2 py-1 bg-green-600/30 text-green-300 rounded text-xs">⚡ GPT-5.2</span>
                     <span className="px-2 py-1 bg-green-600/30 text-green-300 rounded text-xs">🎨 DALL-E</span>
                     <span className="px-2 py-1 bg-green-600/30 text-green-300 rounded text-xs">📊 Análisis</span>
                   </div>
