@@ -48,19 +48,12 @@ const Activaciones = () => {
 
   // Productos de ChatGPT
   const chatgptProducts = [
-    { 
-      id: 'gpt-invite-1', 
-      title: "ChatGPT Plus - 1 Mes", 
-      desc: "Activación mediante invitación", 
-      price: 5000, 
-      image: "Imagenes/ChatGPT-Plus.png",
-      categoria: "ChatGPT Plus"
-    },
+    
     { 
       id: 'gpt-direct-12', 
       title: "ChatGPT Plus - 12 Meses", 
       desc: "Activación directa en tu cuenta", 
-      price: 20000, 
+      price: 8000, 
       image: "Imagenes/ChatGPT-Plus.png",
       categoria: "ChatGPT Plus"
     }
