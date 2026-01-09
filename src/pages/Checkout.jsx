@@ -471,19 +471,36 @@ const Checkout = () => {
   }
 
   return (
-    <div className="min-h-screen pt-24 bg-gradient-to-br min-h-screen pt-24 bg-gray-900 flex flex-col items-center justify-center animate-fade-in">
-      <div className="w-full max-w-5xl mx-auto flex flex-col md:flex-row gap-8 md:gap-12 bg-white/90 rounded-3xl shadow-2xl p-4 md:p-10 border border-gray-200 flex-col md:flex-row">
+    <div className="min-h-screen pt-24 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex flex-col items-center justify-center animate-fade-in">
+      {/* Header con gradiente y progreso */}
+      <div className="w-full max-w-7xl mx-auto mb-6 px-4">
+        <div className="text-center">
+          <div className="inline-block mb-3">
+            <span className="bg-blue-600/20 text-blue-400 px-4 py-2 rounded-full text-sm font-semibold tracking-wider uppercase border border-blue-600/30">
+              PASO FINAL
+            </span>
+          </div>
+          <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-500 via-cyan-400 to-blue-600 bg-clip-text text-transparent">
+            Finaliza tu Compra
+          </h1>
+          <p className="text-gray-400 mt-2">Completa tus datos para procesar el pedido</p>
+        </div>
+      </div>
+
+      <div className="w-full max-w-7xl mx-auto flex flex-col lg:flex-row gap-6 p-4">
         {/* Formulario */}
-        <div className="w-full md:w-2/3 flex flex-col gap-6 order-1 md:order-1">
-          <h2 className="text-2xl font-bold mb-2 text-gray-800">
-            Finaliza tu compra
-          </h2>
-          <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
+        <div className="w-full lg:w-2/3 flex flex-col gap-6 order-1 lg:order-1 bg-gray-800/50 backdrop-blur-lg rounded-2xl shadow-2xl p-6 md:p-8 border border-gray-700/50">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Grid de 2 columnas para campos principales en pantallas grandes */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm text-gray-700 font-semibold"
+                className="block text-sm text-gray-300 font-semibold mb-2 flex items-center gap-2"
               >
+                <svg className="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
                 Correo electrónico
               </label>
               <input
@@ -492,12 +509,17 @@ const Checkout = () => {
                 placeholder="tuemail@ejemplo.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className={`mt-2 w-full rounded-xl bg-white border-2 p-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400 transition ${
-                  errors.email ? "border-red-400" : "border-gray-300"
+                className={`w-full rounded-xl bg-gray-900/80 border-2 p-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all ${
+                  errors.email ? "border-red-400 focus:ring-red-400" : "border-gray-600"
                 }`}
               />
               {errors.email && (
-                <p className="text-xs mt-1 text-red-500">{errors.email}</p>
+                <p className="text-xs mt-1 text-red-400 flex items-center gap-1">
+                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd"/>
+                  </svg>
+                  {errors.email}
+                </p>
               )}
             </div>
 
@@ -514,8 +536,11 @@ const Checkout = () => {
               <div>
                 <label
                   htmlFor="fortniteusername"
-                  className="block text-sm text-gray-700 font-semibold"
+                  className="block text-sm text-gray-300 font-semibold mb-2 flex items-center gap-2"
                 >
+                  <svg className="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                  </svg>
                   Nombre en Fortnite
                 </label>
                 <input
@@ -524,12 +549,15 @@ const Checkout = () => {
                   placeholder="TuNombreEnFortnite"
                   value={fortniteUsername}
                   onChange={(e) => setFortniteUsername(e.target.value)}
-                  className={`mt-2 w-full rounded-xl bg-white border-2 p-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400 transition ${
-                    errors.fortniteUsername ? "border-red-400" : "border-gray-300"
+                  className={`w-full rounded-xl bg-gray-900/80 border-2 p-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all ${
+                    errors.fortniteUsername ? "border-red-400 focus:ring-red-400" : "border-gray-600"
                   }`}
                 />
                 {errors.fortniteUsername && (
-                  <p className="text-xs mt-1 text-red-500">
+                  <p className="text-xs mt-1 text-red-400 flex items-center gap-1">
+                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd"/>
+                    </svg>
                     {errors.fortniteUsername}
                   </p>
                 )}
@@ -539,8 +567,11 @@ const Checkout = () => {
             <div>
               <label
                 htmlFor="telefono"
-                className="block text-sm text-gray-700 font-semibold"
+                className="block text-sm text-gray-300 font-semibold mb-2 flex items-center gap-2"
               >
+                <svg className="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                </svg>
                 Número de teléfono
               </label>
               <input
@@ -549,20 +580,28 @@ const Checkout = () => {
                 placeholder="Ej: +56912345678"
                 value={telefono}
                 onChange={(e) => setTelefono(e.target.value)}
-                className={`mt-2 w-full rounded-xl bg-white border-2 p-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400 transition ${
-                  errors.telefono ? "border-red-400" : "border-gray-300"
+                className={`w-full rounded-xl bg-gray-900/80 border-2 p-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all ${
+                  errors.telefono ? "border-red-400 focus:ring-red-400" : "border-gray-600"
                 }`}
               />
               {errors.telefono && (
-                <p className="text-xs mt-1 text-red-500">{errors.telefono}</p>
+                <p className="text-xs mt-1 text-red-400 flex items-center gap-1">
+                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd"/>
+                  </svg>
+                  {errors.telefono}
+                </p>
               )}
             </div>
 
             <div>
               <label
                 htmlFor="rut"
-                className="block text-sm text-gray-700 font-semibold"
+                className="block text-sm text-gray-300 font-semibold mb-2 flex items-center gap-2"
               >
+                <svg className="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/>
+                </svg>
                 RUT
               </label>
               <input
@@ -571,20 +610,30 @@ const Checkout = () => {
                 placeholder="Ej: 12.345.678-9"
                 value={rut}
                 onChange={(e) => setRut(e.target.value)}
-                className={`mt-2 w-full rounded-xl bg-white border-2 p-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400 transition ${
-                  errors.rut ? "border-red-400" : "border-gray-300"
+                className={`w-full rounded-xl bg-gray-900/80 border-2 p-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all ${
+                  errors.rut ? "border-red-400 focus:ring-red-400" : "border-gray-600"
                 }`}
               />
               {errors.rut && (
-                <p className="text-xs mt-1 text-red-500">{errors.rut}</p>
+                <p className="text-xs mt-1 text-red-400 flex items-center gap-1">
+                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd"/>
+                  </svg>
+                  {errors.rut}
+                </p>
               )}
             </div>
+            </div>
 
+            {/* Notas - Ancho completo */}
             <div>
               <label
                 htmlFor="orderNotes"
-                className="block text-sm text-gray-700 font-semibold"
+                className="block text-sm text-gray-300 font-semibold mb-2 flex items-center gap-2"
               >
+                <svg className="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
                 Notas para el pedido (opcional)
               </label>
               <textarea
@@ -593,7 +642,7 @@ const Checkout = () => {
                 placeholder="Ej: estoy conectado de 20:00 a 22:00…"
                 value={orderNotes}
                 onChange={(e) => setOrderNotes(e.target.value)}
-                className="mt-2 w-full rounded-xl bg-white border-2 border-gray-300 p-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400 transition"
+                className="w-full rounded-xl bg-gray-900/80 border-2 border-gray-600 p-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all"
               />
             </div>
 
@@ -902,42 +951,41 @@ const Checkout = () => {
 
             {/* Método de pago */}
             <div>
-              <label className="block text-sm text-gray-700 font-semibold mb-1">
+              <label className="block text-sm text-gray-300 font-semibold mb-2 flex items-center gap-2">
+                <svg className="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                </svg>
                 Método de pago
               </label>
               <select
                 value={paymentMethod}
                 onChange={(e) => setPaymentMethod(e.target.value)}
-                className={`w-full rounded-xl bg-white border-2 p-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-400 transition ${
-                  errors.paymentMethod ? "border-red-400" : "border-gray-300"
+                className={`w-full rounded-xl bg-gray-900/80 border-2 p-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all ${
+                  errors.paymentMethod ? "border-red-400 focus:ring-red-400" : "border-gray-600"
                 }`}
               >
-                <option value="">Selecciona un método</option>
-                <option value="MercadoPago">Mercado Pago (Tarjeta, Webpay, etc)</option>
+                <option value="" className="bg-gray-800">Selecciona un método</option>
+                <option value="MercadoPago" className="bg-gray-800">💳 Mercado Pago (Tarjeta, Webpay, etc)</option>
                 
               </select>
               {errors.paymentMethod && (
-                <p className="text-xs mt-1 text-red-500">
+                <p className="text-xs mt-1 text-red-400 flex items-center gap-1">
+                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd"/>
+                  </svg>
                   {errors.paymentMethod}
                 </p>
               )}
 
               {/* ✅ Mostrar información sobre WhatsApp automático */}
               {paymentMethod === "MercadoPago" && (
-                <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                  <div className="flex items-center gap-2 text-blue-700">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                    >
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                <div className="mt-3 p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl backdrop-blur-sm">
+                  <div className="flex items-start gap-3 text-blue-400">
+                    <svg className="w-5 h-5 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"/>
                     </svg>
-                    <span className="text-sm font-medium">
-                      Al completar el pago, se enviará automáticamente un WhatsApp
-                      con el resumen del pedido
+                    <span className="text-sm font-medium leading-relaxed">
+                      Al completar el pago, se enviará automáticamente un WhatsApp con el resumen del pedido
                     </span>
                   </div>
                 </div>
@@ -1016,18 +1064,18 @@ const Checkout = () => {
               </div>
             </div>
 
-            <label className="flex items-start gap-3 text-sm text-gray-700 font-semibold">
+            <label className="flex items-start gap-3 text-sm text-gray-300 font-medium">
               <input
                 type="checkbox"
                 checked={acceptTerms}
                 onChange={(e) => setAcceptTerms(e.target.checked)}
-                className="mt-1 rounded border-gray-400 bg-white text-green-500 focus:ring-green-400"
+                className="mt-1 rounded border-gray-600 bg-gray-900 text-cyan-500 focus:ring-cyan-400 focus:ring-offset-gray-800"
               />
               <span>
                 Acepto los{" "}
                 <Link
                   to="/terminos"
-                  className="underline hover:no-underline text-green-600"
+                  className="underline hover:no-underline text-cyan-400 hover:text-cyan-300"
                 >
                   términos y condiciones
                 </Link>
@@ -1054,11 +1102,16 @@ const Checkout = () => {
                      !nombre.includes('windows') &&
                      !nombre.includes('streaming');
             }) && (
-              <label className="flex items-start gap-3 text-sm text-gray-700 font-semibold">
-                <span>
-                  Antes de finalizar, asegúrate de tener agregado como amigo a Reydelosvbucks y pavostioflash2 en Fortnite por minimo 48 Hrs.
-                </span>
-              </label>
+              <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl backdrop-blur-sm">
+                <div className="flex items-start gap-3">
+                  <svg className="w-5 h-5 text-yellow-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"/>
+                  </svg>
+                  <span className="text-sm text-yellow-400 leading-relaxed">
+                    Antes de finalizar, asegúrate de tener agregado como amigo a <span className="font-bold">Reydelosvbucks</span> y <span className="font-bold">pavostioflash2</span> en Fortnite por mínimo 48 horas.
+                  </span>
+                </div>
+              </div>
             )}
             
             {errors.terms && (
@@ -1085,55 +1138,25 @@ const Checkout = () => {
                          !nombre.includes('streaming');
                 }) && !fortniteUsername.trim())
               }
-              className="mt-4 w-full py-3 rounded-xl bg-gradient-to-r from-green-500 to-cyan-500 hover:from-green-600 hover:to-cyan-600 text-white font-bold text-lg shadow-lg transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="group mt-6 w-full py-4 rounded-xl bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 hover:from-blue-700 hover:via-cyan-600 hover:to-blue-700 text-white font-bold text-lg shadow-xl hover:shadow-2xl hover:shadow-cyan-500/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-xl flex items-center justify-center gap-3 relative overflow-hidden"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="22"
-                height="22"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke="#fff"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M5 12l5 5L20 7"
-                />
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+              <svg className="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/>
               </svg>
-              Finalizar pedido
+              <span className="relative">Finalizar Pedido</span>
             </button>
 
-            <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="18"
-                height="18"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="#22c55e"
-                  strokeWidth="2"
-                />
-                <path
-                  stroke="#22c55e"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M8 12l2 2 4-4"
-                />
+            <div className="flex items-center justify-center gap-2 mt-4 p-3 bg-green-500/10 border border-green-500/30 rounded-xl">
+              <svg className="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
               </svg>
-              Pago 100% seguro y protegido por Mercado Pago.
+              <span className="text-sm text-green-400 font-semibold">Pago 100% seguro protegido por Mercado Pago</span>
             </div>
           </form>
 
           {/* Ayuda WhatsApp */}
-          <div className="mt-8 flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl p-4">
+          <div className="mt-6 flex items-center gap-3 bg-green-500/10 border border-green-500/30 rounded-xl p-4 backdrop-blur-sm hover:bg-green-500/20 transition-all">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
@@ -1146,13 +1169,13 @@ const Checkout = () => {
                 d="M17.472 14.382c-.297-.149-1.758-.867-2.031-.967-.273-.099-.472-.148-.67.15-.198.297-.767.967-.94 1.164-.173.198-.347.223-.644.075-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.151-.174.2-.298.3-.497.099-.198.05-.372-.025-.52-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.5-.669-.51-.173-.008-.372-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.099 3.2 5.077 4.363.71.306 1.263.489 1.694.626.712.227 1.36.195 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.288.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 5.421h-.001a8.933 8.933 0 0 1-4.548-1.252l-.326-.194-3.377.892.902-3.292-.213-.337a8.922 8.922 0 0 1-1.37-4.788c.001-4.936 4.011-8.946 8.949-8.946 2.389 0 4.637.93 6.324 2.617a8.862 8.862 0 0 1 2.624 6.323c-.003 4.936-4.013 8.946-8.949 8.946m7.437-16.384A10.92 10.92 0 0 0 12.05 1.933C6.477 1.933 1.93 6.479 1.928 12.05c0 2.123.555 4.199 1.607 6.032l-1.7 6.191a1.003 1.003 0 0 0 1.223 1.223l6.193-1.7a10.888 10.888 0 0 0 4.799 1.146h.005c5.572 0 10.119-4.547 10.121-10.118a10.86 10.86 0 0 0-3.184-7.924"
               />
             </svg>
-            <span className="text-green-700 font-semibold text-sm">
+            <span className="text-green-400 font-semibold text-sm">
               ¿Dudas?{" "}
               <a
                 href="https://wa.me/56930917730"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="underline"
+                className="underline hover:text-green-300 transition-colors"
               >
                 Habla con soporte
               </a>
@@ -1161,22 +1184,27 @@ const Checkout = () => {
         </div>
 
         {/* Resumen del pedido SOLO en escritorio */}
-        <div className="hidden md:block w-full md:w-1/3 bg-white/80 rounded-2xl shadow-lg p-6 flex flex-col gap-4 border border-gray-200 h-fit self-start order-2 md:order-2">
-          <h2 className="text-xl font-bold mb-2 text-gray-800">
-            Resumen del pedido
-          </h2>
-          <div className="space-y-3">
+        <div className="hidden lg:block w-full lg:w-1/3 bg-gray-800/50 backdrop-blur-lg rounded-2xl shadow-2xl p-6 flex flex-col gap-4 border border-gray-700/50 h-fit self-start order-2 lg:order-2 sticky top-28">
+          <div className="flex items-center gap-2 mb-4">
+            <svg className="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+            </svg>
+            <h2 className="text-xl font-bold text-white">
+              Resumen del Pedido
+            </h2>
+          </div>
+          <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
             {cart.length === 0 ? (
-              <p className="text-gray-400 text-center">
+              <p className="text-gray-400 text-center py-8">
                 No hay productos en el carrito.
               </p>
             ) : (
               cart.map((item, index) => (
                 <div
                   key={index}
-                  className="flex items-center gap-3 border-b border-gray-200 pb-3 last:border-b-0"
+                  className="flex items-center gap-3 border-b border-gray-700/50 pb-3 last:border-b-0 hover:bg-gray-700/20 p-2 rounded-lg transition-all"
                 >
-                  <div className="w-14 h-14 rounded-xl flex items-center justify-center bg-gradient-to-br from-[#47fdfe] to-[#2b6fa1]">
+                  <div className="w-14 h-14 rounded-xl flex items-center justify-center bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30">
                     <img
                       src={item.imagen}
                       alt={item.nombre}
@@ -1184,14 +1212,14 @@ const Checkout = () => {
                     />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-gray-800 truncate">
+                    <p className="font-semibold text-white truncate text-sm">
                       {item.nombre}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-400">
                       Cantidad: {item.cantidad || 1}
                     </p>
                   </div>
-                  <span className="font-bold text-green-600">
+                  <span className="font-bold text-cyan-400 text-sm">
                     {CLP.format(item.precio)}
                   </span>
                   <button
@@ -1220,13 +1248,15 @@ const Checkout = () => {
               ))
             )}
           </div>
-          <div className="mt-2 flex justify-between text-gray-700 font-semibold">
-            <span>Subtotal</span>
-            <span>{CLP.format(getSubtotal())}</span>
-          </div>
-          <div className="flex justify-between text-lg font-bold text-gray-900 border-t border-gray-200 pt-3">
-            <span>Total</span>
-            <span>{CLP.format(getTotal())}</span>
+          <div className="mt-4 space-y-3">
+            <div className="flex justify-between text-gray-300 font-semibold">
+              <span>Subtotal</span>
+              <span>{CLP.format(getSubtotal())}</span>
+            </div>
+            <div className="flex justify-between text-xl font-bold text-white border-t border-gray-700/50 pt-4">
+              <span>Total</span>
+              <span className="text-cyan-400">{CLP.format(getTotal())}</span>
+            </div>
           </div>
         </div>
       </div>

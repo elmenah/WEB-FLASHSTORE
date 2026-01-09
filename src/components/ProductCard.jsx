@@ -71,14 +71,11 @@ const ProductCard = ({ product, onAddToCart, onClick, fallbackColor }) => {
       className={`relative flex flex-col justify-end rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl hover:scale-[1.01] transition-all cursor-pointer border border-[#33333a]
         ${
           isBundle
-            ? "min-h-[380px] w-auto  max-w-[600px]"
+            ? "min-h-[380px] w-full sm:w-[720px] max-w-[720px]"
             : "w-1/2 min-h-[280px] max-w-[140px] sm:w-[350px] sm:min-h-[380px] sm:max-w-[350px]"
         }`}
       style={{
         background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
-        ...(isBundle && { 
-          aspectRatio: '16/9' // Forzar una proporción específica para bundles
-        })
       }}
       onClick={handleCardClick}
     >

@@ -28,6 +28,11 @@ const Shop2 = () => {
     fetchProducts();
   }, []);
 
+  // Scroll al top cuando cambie la categoría seleccionada
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [selectedCategory]);
+
   const fetchProducts = async () => {
     try {
       const response = await fetch(
@@ -250,6 +255,26 @@ const Shop2 = () => {
       );
     }
 
+    // ✅ Ordenar: lotes primero, luego el resto
+    filtered.sort((a, b) => {
+      const aEsLote =
+        a.bundle?.name ||
+        a.layout?.name?.toLowerCase().includes("lote") ||
+        a.brItems?.[0]?.name?.toLowerCase().includes("lote");
+
+      const bEsLote =
+        b.bundle?.name ||
+        b.layout?.name?.toLowerCase().includes("lote") ||
+        b.brItems?.[0]?.name?.toLowerCase().includes("lote");
+
+      // Si A es lote y B no, A va primero (-1)
+      if (aEsLote && !bEsLote) return -1;
+      // Si B es lote y A no, B va primero (1)
+      if (!aEsLote && bEsLote) return 1;
+      // Si ambos son lotes o ambos no son lotes, mantener orden original
+      return 0;
+    });
+
     return filtered;
   };
 
@@ -282,6 +307,35 @@ const Shop2 = () => {
 
   return (
     <>
+      {/* Estilos personalizados para el scrollbar */}
+      <style>{`
+        .category-sidebar::-webkit-scrollbar {
+          width: 10px;
+        }
+
+        .category-sidebar::-webkit-scrollbar-track {
+          background: rgba(31, 41, 55, 0.5);
+          border-radius: 10px;
+          margin: 8px 0;
+        }
+
+        .category-sidebar::-webkit-scrollbar-thumb {
+          background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+          border-radius: 10px;
+          border: 2px solid rgba(31, 41, 55, 0.5);
+        }
+
+        .category-sidebar::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
+        }
+
+        /* Firefox */
+        .category-sidebar {
+          scrollbar-width: thin;
+          scrollbar-color: #3b82f6 rgba(31, 41, 55, 0.5);
+        }
+      `}</style>
+
       {/* Notification */}
       <div
         className={`fixed top-20 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg transition-opacity duration-500 z-50 ${
@@ -292,141 +346,243 @@ const Shop2 = () => {
       </div>
 
       <div className="pt-20 pb-8">
-        <div className="text-center mt-4">
-          <h1 className="text-4xl font-bold">Tienda</h1>
-          <p className="text-gray-400 mt-2">
-            {new Date().toLocaleString("es-ES")}
-          </p>
-        </div>
-
-        <div className="text-center mt-6 mb-4">
-          <div className="inline-flex items-center gap-6 bg-gray-800/50 rounded-lg px-6 py-3 border border-gray-700">
-            {/* Epic Games Precio */}
+        {/* Header Moderno - Layout centrado */}
+        <div className="px-4 max-w-[1400px] mx-auto mb-8">
+          <div className="flex flex-col items-center gap-6">
+            {/* Título y fecha centrados */}
             <div className="text-center">
-              <p className="text-xs text-gray-400 mb-1">Epic Games:</p>
-              <p className="text-red-400 font-bold text-lg">$6.7 CLP/V-Buck</p>
+              <div className="inline-block mb-4">
+                
+              </div>
+              
+              <h1 className="text-4xl md:text-5xl font-bold mb-3 bg-gradient-to-r from-blue-500 via-cyan-400 to-blue-600 bg-clip-text text-transparent">
+                Rotación de la Tienda
+              </h1>
+              
+              
             </div>
 
-            {/* VS */}
-            <div className="text-2xl text-gray-500 font-bold">VS</div>
+            {/* Badges y VS en la misma línea */}
+            <div className="flex flex-col lg:flex-row items-center gap-6 w-full justify-center">
+              {/* Badges informativos */}
+              <div className="flex flex-col gap-3">
+                <div className="inline-flex items-center gap-2 bg-yellow-600/20 text-yellow-400 px-4 py-2.5 rounded-full border border-yellow-600/30">
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"/>
+                  </svg>
+                  <span className="text-sm font-semibold">Recuerda tenernos agregados 48hrs antes</span>
+                </div>
+                <div className="inline-flex items-center gap-2 bg-green-600/20 text-green-400 px-4 py-2.5 rounded-full border border-green-600/30">
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+                  </svg>
+                  <span className="text-sm font-semibold">Usuarios: Reydelosvbucks | pavostioflash2</span>
+                </div>
+              </div>
 
-            {/* Nuestros Precios */}
+              {/* Comparación Epic vs Nosotros */}
+              <div className="flex items-center gap-4">
+                {/* Epic Games */}
+                <div className="w-40">
+                  <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 text-center">
+                    <div className="flex items-center justify-center gap-1.5 mb-1.5">
+                      <svg className="w-4 h-4 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd"/>
+                      </svg>
+                      <p className="text-xs font-semibold text-gray-300">Epic Games</p>
+                    </div>
+                    <p className="text-2xl font-bold text-red-400 leading-none">$6.7</p>
+                    <p className="text-xs text-gray-400 mt-1">CLP/V-Buck</p>
+                  </div>
+                </div>
+
+                {/* VS Divider */}
+                <div className="bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full p-2.5 w-12 h-12 flex items-center justify-center flex-shrink-0">
+                  <span className="text-white font-bold text-lg">VS</span>
+                </div>
+
+                {/* Nosotros */}
+                <div className="w-40">
+                  <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-3 text-center">
+                    <div className="flex items-center justify-center gap-1.5 mb-1.5">
+                      <svg className="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+                      </svg>
+                      <p className="text-xs font-semibold text-gray-300">Nosotros</p>
+                    </div>
+                    <p className="text-2xl font-bold text-green-400 leading-none">${VBUCK_TO_CLP_RATE}</p>
+                    <p className="text-xs text-gray-400 mt-1">CLP/V-Buck</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Mensaje de ahorro */}
             <div className="text-center">
-              <p className="text-xs text-gray-400 mb-1">Nosotros:</p>
-              <p className="text-green-400 font-bold text-lg">
-                ${VBUCK_TO_CLP_RATE} CLP/V-Buck
+              <p className="text-sm text-gray-400">
+                💰 Ahorra hasta un <span className="text-green-400 font-bold">{Math.round((1 - VBUCK_TO_CLP_RATE / 6.7) * 100)}%</span> comprando con nosotros
               </p>
             </div>
           </div>
         </div>
 
-        {/* Buscador */}
-        <div className="flex justify-center items-center mt-4 mb-2 px-4">
-          <input
-            type="text"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Buscar skins, lotes, rarezas..."
-            className="w-full max-w-md p-2 rounded-lg border border-gray-700 bg-gray-900 text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
-          />
-        </div>
+        {/* Layout con Sidebar */}
+        <div className="flex gap-6 px-4 max-w-[1800px] mx-auto">
+          {/* SIDEBAR IZQUIERDO - Categorías */}
+          <aside className="w-64 flex-shrink-0 sticky top-24 h-fit hidden lg:block">
+            <div className="bg-gray-800/50 rounded-2xl p-4 border border-gray-700 max-h-[calc(100vh-120px)] overflow-y-auto category-sidebar">
+              <h2 className="text-lg font-bold mb-4 text-white sticky top-0 bg-gray-800/50 pb-2 z-10">Botín de Fortnite</h2>
+              
+              {/* Buscador dentro del sidebar */}
+              <div className="mb-4 sticky top-12 bg-gray-800/50 pb-2 z-10">
+                <input
+                  type="text"
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  placeholder="Buscar items..."
+                  className="w-full p-2.5 rounded-lg border border-gray-600 bg-gray-900/80 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500"
+                />
+              </div>
 
-        {/* Dropdown mejorado */}
-        <div className="flex justify-center my-6">
-          <div className="relative w-full max-w-md">
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full p-3 pr-10 rounded-lg bg-gray-800/50 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none cursor-pointer"
-            >
-              <option value="">🌟 Todas las categorías</option>
-              {Object.entries(categorizedProducts).map(
-                ([categoria, { productos }]) => (
-                  <option key={categoria} value={categoria}>
-                    {categoria} ({productos.length})
-                  </option>
-                )
-              )}
-            </select>
-            <svg
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
-          </div>
-        </div>
+              {/* Todas las categorías */}
+              <button
+                onClick={() => setSelectedCategory("")}
+                className={`w-full text-left px-4 py-3 rounded-lg mb-2 transition-all ${
+                  selectedCategory === ""
+                    ? "bg-blue-600 text-white font-semibold"
+                    : "text-gray-300 hover:bg-gray-700/50"
+                }`}
+              >
+                <span className="mr-2">🌟</span>
+                Todas las categorías
+              </button>
 
-        <section className="px-4">
-          {selectedCategory ? (
-            <div>
-              <h2 className="text-2xl font-semibold text-white border-b-2 border-blue-500 pb-2 mb-4">
-                {selectedCategory}
-              </h2>
-              <div className="flex flex-wrap gap-[20px] justify-center items-start p-5">
-                {filtered.slice(0, 20).map((product, index) => (
-                  <ProductCard
-                    key={product.offerId}
-                    product={product}
-                    onAddToCart={handleAddToCart}
-                    onClick={handleProductClick}
-                  />
-                ))}
+              {/* Lista de categorías */}
+              <div className="space-y-1">
+                {Object.entries(categorizedProducts).map(
+                  ([categoria, { productos }]) => (
+                    <button
+                      key={categoria}
+                      onClick={() => setSelectedCategory(categoria)}
+                      className={`w-full text-left px-4 py-3 rounded-lg transition-all ${
+                        selectedCategory === categoria
+                          ? "bg-blue-600 text-white font-semibold"
+                          : "text-gray-300 hover:bg-gray-700/50"
+                      }`}
+                    >
+                      <div className="flex justify-between items-center">
+                        <span className="truncate">{categoria}</span>
+                        <span className="text-xs bg-gray-700 px-2 py-1 rounded-full ml-2">
+                          {productos.length}
+                        </span>
+                      </div>
+                    </button>
+                  )
+                )}
               </div>
             </div>
-          ) : (
-            Object.entries(categorizedProducts).map(
-              ([categoria, { color, productos }]) => {
-                // Filtrar productos por el término de búsqueda
-                const productosFiltrados = searchTerm
-                  ? productos.filter((product) => {
-                      const mainItem = product.brItems?.[0];
-                      const bundleName = product.bundle?.name || "";
-                      return (
-                        mainItem?.name
-                          ?.toLowerCase()
-                          .includes(searchTerm.toLowerCase()) ||
-                        mainItem?.rarity?.displayValue
-                          ?.toLowerCase()
-                          .includes(searchTerm.toLowerCase()) ||
-                        bundleName
-                          .toLowerCase()
-                          .includes(searchTerm.toLowerCase())
-                      );
-                    })
-                  : productos;
+          </aside>
 
-                if (productosFiltrados.length === 0) return null;
+          {/* CONTENIDO PRINCIPAL - Derecha */}
+          <main className="flex-1 min-w-0">
+            {/* Dropdown móvil */}
+            <div className="flex justify-center mb-6 lg:hidden">
+              <div className="relative w-full max-w-md">
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="w-full p-3 pr-10 rounded-lg bg-gray-800/50 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none cursor-pointer"
+                >
+                  <option value="">🌟 Todas las categorías</option>
+                  {Object.entries(categorizedProducts).map(
+                    ([categoria, { productos }]) => (
+                      <option key={categoria} value={categoria}>
+                        {categoria} ({productos.length})
+                      </option>
+                    )
+                  )}
+                </select>
+                <svg
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </div>
+            </div>
 
-                return (
-                  <div key={categoria} className="mb-12">
-                    <h2 className="text-2xl font-semibold text-white border-b-2 border-blue-500 pb-2 mb-4">
-                      {categoria}
-                    </h2>
-                    <div className="flex flex-wrap gap-[20px] justify-center items-start p-5">
-                      {productosFiltrados.slice(0, 20).map((product) => (
-                        <ProductCard
-                          key={product.offerId}
-                          product={product}
-                          onAddToCart={handleAddToCart}
-                          onClick={handleProductClick}
-                          fallbackColor={color}
-                        />
-                      ))}
-                    </div>
+            {/* Productos */}
+            <section>
+              {selectedCategory ? (
+                <div>
+                  <h2 className="text-2xl font-semibold text-white border-b-2 border-blue-500 pb-2 mb-6">
+                    {selectedCategory}
+                  </h2>
+                  <div className="flex flex-wrap gap-[20px] justify-center lg:justify-start items-start">
+                    {filtered.slice(0, 20).map((product, index) => (
+                      <ProductCard
+                        key={product.offerId}
+                        product={product}
+                        onAddToCart={handleAddToCart}
+                        onClick={handleProductClick}
+                      />
+                    ))}
                   </div>
-                );
-              }
-            )
-          )}
-        </section>
+                </div>
+              ) : (
+                Object.entries(categorizedProducts).map(
+                  ([categoria, { color, productos }]) => {
+                    const productosFiltrados = searchTerm
+                      ? productos.filter((product) => {
+                          const mainItem = product.brItems?.[0];
+                          const bundleName = product.bundle?.name || "";
+                          return (
+                            mainItem?.name
+                              ?.toLowerCase()
+                              .includes(searchTerm.toLowerCase()) ||
+                            mainItem?.rarity?.displayValue
+                              ?.toLowerCase()
+                              .includes(searchTerm.toLowerCase()) ||
+                            bundleName
+                              .toLowerCase()
+                              .includes(searchTerm.toLowerCase())
+                          );
+                        })
+                      : productos;
+
+                    if (productosFiltrados.length === 0) return null;
+
+                    return (
+                      <div key={categoria} className="mb-12">
+                        <h2 className="text-2xl font-semibold text-white border-b-2 border-blue-500 pb-2 mb-6">
+                          {categoria}
+                        </h2>
+                        <div className="flex flex-wrap gap-[20px] justify-center lg:justify-start items-start">
+                          {productosFiltrados.slice(0, 20).map((product) => (
+                            <ProductCard
+                              key={product.offerId}
+                              product={product}
+                              onAddToCart={handleAddToCart}
+                              onClick={handleProductClick}
+                              fallbackColor={color}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  }
+                )
+              )}
+            </section>
+          </main>
+        </div>
       </div>
     </>
   );
