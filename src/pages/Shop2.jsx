@@ -431,7 +431,7 @@ const Shop2 = () => {
           {/* SIDEBAR IZQUIERDO - Categorías */}
           <aside className="w-64 flex-shrink-0 sticky top-24 h-fit hidden lg:block">
             <div className="bg-gray-800/50 rounded-2xl p-4 border border-gray-700 max-h-[calc(100vh-120px)] overflow-y-auto category-sidebar">
-              <h2 className="text-lg font-bold mb-4 text-white sticky top-0 bg-gray-800/50 pb-2 z-10">Botín de Fortnite</h2>
+              <h2 className="text-lg font-bold mb-4 text-white sticky top-0 bg-gray-800/50 pb-2 z-10">Categorías</h2>
               
               {/* Buscador dentro del sidebar */}
               <div className="mb-4 sticky top-12 bg-gray-800/50 pb-2 z-10">
@@ -485,9 +485,36 @@ const Shop2 = () => {
 
           {/* CONTENIDO PRINCIPAL - Derecha */}
           <main className="flex-1 min-w-0">
-            {/* Dropdown móvil */}
-            <div className="flex justify-center mb-6 lg:hidden">
-              <div className="relative w-full max-w-md">
+            {/* Buscador y Dropdown móvil */}
+            <div className="flex flex-col gap-4 mb-6 lg:hidden">
+              {/* Buscador móvil */}
+              <div className="w-full max-w-md mx-auto">
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                    placeholder="Buscar items..."
+                    className="w-full p-3 pl-10 rounded-lg border border-gray-600 bg-gray-800/50 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400"
+                  />
+                  <svg
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                </div>
+              </div>
+
+              {/* Dropdown de categorías móvil */}
+              <div className="relative w-full max-w-md mx-auto">
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}

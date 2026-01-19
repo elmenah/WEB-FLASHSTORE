@@ -145,6 +145,7 @@ const Header = () => {
                   Club
                 </Link>
               </li>
+              
               <li
                 className={`nav-link ${
                   isActive("/streaming")
@@ -291,6 +292,15 @@ const Header = () => {
                   onClick={closeMobileMenu}
                 >
                   Club
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/recargas"
+                  className="text-white hover:text-yellow-500"
+                  onClick={closeMobileMenu}
+                >
+                  Recargas
                 </Link>
               </li>
               <li>

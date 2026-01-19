@@ -60,6 +60,15 @@ const Checkout = () => {
   const [chatgptEmail, setChatgptEmail] = useState("");
   const [iptvOption, setIptvOption] = useState("");
   const [rut, setRut] = useState("");
+  
+  // Estados para configuración de V-Bucks
+  const [vbucksDeliveryMethod, setVbucksDeliveryMethod] = useState("");
+  const [vbucksEpicEmail, setVbucksEpicEmail] = useState("");
+  const [vbucksEpicPassword, setVbucksEpicPassword] = useState("");
+  const [vbucksXboxEmail, setVbucksXboxEmail] = useState("");
+  const [vbucksXboxPassword, setVbucksXboxPassword] = useState("");
+  const [vbucks2FAConfirmed, setVbucks2FAConfirmed] = useState(false);
+  
   const navigate = useNavigate();
 
   const CLP = new Intl.NumberFormat("es-CL", {
@@ -81,7 +90,7 @@ const Checkout = () => {
   const validateForm = () => {
     const newErrors = {};
     
-    // Detectar si solo tiene productos que no son de Fortnite (Crunchyroll, IPTV, ChatGPT, Office, Windows)
+    // Detectar si solo tiene productos que no son de Fortnite (Crunchyroll, IPTV, ChatGPT, Office, Windows, V-Bucks)
     const hasFortniteProducts = cart.some(item => {
       const nombre = item.nombre.toLowerCase();
       return !nombre.includes('crunchyroll') && 
@@ -89,7 +98,10 @@ const Checkout = () => {
              !nombre.includes('chatgpt') && 
              !nombre.includes('office') && 
              !nombre.includes('windows') &&
-             !nombre.includes('streaming');
+             !nombre.includes('streaming') &&
+             !nombre.includes('v-bucks') &&
+             !nombre.includes('vbucks') &&
+             !nombre.includes('pavos');
     });
 
     if (!email.trim()) {
@@ -154,6 +166,40 @@ const Checkout = () => {
       }
     }
 
+    // Validación para V-Bucks/Recargas
+    const hasVbucksItem = cart.some(item => {
+      const nombre = item.nombre.toLowerCase();
+      return nombre.includes('v-bucks') || nombre.includes('vbucks') || nombre.includes('pavos');
+    });
+    if (hasVbucksItem) {
+      if (!vbucksDeliveryMethod) {
+        newErrors.vbucksDeliveryMethod = "Por favor selecciona el método de entrega de V-Bucks.";
+      }
+      // Validar credenciales según el método seleccionado
+      if (vbucksDeliveryMethod === 'epic-link') {
+        if (!vbucksEpicEmail.trim()) {
+          newErrors.vbucksEpicEmail = "Por favor introduce el correo de tu cuenta de Epic.";
+        }
+        if (!vbucksEpicPassword.trim()) {
+          newErrors.vbucksEpicPassword = "Por favor introduce la contraseña de tu cuenta de Epic.";
+        }
+        if (!vbucks2FAConfirmed) {
+          newErrors.vbucks2FAConfirmed = "Debes confirmar que deshabilitarás la autenticación de dos factores.";
+        }
+      } else if (vbucksDeliveryMethod === 'xbox-account') {
+        if (!vbucksXboxEmail.trim()) {
+          newErrors.vbucksXboxEmail = "Por favor introduce el correo de tu cuenta de Xbox.";
+        }
+        if (!vbucksXboxPassword.trim()) {
+          newErrors.vbucksXboxPassword = "Por favor introduce la contraseña de tu cuenta de Xbox.";
+        }
+        if (!vbucks2FAConfirmed) {
+          newErrors.vbucks2FAConfirmed = "Debes confirmar que deshabilitarás la autenticación de dos factores.";
+        }
+      }
+      // La opción 'preloaded-account' no requiere credenciales
+    }
+
     if (!rut.trim()) {
       newErrors.rut = "Por favor introduce tu RUT.";
     } else if (!validateRut(rut)) {
@@ -209,7 +255,20 @@ const Checkout = () => {
         iptv_option: iptvOption
       } : {};
 
-      // Detectar si hay productos de Fortnite
+      // Preparar la información de V-Bucks/Recargas si hay un producto de V-Bucks
+      const hasVbucksItem = cart.some(item => {
+        const nombre = item.nombre.toLowerCase();
+        return nombre.includes('v-bucks') || nombre.includes('vbucks') || nombre.includes('pavos');
+      });
+      const vbucksData = hasVbucksItem ? {
+        vbucks_delivery_method: vbucksDeliveryMethod,
+        vbucks_epic_email: vbucksDeliveryMethod === 'epic-link' ? vbucksEpicEmail.trim() : null,
+        vbucks_epic_password: vbucksDeliveryMethod === 'epic-link' ? vbucksEpicPassword.trim() : null,
+        vbucks_xbox_email: vbucksDeliveryMethod === 'xbox-account' ? vbucksXboxEmail.trim() : null,
+        vbucks_xbox_password: vbucksDeliveryMethod === 'xbox-account' ? vbucksXboxPassword.trim() : null
+      } : {};
+
+      // Detectar si hay productos de Fortnite (excluyendo V-Bucks que tienen su propia sección)
       const hasFortniteProducts = cart.some(item => {
         const nombre = item.nombre.toLowerCase();
         return !nombre.includes('crunchyroll') && 
@@ -217,7 +276,10 @@ const Checkout = () => {
                !nombre.includes('chatgpt') && 
                !nombre.includes('office') && 
                !nombre.includes('windows') &&
-               !nombre.includes('streaming');
+               !nombre.includes('streaming') &&
+               !nombre.includes('v-bucks') &&
+               !nombre.includes('vbucks') &&
+               !nombre.includes('pavos');
       });
 
       const { data: pedidoData, error: pedidoError } = await supabase
@@ -233,7 +295,8 @@ const Checkout = () => {
             ...xboxData,  // Incluir información de Xbox solo si existe
             ...crunchyrollData,  // Incluir información de Crunchyroll solo si existe
             ...chatgptData,  // Incluir información de ChatGPT solo si existe
-            ...iptvData  // Incluir información de IPTV solo si existe
+            ...iptvData,  // Incluir información de IPTV solo si existe
+            ...vbucksData  // Incluir información de V-Bucks solo si existe
           },
         ])
         .select()
@@ -949,6 +1012,274 @@ const Checkout = () => {
               </div>
             )}
 
+            {/* Sección Recargas de V-Bucks */}
+            {cart.some(item => {
+              const nombre = item.nombre.toLowerCase();
+              return nombre.includes('v-bucks') || nombre.includes('vbucks') || nombre.includes('pavos');
+            }) && (
+              <div className="space-y-4 p-4 bg-gradient-to-br from-purple-800/50 to-blue-900/50 rounded-xl border border-purple-700/50 shadow-lg">
+                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/>
+                    <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/>
+                    <path d="M18 12a2 2 0 0 0 0 4h4v-4z"/>
+                  </svg>
+                  ¿Cómo deseas recibir tus V-Bucks?
+                </h3>
+                
+                <p className="text-sm text-gray-300">
+                  Selecciona el método de entrega que prefieras
+                </p>
+
+                <div className="space-y-3">
+                  {/* Opción 1: Link to Epic profile */}
+                  <div className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                    vbucksDeliveryMethod === 'epic-link' 
+                      ? 'border-purple-500 bg-purple-500/10' 
+                      : 'border-gray-600 bg-gray-800/30 hover:border-purple-400'
+                  }`}
+                  onClick={() => setVbucksDeliveryMethod('epic-link')}>
+                    <label className="flex items-start gap-3 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="vbucksDeliveryMethod"
+                        value="epic-link"
+                        checked={vbucksDeliveryMethod === 'epic-link'}
+                        onChange={(e) => setVbucksDeliveryMethod(e.target.value)}
+                        className="mt-1 text-purple-500 focus:ring-purple-400 bg-gray-800 border-gray-600"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-white">Vincular a mi perfil de Epic</span>
+                          <span className="text-xs bg-purple-500 text-white px-2 py-0.5 rounded-full uppercase font-bold">Recomendado</span>
+                        </div>
+                        <p className="text-sm text-gray-400 mt-1">
+                          Conectamos nuestra Xbox a tu cuenta de Epic y recargamos los V-Bucks directamente.
+                        </p>
+                      </div>
+                    </label>
+                  </div>
+
+                  {/* Opción 2: Xbox account */}
+                  <div className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                    vbucksDeliveryMethod === 'xbox-account' 
+                      ? 'border-blue-500 bg-blue-500/10' 
+                      : 'border-gray-600 bg-gray-800/30 hover:border-blue-400'
+                  }`}
+                  onClick={() => setVbucksDeliveryMethod('xbox-account')}>
+                    <label className="flex items-start gap-3 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="vbucksDeliveryMethod"
+                        value="xbox-account"
+                        checked={vbucksDeliveryMethod === 'xbox-account'}
+                        onChange={(e) => setVbucksDeliveryMethod(e.target.value)}
+                        className="mt-1 text-blue-500 focus:ring-blue-400 bg-gray-800 border-gray-600"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-white">Usar mi cuenta de Xbox</span>
+                          <span className="text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full uppercase font-bold">Directo</span>
+                        </div>
+                        <p className="text-sm text-gray-400 mt-1">
+                          Cargamos los V-Bucks directamente en tu cuenta de Xbox vinculada.
+                        </p>
+                      </div>
+                    </label>
+                  </div>
+
+                  {/* Opción 3: Preloaded account */}
+                  <div className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                    vbucksDeliveryMethod === 'preloaded-account' 
+                      ? 'border-cyan-500 bg-cyan-500/10' 
+                      : 'border-gray-600 bg-gray-800/30 hover:border-cyan-400'
+                  }`}
+                  onClick={() => setVbucksDeliveryMethod('preloaded-account')}>
+                    <label className="flex items-start gap-3 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="vbucksDeliveryMethod"
+                        value="preloaded-account"
+                        checked={vbucksDeliveryMethod === 'preloaded-account'}
+                        onChange={(e) => setVbucksDeliveryMethod(e.target.value)}
+                        className="mt-1 text-cyan-500 focus:ring-cyan-400 bg-gray-800 border-gray-600"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-white">Enviarme una cuenta precargada</span>
+                          <span className="text-xs bg-cyan-500 text-white px-2 py-0.5 rounded-full uppercase font-bold">Más Rápido</span>
+                        </div>
+                        <p className="text-sm text-gray-400 mt-1">
+                          Recibes un login de Fortnite nuevo ya cargado con tus V-Bucks.
+                        </p>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                {errors.vbucksDeliveryMethod && (
+                  <p className="text-xs text-red-500 mt-2">{errors.vbucksDeliveryMethod}</p>
+                )}
+
+                {/* Campos para Epic Link */}
+                {vbucksDeliveryMethod === 'epic-link' && (
+                  <div className="space-y-3 mt-4 p-4 bg-gray-800/50 rounded-lg border border-purple-500/30">
+                    <p className="text-purple-400 text-sm font-semibold flex items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="16" x2="12" y2="12"/>
+                        <line x1="12" y1="8" x2="12.01" y2="8"/>
+                      </svg>
+                      Proporciona tus credenciales de Epic Games
+                    </p>
+                    <div>
+                      <label className="block text-sm text-gray-300 font-semibold mb-1">
+                        Correo de Epic Games
+                      </label>
+                      <input
+                        type="email"
+                        value={vbucksEpicEmail}
+                        onChange={(e) => setVbucksEpicEmail(e.target.value)}
+                        placeholder="player@example.com"
+                        className={`w-full rounded-lg bg-gray-900 border-2 p-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 ${
+                          errors.vbucksEpicEmail ? 'border-red-400' : 'border-gray-600'
+                        }`}
+                      />
+                      {errors.vbucksEpicEmail && (
+                        <p className="text-xs text-red-400 mt-1">{errors.vbucksEpicEmail}</p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-300 font-semibold mb-1">
+                        Contraseña de Epic Games
+                      </label>
+                      <input
+                        type="password"
+                        value={vbucksEpicPassword}
+                        onChange={(e) => setVbucksEpicPassword(e.target.value)}
+                        placeholder="Enter password"
+                        className={`w-full rounded-lg bg-gray-900 border-2 p-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 ${
+                          errors.vbucksEpicPassword ? 'border-red-400' : 'border-gray-600'
+                        }`}
+                      />
+                      {errors.vbucksEpicPassword && (
+                        <p className="text-xs text-red-400 mt-1">{errors.vbucksEpicPassword}</p>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-400 flex items-start gap-2">
+                      <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"/>
+                      </svg>
+                      Tip: Ten tu teléfono cerca por si Epic solicita verificación. Entrega completada en 24 horas.
+                    </p>
+                    
+                    <div className="mt-3 p-3 bg-purple-900/30 border border-purple-500/30 rounded-lg">
+                      <label className="flex items-start gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={vbucks2FAConfirmed}
+                          onChange={(e) => setVbucks2FAConfirmed(e.target.checked)}
+                          className="mt-0.5 rounded border-gray-600 bg-gray-900 text-purple-500 focus:ring-purple-400 focus:ring-offset-gray-800"
+                        />
+                        <span className="text-xs text-purple-200">
+                          Confirmo que la autenticación de dos factores está deshabilitada mientras el equipo entrega los V-Bucks. Puedo volver a habilitarla después.
+                        </span>
+                      </label>
+                      {errors.vbucks2FAConfirmed && (
+                        <p className="text-xs text-red-400 mt-2">{errors.vbucks2FAConfirmed}</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Campos para Xbox Account */}
+                {vbucksDeliveryMethod === 'xbox-account' && (
+                  <div className="space-y-3 mt-4 p-4 bg-gray-800/50 rounded-lg border border-blue-500/30">
+                    <p className="text-blue-400 text-sm font-semibold flex items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="16" x2="12" y2="12"/>
+                        <line x1="12" y1="8" x2="12.01" y2="8"/>
+                      </svg>
+                      Ingresa tus datos de Xbox
+                    </p>
+                    <div>
+                      <label className="block text-sm text-gray-300 font-semibold mb-1">
+                        Correo de Xbox
+                      </label>
+                      <input
+                        type="email"
+                        value={vbucksXboxEmail}
+                        onChange={(e) => setVbucksXboxEmail(e.target.value)}
+                        placeholder="player@example.com"
+                        className={`w-full rounded-lg bg-gray-900 border-2 p-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 ${
+                          errors.vbucksXboxEmail ? 'border-red-400' : 'border-gray-600'
+                        }`}
+                      />
+                      {errors.vbucksXboxEmail && (
+                        <p className="text-xs text-red-400 mt-1">{errors.vbucksXboxEmail}</p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-300 font-semibold mb-1">
+                        Contraseña de Xbox
+                      </label>
+                      <input
+                        type="password"
+                        value={vbucksXboxPassword}
+                        onChange={(e) => setVbucksXboxPassword(e.target.value)}
+                        placeholder="Enter password"
+                        className={`w-full rounded-lg bg-gray-900 border-2 p-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 ${
+                          errors.vbucksXboxPassword ? 'border-red-400' : 'border-gray-600'
+                        }`}
+                      />
+                      {errors.vbucksXboxPassword && (
+                        <p className="text-xs text-red-400 mt-1">{errors.vbucksXboxPassword}</p>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-400 flex items-start gap-2">
+                      <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"/>
+                      </svg>
+                      Tip: Asegúrate de que tu cuenta de Xbox esté vinculada a Epic Games. Entrega completada en 24 horas.
+                    </p>
+                    
+                    <div className="mt-3 p-3 bg-blue-900/30 border border-blue-500/30 rounded-lg">
+                      <label className="flex items-start gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={vbucks2FAConfirmed}
+                          onChange={(e) => setVbucks2FAConfirmed(e.target.checked)}
+                          className="mt-0.5 rounded border-gray-600 bg-gray-900 text-blue-500 focus:ring-blue-400 focus:ring-offset-gray-800"
+                        />
+                        <span className="text-xs text-blue-200">
+                          Confirmo que la autenticación de dos factores está deshabilitada mientras el equipo entrega los V-Bucks. Puedo volver a habilitarla después.
+                        </span>
+                      </label>
+                      {errors.vbucks2FAConfirmed && (
+                        <p className="text-xs text-red-400 mt-2">{errors.vbucks2FAConfirmed}</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Mensaje para Preloaded Account */}
+                {vbucksDeliveryMethod === 'preloaded-account' && (
+                  <div className="mt-4 p-4 bg-gray-800/50 rounded-lg border border-cyan-500/30">
+                    <p className="text-cyan-400 text-sm flex items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M20 6L9 17l-5-5"/>
+                      </svg>
+                      Te enviaremos una cuenta de Fortnite nueva con tus V-Bucks ya cargados, lista para usar inmediatamente.
+                    </p>
+                    <p className="text-xs text-gray-400 mt-2">
+                      📧 Recibirás el login por correo electrónico con una guía de inicio rápido.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Método de pago */}
             <div>
               <label className="block text-sm text-gray-300 font-semibold mb-2 flex items-center gap-2">
@@ -977,19 +1308,7 @@ const Checkout = () => {
                 </p>
               )}
 
-              {/* ✅ Mostrar información sobre WhatsApp automático */}
-              {paymentMethod === "MercadoPago" && (
-                <div className="mt-3 p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl backdrop-blur-sm">
-                  <div className="flex items-start gap-3 text-blue-400">
-                    <svg className="w-5 h-5 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"/>
-                    </svg>
-                    <span className="text-sm font-medium leading-relaxed">
-                      Al completar el pago, se enviará automáticamente un WhatsApp con el resumen del pedido
-                    </span>
-                  </div>
-                </div>
-              )}
+              
 
               {/* Resumen del pedido SOLO en móvil */}
               <div className="block md:hidden mt-6">
@@ -1086,13 +1405,16 @@ const Checkout = () => {
                          !nombre.includes('chatgpt') && 
                          !nombre.includes('office') && 
                          !nombre.includes('windows') &&
-                         !nombre.includes('streaming');
+                         !nombre.includes('streaming') &&
+                         !nombre.includes('v-bucks') &&
+                         !nombre.includes('vbucks') &&
+                         !nombre.includes('pavos');
                 }) && " y confirmo que mi nombre de Fortnite es correcto"}
                 .
               </span>
             </label>
             
-            {/* Solo mostrar mensaje de agregar amigos si hay productos de Fortnite */}
+            {/* Solo mostrar mensaje de agregar amigos si hay productos de Fortnite (no V-Bucks) */}
             {cart.some(item => {
               const nombre = item.nombre.toLowerCase();
               return !nombre.includes('crunchyroll') && 
@@ -1100,7 +1422,10 @@ const Checkout = () => {
                      !nombre.includes('chatgpt') && 
                      !nombre.includes('office') && 
                      !nombre.includes('windows') &&
-                     !nombre.includes('streaming');
+                     !nombre.includes('streaming') &&
+                     !nombre.includes('v-bucks') &&
+                     !nombre.includes('vbucks') &&
+                     !nombre.includes('pavos');
             }) && (
               <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl backdrop-blur-sm">
                 <div className="flex items-start gap-3">

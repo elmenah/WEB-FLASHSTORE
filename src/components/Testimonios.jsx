@@ -10,8 +10,7 @@ const Testimonios = () => {
     "/imagenes/testimonios/4.png",
     "/imagenes/testimonios/5.png",
     "/imagenes/testimonios/6.png",
-    "/imagenes/testimonios/7.png",
-    "/imagenes/testimonios/8.png",
+    "/imagenes/testimonios/7.png"
   ];
 
   const sliderRef = useRef(null);

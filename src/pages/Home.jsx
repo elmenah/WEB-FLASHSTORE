@@ -148,7 +148,7 @@ const Home = () => {
               <div className="relative w-full mb-6">
                 {/* Primera fila - de izquierda a derecha */}
                 <Marquee speed={30} pauseOnHover gradient={false} className="mb-3">
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                  {[1, 2, 3, 4, 5, 6, 7].map((num) => (
                     <div
                       key={num}
                       className="relative w-[280px] h-[115px] bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl overflow-hidden shadow-xl border border-gray-700 mx-2"
@@ -192,7 +192,7 @@ const Home = () => {
 
                 {/* Tercera fila - de izquierda a derecha */}
                 <Marquee speed={30} pauseOnHover gradient={false}>
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                  {[1, 2, 3, 4, 5, 6, 7].map((num) => (
                     <div
                       key={num}
                       className="relative w-[280px] h-[115px] bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl overflow-hidden shadow-xl border border-gray-700 mx-2"
