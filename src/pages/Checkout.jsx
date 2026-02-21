@@ -544,16 +544,16 @@ const Checkout = () => {
   if (showPayPalCheckout && currentOrderId) {
     return (
       <div className="min-h-screen pt-24 bg-gradient-to-br bg-gray-900 flex flex-col items-center justify-center">
-        <div className="w-full max-w-2xl mx-auto bg-white/90 rounded-3xl shadow-2xl p-8">
+        <div className="w-full max-w-2xl mx-auto bg-white/10 backdrop-blur-lg border border-white/20 rounded-3xl shadow-2xl p-8">
           <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">
+            <h2 className="text-2xl font-bold text-white mb-2">
               Pagar con PayPal
             </h2>
-            <p className="text-gray-600">Total: {CLP.format(getTotal())}</p>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-gray-300">Total: {CLP.format(getTotal())}</p>
+            <p className="text-sm text-gray-400 mt-1">
               Equivalente a ~${(getTotal() / 950).toFixed(2)} USD
             </p>
-            <p className="text-sm text-blue-600 mt-2">
+            <p className="text-sm text-blue-400 mt-2">
               💬 Al completar el pago, se enviará automáticamente un WhatsApp con el resumen
             </p>
           </div>
@@ -562,13 +562,12 @@ const Checkout = () => {
             orderId={currentOrderId.toString()}
             amount={getTotal()}
             email={email}
-            onSuccess={handlePayPalSuccess}
             onError={handlePayPalError}
           />
 
           <button
             onClick={() => setShowPayPalCheckout(false)}
-            className="mt-4 w-full px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
+            className="mt-4 w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition"
           >
             Volver atrás
           </button>

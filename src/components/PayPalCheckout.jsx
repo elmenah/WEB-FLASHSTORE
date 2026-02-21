@@ -1,147 +1,85 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 
-const PayPalCheckout = ({ orderId, amount, email, onSuccess, onError }) => {
-  const paypalRef = useRef(null);
-  const [loading, setLoading] = useState(true);
+const PayPalCheckout = ({ orderId, amount, email, onError }) => {
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [sdkReady, setSdkReady] = useState(false);
 
-  // Cargar el SDK de PayPal
-  useEffect(() => {
-    // Si ya existe el script, no cargarlo de nuevo
-    if (document.querySelector('script[data-paypal-sdk]')) {
-      if (window.paypal) {
-        setSdkReady(true);
-        setLoading(false);
+  const handlePayWithPayPal = async () => {
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch('https://backendflash.onrender.com/api/paypal/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderId: String(orderId),
+          amount,
+          email
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.approveUrl) {
+        // Redirigir al usuario a PayPal para completar el pago
+        window.location.href = data.approveUrl;
+      } else if (data.id) {
+        // Fallback: usar el link directo de PayPal
+        window.location.href = `https://www.paypal.com/checkoutnow?token=${data.id}`;
+      } else {
+        throw new Error(data.error || 'No se pudo crear la orden de PayPal');
       }
-      return;
+    } catch (err) {
+      console.error('Error iniciando pago PayPal:', err);
+      setError('Error al conectar con PayPal. Intenta nuevamente.');
+      setLoading(false);
+      onError?.(err);
     }
-
-    const loadScript = async () => {
-      try {
-        // Obtener el Client ID desde el backend
-        const res = await fetch('https://backendflash.onrender.com/api/paypal/client-id');
-        const { clientId } = await res.json();
-
-        const script = document.createElement('script');
-        script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=USD&intent=capture`;
-        script.setAttribute('data-paypal-sdk', 'true');
-        script.async = true;
-        script.onload = () => {
-          setSdkReady(true);
-          setLoading(false);
-        };
-        script.onerror = () => {
-          setError('No se pudo cargar PayPal. Intenta nuevamente.');
-          setLoading(false);
-        };
-        document.body.appendChild(script);
-      } catch (err) {
-        console.error('Error cargando PayPal SDK:', err);
-        setError('Error conectando con PayPal.');
-        setLoading(false);
-      }
-    };
-
-    loadScript();
-  }, []);
-
-  // Renderizar botones cuando el SDK esté listo
-  useEffect(() => {
-    if (!sdkReady || !window.paypal || !paypalRef.current) return;
-
-    // Limpiar contenido anterior
-    paypalRef.current.innerHTML = '';
-
-    window.paypal.Buttons({
-      style: {
-        layout: 'vertical',
-        color: 'blue',
-        shape: 'rect',
-        label: 'paypal',
-        height: 45
-      },
-      createOrder: async () => {
-        try {
-          const response = await fetch('https://backendflash.onrender.com/api/paypal/create-order', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              orderId: String(orderId),
-              amount,
-              email
-            })
-          });
-
-          const data = await response.json();
-          if (data.id) {
-            return data.id;
-          } else {
-            throw new Error(data.error || 'No se pudo crear la orden');
-          }
-        } catch (err) {
-          console.error('Error creando orden PayPal:', err);
-          onError?.(err);
-          throw err;
-        }
-      },
-      onApprove: async (data) => {
-        try {
-          const response = await fetch(`https://backendflash.onrender.com/api/paypal/capture-order/${data.orderID}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
-          });
-
-          const captureData = await response.json();
-          
-          if (captureData.status === 'COMPLETED') {
-            console.log('Pago PayPal completado:', captureData);
-            onSuccess?.(captureData);
-          } else {
-            throw new Error('El pago no se completó correctamente');
-          }
-        } catch (err) {
-          console.error('Error capturando pago PayPal:', err);
-          onError?.(err);
-        }
-      },
-      onError: (err) => {
-        console.error('Error PayPal buttons:', err);
-        setError('Ocurrió un error con PayPal. Intenta nuevamente.');
-        onError?.(err);
-      },
-      onCancel: () => {
-        console.log('Pago PayPal cancelado por el usuario');
-      }
-    }).render(paypalRef.current);
-  }, [sdkReady, orderId, amount, email]);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center p-4">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <span className="ml-2">Cargando PayPal...</span>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-center p-4">
-        <p className="text-red-600 mb-2">{error}</p>
-        <button
-          onClick={() => window.location.reload()}
-          className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          Reintentar
-        </button>
-      </div>
-    );
-  }
+  };
 
   return (
-    <div className="paypal-checkout">
-      <div ref={paypalRef}></div>
+    <div className="paypal-checkout space-y-4">
+      {error && (
+        <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-3 text-center">
+          <p className="text-red-400 text-sm">{error}</p>
+        </div>
+      )}
+
+      <button
+        onClick={handlePayWithPayPal}
+        disabled={loading}
+        className="w-full flex items-center justify-center gap-3 py-4 px-6 rounded-xl font-bold text-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+        style={{
+          background: 'linear-gradient(135deg, #0070ba, #003087)',
+          color: 'white',
+          boxShadow: '0 4px 15px rgba(0, 112, 186, 0.4)'
+        }}
+      >
+        {loading ? (
+          <>
+            <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+            <span>Conectando con PayPal...</span>
+          </>
+        ) : (
+          <>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M19.5 6.5C19.5 9.5 17 12 14 12H11.5L10.5 18H7L10 4H15C17.5 4 19.5 4.5 19.5 6.5Z" fill="#ffffff" fillOpacity="0.8"/>
+              <path d="M17 8.5C17 11 15 13 12.5 13H10.5L9.5 18.5H7L9.5 5H13.5C15.5 5 17 6.5 17 8.5Z" fill="white"/>
+            </svg>
+            <span>Pagar con PayPal</span>
+          </>
+        )}
+      </button>
+
+      <div className="text-center">
+        <p className="text-gray-400 text-xs">
+          Serás redirigido a PayPal para completar el pago de forma segura
+        </p>
+        <p className="text-gray-500 text-xs mt-1">
+          Puedes pagar con tu cuenta PayPal o tarjeta de crédito/débito internacional
+        </p>
+      </div>
     </div>
   );
 };

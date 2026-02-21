@@ -477,15 +477,14 @@ app.get('/zenobank-success', async (req, res) => {
 const PORT = process.env.PORT || 10000;
 
 // ==========================================
-// PAYPAL - Pagos con PayPal / Tarjeta
+// PAYPAL - Pagos Internacionales
 // ==========================================
 const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID;
 const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET;
-const PAYPAL_API_BASE = process.env.PAYPAL_MODE === 'live' 
-    ? 'https://api-m.paypal.com' 
+const PAYPAL_API_BASE = process.env.PAYPAL_MODE === 'live'
+    ? 'https://api-m.paypal.com'
     : 'https://api-m.sandbox.paypal.com';
 
-// Obtener access token de PayPal
 async function getPayPalAccessToken() {
     const auth = Buffer.from(`${PAYPAL_CLIENT_ID}:${PAYPAL_CLIENT_SECRET}`).toString('base64');
     const response = await fetch(`${PAYPAL_API_BASE}/v1/oauth2/token`, {
@@ -500,19 +499,23 @@ async function getPayPalAccessToken() {
     return data.access_token;
 }
 
-// Crear orden de PayPal
+// Exponer Client ID al frontend
+app.get('/api/paypal/client-id', (req, res) => {
+    res.json({ clientId: PAYPAL_CLIENT_ID });
+});
+
+// Crear orden PayPal
 app.post('/api/paypal/create-order', async (req, res) => {
     try {
         const { orderId, amount, email } = req.body;
 
         if (!orderId || !amount || !email) {
-            return res.status(400).json({ 
+            return res.status(400).json({
                 error: 'Faltan parámetros requeridos',
                 required: ['orderId', 'amount', 'email']
             });
         }
 
-        // Convertir CLP a USD
         const amountUSD = (Number(amount) / 950).toFixed(2);
         console.log('Creando orden PayPal:', { orderId, amountUSD, email });
 
@@ -548,26 +551,26 @@ app.post('/api/paypal/create-order', async (req, res) => {
         });
 
         const data = await response.json();
-        console.log('Orden PayPal creada:', { id: data.id, status: data.status });
+        console.log('Orden PayPal creada:', { id: data.id, status: data.status, links: data.links });
 
         if (data.id) {
-            res.json({
-                id: data.id,
-                status: data.status
+            // Buscar la URL de aprobación para redirigir al usuario
+            const approveLink = data.links?.find(link => link.rel === 'payer-action' || link.rel === 'approve');
+            res.json({ 
+                id: data.id, 
+                status: data.status,
+                approveUrl: approveLink?.href || null
             });
         } else {
             throw new Error(data.message || JSON.stringify(data.details) || 'No se pudo crear la orden');
         }
     } catch (error) {
         console.error('Error creando orden PayPal:', error);
-        res.status(500).json({ 
-            error: 'Error creando orden de PayPal',
-            details: error.message
-        });
+        res.status(500).json({ error: 'Error creando orden de PayPal', details: error.message });
     }
 });
 
-// Capturar pago de PayPal
+// Capturar pago PayPal
 app.post('/api/paypal/capture-order/:orderID', async (req, res) => {
     try {
         const { orderID } = req.params;
@@ -587,7 +590,6 @@ app.post('/api/paypal/capture-order/:orderID', async (req, res) => {
         console.log('Captura PayPal:', { id: data.id, status: data.status });
 
         if (data.status === 'COMPLETED') {
-            // Actualizar pedido en Supabase
             const referenceId = data.purchase_units?.[0]?.reference_id;
             if (referenceId) {
                 const { error } = await supabase
@@ -606,30 +608,24 @@ app.post('/api/paypal/capture-order/:orderID', async (req, res) => {
         res.json(data);
     } catch (error) {
         console.error('Error capturando pago PayPal:', error);
-        res.status(500).json({ 
-            error: 'Error capturando pago de PayPal',
-            details: error.message
-        });
+        res.status(500).json({ error: 'Error capturando pago de PayPal', details: error.message });
     }
 });
 
-// Redirección después de pago exitoso con PayPal (para flujo redirect)
+// Redirección después de pago exitoso con PayPal
 app.get('/paypal-success', async (req, res) => {
     const { order, email, token } = req.query;
-    console.log('PayPal pago exitoso (redirect):', { order, email, token });
+    console.log('PayPal pago exitoso:', { order, email, token });
     try {
-        // Capturar el pago si viene con token de PayPal
         if (token) {
             const accessToken = await getPayPalAccessToken();
-            const captureResponse = await fetch(`${PAYPAL_API_BASE}/v2/checkout/orders/${token}/capture`, {
+            await fetch(`${PAYPAL_API_BASE}/v2/checkout/orders/${token}/capture`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${accessToken}`
                 }
             });
-            const captureData = await captureResponse.json();
-            console.log('Captura PayPal (redirect):', captureData.status);
         }
 
         const pedidoId = order;
@@ -716,11 +712,7 @@ app.get('/paypal-success', async (req, res) => {
     }
 });
 
-// Endpoint para obtener el Client ID de PayPal (para el frontend)
-app.get('/api/paypal/client-id', (req, res) => {
-    res.json({ clientId: PAYPAL_CLIENT_ID });
-});
-
 app.listen(PORT, () => {
     console.log('Backend Mercado Pago + Zenobank + PayPal escuchando en puerto', PORT);
 });
+
