@@ -70,6 +70,7 @@ const Checkout = () => {
   const [vbucksXboxEmail, setVbucksXboxEmail] = useState("");
   const [vbucksXboxPassword, setVbucksXboxPassword] = useState("");
   const [vbucks2FAConfirmed, setVbucks2FAConfirmed] = useState(false);
+  const [exchangeRate, setExchangeRate] = useState(null);
   
   const navigate = useNavigate();
 
@@ -538,10 +539,22 @@ const Checkout = () => {
     };
 
     fetchUserData();
+
+    // Obtener tasa de cambio actual
+    fetch('https://backendflash.onrender.com/api/exchange-rate')
+      .then(res => res.json())
+      .then(data => {
+        if (data.clpPerUsd) setExchangeRate(data.clpPerUsd);
+      })
+      .catch(() => setExchangeRate(950));
   }, []);
 
   // Si está mostrando el checkout de PayPal
   if (showPayPalCheckout && currentOrderId) {
+    const rate = exchangeRate || 950;
+    const baseUSD = (getTotal() / rate);
+    const totalWithFee = (baseUSD + 0.30) / (1 - 0.054);
+    const feeUSD = totalWithFee - baseUSD;
     return (
       <div className="min-h-screen pt-24 bg-gradient-to-br bg-gray-900 flex flex-col items-center justify-center">
         <div className="w-full max-w-2xl mx-auto bg-white/10 backdrop-blur-lg border border-white/20 rounded-3xl shadow-2xl p-8">
@@ -549,11 +562,26 @@ const Checkout = () => {
             <h2 className="text-2xl font-bold text-white mb-2">
               Pagar con PayPal
             </h2>
-            <p className="text-gray-300">Total: {CLP.format(getTotal())}</p>
-            <p className="text-sm text-gray-400 mt-1">
-              Equivalente a ~${(getTotal() / 950).toFixed(2)} USD
-            </p>
-            <p className="text-sm text-blue-400 mt-2">
+            <div className="space-y-1 mt-3">
+              <p className="text-gray-300">Subtotal: {CLP.format(getTotal())}</p>
+              <p className="text-sm text-gray-400">
+                Equivalente a ~${baseUSD.toFixed(2)} USD
+              </p>
+              <div className="border-t border-white/10 mt-2 pt-2">
+                <p className="text-sm text-yellow-400">
+                  Comisión PayPal (5.4% + $0.30): +${feeUSD.toFixed(2)} USD
+                </p>
+                <p className="text-lg font-bold text-white mt-1">
+                  Total a pagar: ${totalWithFee.toFixed(2)} USD
+                </p>
+              </div>
+              {exchangeRate && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Tasa actual: 1 USD = {Math.round(exchangeRate)} CLP
+                </p>
+              )}
+            </div>
+            <p className="text-sm text-blue-400 mt-3">
               💬 Al completar el pago, se enviará automáticamente un WhatsApp con el resumen
             </p>
           </div>
@@ -590,10 +618,7 @@ const Checkout = () => {
             </h2>
             <p className="text-gray-600">Total: {CLP.format(getTotal())}</p>
             {/* ✅ Agregar información sobre WhatsApp */}
-            <p className="text-sm text-blue-600 mt-2">
-              💬 Al completar el pago, se enviará automáticamente un WhatsApp con el
-              resumen
-            </p>
+            
           </div>
 
           <MercadoPagoCheckout
