@@ -425,6 +425,38 @@ const Checkout = () => {
         // Flujo Mercado Pago con componente React
         setCurrentOrderId(pedidoData.id);
         setShowMPCheckout(true);
+      } else if (paymentMethod === "Cripto") {
+        // Flujo Zenobank - Criptomonedas
+        const subject =
+          cart.length === 1 ? cart[0].nombre : `Pedido #${pedidoData.id}`;
+        const amount = getTotal();
+
+        try {
+          const response = await fetch(
+            "https://backendflash.onrender.com/api/zenobank-checkout",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                orderId: String(pedidoData.id),
+                subject,
+                amount,
+                email,
+              }),
+            }
+          );
+
+          const data = await response.json();
+          if (data.checkoutUrl) {
+            clearCart();
+            window.location.href = data.checkoutUrl;
+          } else {
+            alert("No se pudo iniciar el pago con criptomonedas. Intenta nuevamente.");
+          }
+        } catch (cryptoErr) {
+          console.error("Error con Zenobank:", cryptoErr);
+          alert("Error al conectar con el servicio de criptomonedas.");
+        }
       } else if (paymentMethod === "FLOW") {
         // Mantener flujo FLOW existente
         const subject =
@@ -1297,6 +1329,7 @@ const Checkout = () => {
               >
                 <option value="" className="bg-gray-800">Selecciona un método</option>
                 <option value="MercadoPago" className="bg-gray-800">💳 Mercado Pago (Tarjeta, Webpay, etc)</option>
+                <option value="Cripto" className="bg-gray-800">₿ Criptomonedas (Bitcoin, USDT, etc)</option>
                 
               </select>
               {errors.paymentMethod && (
