@@ -582,7 +582,7 @@ const Checkout = () => {
               )}
             </div>
             <p className="text-sm text-blue-400 mt-3">
-              💬 Al completar el pago, se enviará automáticamente un WhatsApp con el resumen
+              💬 Al completar el pago, recuerda enviar la confirmacion de pago por whatsapp
             </p>
           </div>
 
@@ -618,7 +618,9 @@ const Checkout = () => {
             </h2>
             <p className="text-gray-600">Total: {CLP.format(getTotal())}</p>
             {/* ✅ Agregar información sobre WhatsApp */}
-            
+            <p className="text-sm text-blue-400 mt-3">
+              💬 Al completar el pago, recuerda enviar la confirmación de pago por whatsapp.
+            </p>
           </div>
 
           <MercadoPagoCheckout

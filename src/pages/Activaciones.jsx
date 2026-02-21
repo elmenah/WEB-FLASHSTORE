@@ -46,19 +46,7 @@ const Activaciones = () => {
     }
   ];
 
-  // Productos de ChatGPT
-  const chatgptProducts = [
-    
-    { 
-      id: 'gpt-direct-12', 
-      title: "ChatGPT Plus - 12 Meses", 
-      desc: "Activación directa en tu cuenta", 
-      price: 8000, 
-      image: "Imagenes/ChatGPT-Plus.png",
-      categoria: "ChatGPT Plus"
-    }
-  ];
-
+  
   const handleAddToCart = (item) => {
     const cartItem = {
       nombre: item.title,
@@ -229,54 +217,7 @@ const Activaciones = () => {
         </div>
       </section>
 
-      {/* CHATGPT PLUS */}
-      <section className="py-16 px-6 max-w-6xl mx-auto bg-gradient-to-br from-green-900/20 to-emerald-900/20 rounded-2xl">
-        <div className="mb-8 text-center">
-          <h2 className="text-3xl font-bold mb-2">
-            <span className="text-green-400">ChatGPT</span> Plus
-          </h2>
-          <p className="text-gray-400">Inteligencia artificial avanzada para impulsar tu productividad</p>
-        </div>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-          {chatgptProducts.map((item) => (
-            <div key={item.id} className="bg-gradient-to-br from-green-900/40 to-emerald-900/40 rounded-lg shadow-lg overflow-hidden flex flex-col hover:transform hover:scale-105 transition-all duration-300 border border-green-500/30">
-              <div className="w-full h-40 bg-white/5 flex items-center justify-center p-4">
-                <img 
-                  src={item.image} 
-                  alt={item.title} 
-                  className="max-w-full max-h-full object-contain"
-                />
-              </div>
-              <div className="p-4 flex-1 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-2xl">🤖</span>
-                    <h3 className="text-lg font-semibold">{item.title}</h3>
-                  </div>
-                  <p className="text-gray-400 text-sm mb-3">{item.desc}</p>
-                  <div className="flex flex-wrap gap-2">
-                    <span className="px-2 py-1 bg-green-600/30 text-green-300 rounded text-xs">⚡ GPT-5.2</span>
-                    <span className="px-2 py-1 bg-green-600/30 text-green-300 rounded text-xs">🎨 DALL-E</span>
-                    <span className="px-2 py-1 bg-green-600/30 text-green-300 rounded text-xs">📊 Análisis</span>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between mt-4">
-                  <p className="text-gray-100 text-xl font-bold">
-                    {new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(item.price)}
-                  </p>
-                  <button 
-                    onClick={() => handleAddToCart(item)} 
-                    className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-full transition-all"
-                  >
-                    <i className="fas fa-shopping-cart"></i>
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+      
 
       
 
