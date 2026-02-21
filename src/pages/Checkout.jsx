@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { supabase } from "../supabaseCliente";
 import MercadoPagoCheckout from "../components/MercadoPagoCheckout";
+import PayPalCheckout from "../components/PayPalCheckout";
 import useScrollToTop from '../hooks/useScrollToTop';
 import { VBUCK_TO_CLP_RATE, convertCLPToVBuck, convertVBuckToCLP, formatCLP } from '../config/prices';
 
@@ -50,6 +51,7 @@ const Checkout = () => {
   const [paymentMethod, setPaymentMethod] = useState("");
   const [errors, setErrors] = useState({});
   const [showMPCheckout, setShowMPCheckout] = useState(false);
+  const [showPayPalCheckout, setShowPayPalCheckout] = useState(false);
   const [currentOrderId, setCurrentOrderId] = useState(null);
   const [telefono, setTelefono] = useState("");
   const [xboxOption, setXboxOption] = useState("");
@@ -425,6 +427,10 @@ const Checkout = () => {
         // Flujo Mercado Pago con componente React
         setCurrentOrderId(pedidoData.id);
         setShowMPCheckout(true);
+      } else if (paymentMethod === "PayPal") {
+        // Flujo PayPal
+        setCurrentOrderId(pedidoData.id);
+        setShowPayPalCheckout(true);
       } else if (paymentMethod === "Cripto") {
         // Flujo Zenobank - Criptomonedas
         const subject =
@@ -496,6 +502,18 @@ const Checkout = () => {
     setShowMPCheckout(false);
   };
 
+  const handlePayPalSuccess = (captureData) => {
+    clearCart();
+    // Redirigir al backend para generar el mensaje de WhatsApp
+    window.location.href = `https://backendflash.onrender.com/paypal-success?order=${currentOrderId}&email=${encodeURIComponent(email)}`;
+  };
+
+  const handlePayPalError = (error) => {
+    console.error("Error en pago PayPal:", error);
+    alert("Error al procesar el pago con PayPal");
+    setShowPayPalCheckout(false);
+  };
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -521,6 +539,43 @@ const Checkout = () => {
 
     fetchUserData();
   }, []);
+
+  // Si está mostrando el checkout de PayPal
+  if (showPayPalCheckout && currentOrderId) {
+    return (
+      <div className="min-h-screen pt-24 bg-gradient-to-br bg-gray-900 flex flex-col items-center justify-center">
+        <div className="w-full max-w-2xl mx-auto bg-white/90 rounded-3xl shadow-2xl p-8">
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">
+              Pagar con PayPal
+            </h2>
+            <p className="text-gray-600">Total: {CLP.format(getTotal())}</p>
+            <p className="text-sm text-gray-500 mt-1">
+              Equivalente a ~${(getTotal() / 950).toFixed(2)} USD
+            </p>
+            <p className="text-sm text-blue-600 mt-2">
+              💬 Al completar el pago, se enviará automáticamente un WhatsApp con el resumen
+            </p>
+          </div>
+
+          <PayPalCheckout
+            orderId={currentOrderId.toString()}
+            amount={getTotal()}
+            email={email}
+            onSuccess={handlePayPalSuccess}
+            onError={handlePayPalError}
+          />
+
+          <button
+            onClick={() => setShowPayPalCheckout(false)}
+            className="mt-4 w-full px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
+          >
+            Volver atrás
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // Si está mostrando el checkout de Mercado Pago
   if (showMPCheckout && currentOrderId) {
@@ -1329,6 +1384,7 @@ const Checkout = () => {
               >
                 <option value="" className="bg-gray-800">Selecciona un método</option>
                 <option value="MercadoPago" className="bg-gray-800">💳 Mercado Pago (Tarjeta, Webpay, etc)</option>
+                <option value="PayPal" className="bg-gray-800">🅿️ PayPal (Internacional)</option>
                 <option value="Cripto" className="bg-gray-800">₿ Criptomonedas (Bitcoin, USDT, etc)</option>
                 
               </select>

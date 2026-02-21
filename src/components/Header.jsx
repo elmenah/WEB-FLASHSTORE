@@ -170,6 +170,18 @@ const Header = () => {
                   Activaciones
                 </Link>
               </li>
+              <li
+                className={`nav-link ${
+                  isActive("/metodos-de-pago")
+                    ? "text-yellow-500"
+                    : "text-white hover:text-yellow-500"
+                }`}
+              >
+                <Link to="/metodos-de-pago" className="flex items-center gap-2">
+                  <span className="material-icons">payment</span>
+                  Métodos de Pago
+                </Link>
+              </li>
             </ul>
 
             {/* Derecha: Opciones de usuario */}
@@ -319,6 +331,15 @@ const Header = () => {
                   onClick={closeMobileMenu}
                 >
                   Activaciones
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/metodos-de-pago"
+                  className="text-white hover:text-yellow-500"
+                  onClick={closeMobileMenu}
+                >
+                  Métodos de Pago
                 </Link>
               </li>
               {session ? (

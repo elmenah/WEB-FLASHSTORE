@@ -80,6 +80,7 @@ const Footer = () => {
                   { to: '/', label: 'Inicio', icon: '🏠' },
                   { to: '/shop', label: 'Tienda', icon: '🛒' },
                   { to: '/club', label: 'Club', icon: '👑' },
+                  { to: '/metodos-de-pago', label: 'Pagar con Cripto', icon: '🪙' },
                  
                 ].map((link) => (
                   <li key={link.to}>

@@ -20,6 +20,7 @@ import CartPopup from "./components/CartPopup";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import ProductDetail from "./pages/ProductDetail";
 import PagoFallido from "./pages/PagoFallido";
+import MetodosPago from "./pages/MetodosPago";
 import { CartProvider } from './context/CartContext';
 
 const App = () => {
@@ -40,6 +41,7 @@ const App = () => {
             <Route path="/register" element={<Register />} />
             <Route path="/" element={ <AuthGuard> <Home /> </AuthGuard>} />
             <Route path="/terminos" element={  <TermsAndConditions /> } />
+            <Route path="/metodos-de-pago" element={<MetodosPago />} />
             <Route path="product/:id" element={<AuthGuard><ProductDetail /></AuthGuard>} />
             <Route path="/shop" element={ <AuthGuard> <Shop2 /> </AuthGuard>} />
             <Route path="/club" element={ <AuthGuard> <Club /> </AuthGuard>} />
