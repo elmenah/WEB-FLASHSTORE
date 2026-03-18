@@ -172,6 +172,18 @@ const Header = () => {
               </li>
               <li
                 className={`nav-link ${
+                  isActive("/juegos-pc")
+                    ? "text-yellow-500"
+                    : "text-white hover:text-yellow-500"
+                }`}
+              >
+                <Link to="/juegos-pc" className="flex items-center gap-2">
+                  <span className="material-icons">sports_esports</span>
+                  Juegos PC
+                </Link>
+              </li>
+              <li
+                className={`nav-link ${
                   isActive("/metodos-de-pago")
                     ? "text-yellow-500"
                     : "text-white hover:text-yellow-500"
@@ -331,6 +343,15 @@ const Header = () => {
                   onClick={closeMobileMenu}
                 >
                   Activaciones
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/juegos-pc"
+                  className="text-white hover:text-yellow-500"
+                  onClick={closeMobileMenu}
+                >
+                  Juegos PC
                 </Link>
               </li>
               <li>

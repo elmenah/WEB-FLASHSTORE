@@ -6,10 +6,14 @@ import { useCart } from "../context/CartContext";
 import FortnitePesadillas from "../components/FortnitePesadillas";
 import Testimonios from "../components/Testimonios";
 
+
 const Home = () => {
   useScrollToTop();
   const { addToCart } = useCart();
   const [notification, setNotification] = useState(false);
+  const [heroImages, setHeroImages] = useState([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Cargar script de Instagram
   useEffect(() => {
@@ -378,6 +382,117 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+          {/* 🎮 Juegos de Steam */}
+          <section className="py-10 bg-gradient-to-b from-gray-900 to-gray-800">
+            <div className="container mx-auto px-4 max-w-6xl">
+              <div className="bg-gray-800/60 border border-gray-700 rounded-2xl overflow-hidden shadow-2xl">
+                <div className="grid grid-cols-1 lg:grid-cols-2">
+                  <div className="h-[280px] lg:h-full relative">
+                    <img
+                      src="/Imagenes/resident-evil-requiem.jpg"
+                      alt="Resident Evil Requiem"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.src = "/Imagenes/og-s2-line-up-1920x1080-1114b1e89809.webp";
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-br from-black/20 via-black/35 to-black/85"></div>
+                    <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/80 to-transparent"></div>
+                  </div>
+    
+                  <div className="p-6 sm:p-8">
+                    <h2 className="text-3xl sm:text-4xl font-bold text-white italic mb-2">
+                      Juegos de Steam
+                    </h2>
+                    <p className="text-blue-400 font-semibold mb-4">
+                      Instalacion remota, juegos locales (No online)
+                    </p>
+    
+                    <div className="space-y-2 text-gray-200 mb-6">
+                      <p className="font-semibold">Más de 100.000 juegos disponibles</p>
+                      <p>1 juego: <span className="text-white font-bold text-xl">$6.000</span></p>
+                      <p>3 juegos: <span className="text-white font-bold text-xl">$12.000</span></p>
+                      <p>6 juegos: <span className="text-white font-bold text-xl">$18.000</span></p>
+                      <p className="text-yellow-400 font-semibold pt-1">
+                        Desde 3 juegos incluye 1 juego extra de regalo.
+                      </p>
+                    </div>
+    
+                    <Link
+                      to="/juegos-pc"
+                      className="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-3 rounded-lg transition-colors"
+                    >
+                      Ver lista de juegos
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div><br />
+
+        <div className="container mx-auto px-4 max-w-5xl">
+          <div className="text-center mb-6">
+            <h2 className="text-2xl sm:text-3xl font-bold text-white">¿Buscando cuentas de streaming?</h2>
+            <p className="text-gray-400 mt-2">
+              También tenemos Crunchyroll, IPTV y activaciones de Windows con entrega rápida.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[
+              {
+                name: "Crunchyroll",
+                image: "/Imagenes/IPTV/Crunchyroll_Logo.png",
+                desc: "Planes premium para disfrutar anime sin interrupciones.",
+                href: "/streaming",
+                cta: "Ir a Streaming",
+              },
+              {
+                name: "IPTV",
+                image: "/Imagenes/IPTV/Group-81-768x618.png",
+                desc: "Acceso a canales y contenido en vivo para todos los gustos.",
+                href: "/streaming",
+                cta: "Ir a Streaming",
+              },
+              {
+                name: "Activaciones de Windows",
+                image: "/Imagenes/windows-11-professional.png",
+                desc: "Licencias y activaciones para Windows de forma segura.",
+                href: "/activaciones",
+                cta: "Ir a Activaciones",
+              },
+            ].map((item) => (
+              <div
+                key={item.name}
+                className="bg-gray-800/60 border border-gray-700 rounded-xl p-5 flex flex-col justify-between"
+              >
+                <div>
+                  <div className="mb-3 h-16 bg-white rounded-lg p-2 flex items-center justify-center overflow-hidden">
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="h-full w-full object-contain"
+                    />
+                  </div>
+                  <h3 className="text-xl font-bold text-white">{item.name}</h3>
+                  <p className="text-gray-400 mt-2">{item.desc}</p>
+                </div>
+
+                <Link
+                  to={item.href}
+                  className="mt-4 inline-flex items-center justify-center bg-white text-gray-900 font-semibold px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  {item.cta}
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+          </section>
+      {/* 📺 Accesos rápidos */}
+      
+
+      
 
       {/* 💳 Métodos de pago - Diseño moderno */}
       <section className="py-16 bg-gray-900">

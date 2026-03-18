@@ -7,6 +7,7 @@ import Club from "./pages/Club";
 import Recargas from "./pages/Recargas";
 import Streaming from "./pages/Streaming";
 import Activaciones from "./pages/Activaciones";
+import JuegosPC from "./pages/JuegosPC";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import MiCuenta from "./pages/MiCuenta";
@@ -48,6 +49,7 @@ const App = () => {
             <Route path="/recargas" element={ <AuthGuard> <Recargas /> </AuthGuard>} />
             <Route path="/streaming" element={ <AuthGuard> <Streaming /> </AuthGuard>} />
             <Route path="/activaciones" element={ <AuthGuard> <Activaciones /> </AuthGuard>} />
+            <Route path="/juegos-pc" element={ <AuthGuard> <JuegosPC /> </AuthGuard>} />
             <Route path="/pago-exitoso" element={<PagoExitoso />} />
             <Route path="/pago-fallido" element={<PagoFallido />} />
             
