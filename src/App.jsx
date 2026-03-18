@@ -49,7 +49,7 @@ const App = () => {
             <Route path="/recargas" element={ <AuthGuard> <Recargas /> </AuthGuard>} />
             <Route path="/streaming" element={ <AuthGuard> <Streaming /> </AuthGuard>} />
             <Route path="/activaciones" element={ <AuthGuard> <Activaciones /> </AuthGuard>} />
-            <Route path="/juegos-pc" element={ <AuthGuard> <JuegosPC /> </AuthGuard>} />
+            <Route path="/juegos-pc" element={  <JuegosPC /> } />
             <Route path="/pago-exitoso" element={<PagoExitoso />} />
             <Route path="/pago-fallido" element={<PagoFallido />} />
             
