@@ -25,6 +25,17 @@ const Shop2 = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Si hay productos cacheados en sessionStorage, usarlos directamente sin animación
+    const cached = sessionStorage.getItem("shopProducts");
+    if (cached) {
+      try {
+        setProducts(JSON.parse(cached));
+        setLoading(false);
+        return;
+      } catch {
+        sessionStorage.removeItem("shopProducts");
+      }
+    }
     fetchProducts();
   }, []);
 
@@ -46,7 +57,8 @@ const Shop2 = () => {
 
       // La API ahora devuelve los productos en 'data.data.entries'
       if (data?.data?.entries && Array.isArray(data.data.entries)) {
-        setProducts(data.data.entries); // Establece el array de entradas
+        setProducts(data.data.entries);
+        sessionStorage.setItem("shopProducts", JSON.stringify(data.data.entries));
       } else {
         console.error("⚠️ La API no devolvió 'entries' como arreglo");
         setProducts([]);

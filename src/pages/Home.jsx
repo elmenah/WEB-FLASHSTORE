@@ -15,6 +15,39 @@ const Home = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Cargar noticias de Fortnite para el hero dinámico
+  useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        const res = await fetch("https://fortnite-api.com/v2/news/br?language=es");
+        if (!res.ok) throw new Error("Error al obtener noticias");
+        const data = await res.json();
+        const motds = data?.data?.motds || [];
+        if (motds.length > 0) {
+          setHeroImages(motds.map((item) => ({
+            image: item.image,
+            title: item.title,
+            body: item.body,
+          })));
+        }
+      } catch (err) {
+        console.error("Error al cargar noticias de Fortnite:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchNews();
+  }, []);
+
+  // Auto-rotar el carrusel cada 6 segundos
+  useEffect(() => {
+    if (heroImages.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [heroImages]);
+
   // Cargar script de Instagram
   useEffect(() => {
     const script = document.createElement('script');
@@ -62,14 +95,28 @@ const Home = () => {
         Producto agregado al carrito
       </div>
 
-      {/* 🎯 HERO */}
+      {/* 🎯 HERO - Carrusel dinámico */}
       <div className="relative flex items-center justify-center h-[70vh] sm:h-screen bg-gray-900 text-white overflow-hidden animate-fade-in">
-        <img
-          src="/Imagenes/cap7.png"
-          className="w-full h-full object-cover z-0"
-          alt="Hero"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent z-10"></div>
+        {/* Imágenes del carrusel */}
+        {heroImages.length > 0 ? (
+          heroImages.map((item, index) => (
+            <img
+              key={index}
+              src={item.image}
+              className={`absolute inset-0 w-full h-full object-cover z-0 transition-opacity duration-1000 ${
+                index === currentImageIndex ? "opacity-100" : "opacity-0"
+              }`}
+              alt={item.title || "Fortnite News"}
+            />
+          ))
+        ) : (
+          <img
+            src="/Imagenes/cap7.png"
+            className="w-full h-full object-cover z-0"
+            alt="Hero"
+          />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/30 to-transparent z-10"></div>
 
         <div className="absolute left-0 top-1/2 transform -translate-y-1/2 z-20 w-11/12 sm:w-auto pl-4 sm:pl-10 pr-4 text-left animate-fade-in">
           <h1 className="text-2xl xs:text-3xl md:text-5xl font-bold mb-3 sm:mb-4 italic drop-shadow-xl leading-tight">
@@ -88,6 +135,24 @@ const Home = () => {
             Ver la tienda de hoy
           </Link>
         </div>
+
+        {/* Indicadores del carrusel */}
+        {heroImages.length > 1 && (
+          <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-20 flex gap-2">
+            {heroImages.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentImageIndex(index)}
+                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+                  index === currentImageIndex
+                    ? "bg-white w-6"
+                    : "bg-white/40 hover:bg-white/60"
+                }`}
+                aria-label={`Slide ${index + 1}`}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* 💎 Beneficios rápidos */}
