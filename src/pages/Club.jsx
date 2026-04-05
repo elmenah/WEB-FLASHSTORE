@@ -1,11 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
+
+const FALLBACK_IMAGE = "https://cms-assets.unrealengine.com/cm6l5gfpm05kr07my04cqgy2x/output=format:webp/cmneuqq20npri07ocyf530pjt";
 
 const Club = () => {
   const { addToCart } = useCart();
   const [notification, setNotification] = useState(false);
+  const [imagen, setImagen] = useState(FALLBACK_IMAGE);
 
-  let imagen = "https://cms-assets.unrealengine.com/cm6l5gfpm05kr07my04cqgy2x/output=format:webp/cmjboacji036807oed9uroy5r";
+  useEffect(() => {
+    const fetchCrewImage = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'https://backendflash.onrender.com'}/api/crew-image`);
+        if (!res.ok) throw new Error('Error al obtener imagen');
+        const data = await res.json();
+        if (data.image) setImagen(data.image);
+      } catch (err) {
+        console.error('Error cargando imagen del Crew:', err);
+      }
+    };
+    fetchCrewImage();
+  }, []);
  const clubItems = [
     { 
       id: 1, 
