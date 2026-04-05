@@ -26,6 +26,18 @@ const Activaciones = () => {
     
   ];
 
+  // Producto de Minecraft
+  const minecraftProducts = [
+    {
+      id: 'minecraft-java-bedrock',
+      title: "Minecraft Java + Bedrock",
+      desc: "Edición completa para PC — Java y Bedrock incluidos",
+      price: 10000,
+      image: "Imagenes/minecraft-java-bedrock.webp",
+      categoria: "Minecraft"
+    }
+  ];
+
   // Productos de Office
   const officeProducts = [
     { 
@@ -107,6 +119,7 @@ const Activaciones = () => {
           <div className="flex flex-wrap gap-3 justify-center">
             <span className="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm border border-white/20">💻 Windows 10 / 11</span>
             <span className="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm border border-white/20">📊 Office PRO</span>
+            <span className="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm border border-white/20">🎮 Minecraft</span>
             <span className="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm border border-white/20">🤖 ChatGPT Plus</span>
           </div>
         </div>
@@ -217,9 +230,54 @@ const Activaciones = () => {
         </div>
       </section>
 
-      
-
-      
+      {/* MINECRAFT */}
+      <section className="py-16 px-6 max-w-6xl mx-auto">
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold mb-2">
+            <span className="text-green-400">Minecraft</span> Java + Bedrock
+          </h2>
+          <p className="text-gray-400">Edición completa para PC — ambas versiones incluidas</p>
+        </div>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+          {minecraftProducts.map((item) => (
+            <div key={item.id} className="bg-gradient-to-br from-green-900/40 to-emerald-800/40 rounded-lg shadow-lg overflow-hidden flex flex-col hover:transform hover:scale-105 transition-all duration-300 border border-green-500/30">
+              <div className="w-full h-40 bg-white/5 flex items-center justify-center p-4">
+                <img 
+                  src={item.image} 
+                  alt={item.title} 
+                  className="max-w-full max-h-full object-contain"
+                />
+              </div>
+              <div className="p-4 flex-1 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-2xl">⛏️</span>
+                    <h3 className="text-lg font-semibold">{item.title}</h3>
+                  </div>
+                  <p className="text-gray-400 text-sm mb-3">{item.desc}</p>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="px-2 py-1 bg-green-600/30 text-green-300 rounded text-xs">☕ Java Edition</span>
+                    <span className="px-2 py-1 bg-green-600/30 text-green-300 rounded text-xs">🪨 Bedrock Edition</span>
+                    <span className="px-2 py-1 bg-green-600/30 text-green-300 rounded text-xs">💻 PC</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between mt-4">
+                  <p className="text-gray-100 text-xl font-bold">
+                    {new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(item.price)}
+                  </p>
+                  <button 
+                    onClick={() => handleAddToCart(item)} 
+                    className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-full transition-all"
+                  >
+                    <i className="fas fa-shopping-cart"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
 
       {/* FAQ Section */}
       <section className="py-12 px-6 max-w-4xl mx-auto">
