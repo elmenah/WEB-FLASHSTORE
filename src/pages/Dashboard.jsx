@@ -726,7 +726,7 @@ const Dashboard = () => {
                   <div className="grid grid-cols-2 gap-3 mb-4 text-sm">
                     <div className="bg-gray-700 rounded-lg p-3">
                       <p className="text-gray-400 text-xs">V-Bucks</p>
-                      <p className="text-yellow-400 font-bold text-lg">{(bot.vbucks ?? 0).toLocaleString()}</p>
+                      <p className="text-yellow-400 font-bold text-lg">{(bot.pavos ?? 0).toLocaleString()}</p>
                     </div>
                     <div className="bg-gray-700 rounded-lg p-3">
                       <p className="text-gray-400 text-xs">Regalos enviados</p>
