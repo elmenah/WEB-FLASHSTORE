@@ -321,7 +321,8 @@ const Checkout = () => {
           precio_unitario: item.precio,
           cantidad: item.cantidad || 1,
           imagen_url: item.imagen,
-          pavos: pavosItem, // ✅ Pavos calculados correctamente
+          pavos: pavosItem,
+          offer_id: item.offer_id || null,
         };
       });
 

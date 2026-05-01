@@ -91,6 +91,8 @@ const Shop2 = () => {
       nombre,
       precio: product.finalPrice * VBUCK_TO_CLP_RATE,
       imagen,
+      offer_id: product.offerId || null,
+      pavos: product.finalPrice || 0,
     };
     addToCart(cartProduct);
     showNotification();

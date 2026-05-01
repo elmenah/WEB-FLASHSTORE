@@ -54,6 +54,8 @@ const Shop = () => {
       imagen:
         product.displayAssets?.[0]?.url ||
         product.granted?.[0]?.images?.icon_background,
+      offer_id: product.offerId || null,
+      pavos: product.price.finalPrice || 0,
     };
 
     addToCart(cartProduct);
