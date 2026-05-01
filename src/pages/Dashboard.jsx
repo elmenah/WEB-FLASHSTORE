@@ -39,6 +39,9 @@ const Dashboard = () => {
   const [botLoading, setBotLoading] = useState(false);
   const [botMsg, setBotMsg] = useState('');
   const [pavosInput, setPavosInput] = useState({});
+  const [friendInput, setFriendInput] = useState('');
+  const [friendResult, setFriendResult] = useState(null);
+  const [friendLoading, setFriendLoading] = useState(false);
 
   const [pavosGastados, setPavosGastados] = useState({
     total_pavos_gastados: 0,
@@ -109,6 +112,35 @@ const Dashboard = () => {
       cargarBotStats();
     } catch (e) {
       setBotMsg('Error reactivando bot');
+    }
+  };
+
+  const verificarAmigo = async () => {
+    if (!friendInput.trim()) { setBotMsg('Ingresa un nombre de usuario'); return; }
+    setFriendLoading(true);
+    setFriendResult(null);
+    setBotMsg('');
+    try {
+      const data = await botFetch(`/api/bot/es-amigo/${encodeURIComponent(friendInput.trim())}`);
+      setFriendResult(data);
+    } catch (e) {
+      setBotMsg('Error verificando amistad');
+    } finally {
+      setFriendLoading(false);
+    }
+  };
+
+  const agregarAmigo = async () => {
+    if (!friendInput.trim()) { setBotMsg('Ingresa un nombre de usuario'); return; }
+    setBotMsg('');
+    try {
+      const data = await botFetch('/api/bot/agregar', {
+        method: 'POST',
+        body: JSON.stringify({ epic_name: friendInput.trim() }),
+      });
+      setBotMsg(data?.message || 'Solicitud programada');
+    } catch (e) {
+      setBotMsg('Error enviando solicitud');
     }
   };
 
@@ -698,6 +730,73 @@ const Dashboard = () => {
               </div>
             )}
 
+            {/* Herramientas */}
+            <div className="bg-gray-800 rounded-xl border border-gray-600 p-6 mb-6">
+              <h3 className="text-lg font-semibold text-white mb-4">Herramientas</h3>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <input
+                  type="text"
+                  placeholder="Nombre de usuario Fortnite..."
+                  value={friendInput}
+                  onChange={(e) => { setFriendInput(e.target.value); setFriendResult(null); }}
+                  onKeyDown={(e) => e.key === 'Enter' && verificarAmigo()}
+                  className="flex-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                />
+                <button
+                  onClick={verificarAmigo}
+                  disabled={friendLoading}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 whitespace-nowrap"
+                >
+                  {friendLoading ? 'Buscando...' : 'Ver si es amigo'}
+                </button>
+                <button
+                  onClick={agregarAmigo}
+                  disabled={friendLoading}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:opacity-50 whitespace-nowrap"
+                >
+                  Agregar amigo
+                </button>
+              </div>
+
+              {/* Resultado de verificar amistad */}
+              {friendResult && (
+                <div className="mt-4 p-4 bg-gray-700 rounded-lg">
+                  <p className="text-white font-semibold mb-2">
+                    {friendResult.display_name || friendInput}
+                    <span className="text-gray-400 text-sm ml-2">({friendResult.epic_id})</span>
+                  </p>
+                  <div className="flex flex-col gap-2">
+                    {(friendResult.bots || []).map((b) => (
+                      <div key={b.bot_account_id} className="flex items-center justify-between bg-gray-600 rounded-lg px-4 py-2">
+                        <span className="text-white text-sm">{b.bot_display_name}</span>
+                        {b.es_amigo ? (
+                          <div className="text-right">
+                            <span className="text-green-400 font-semibold">Amigos</span>
+                            {b.tiempo_amistad_horas !== null && (
+                              <span className={`ml-2 text-xs ${b.tiempo_amistad_horas >= 48 ? 'text-green-400' : 'text-yellow-400'}`}>
+                                {b.tiempo_amistad_horas >= 48
+                                  ? `${Math.floor(b.tiempo_amistad_horas / 24)}d — puede regalar`
+                                  : `${b.tiempo_amistad_horas.toFixed(0)}h — faltan ${(48 - b.tiempo_amistad_horas).toFixed(0)}h para regalar`}
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-red-400 font-semibold">No es amigo</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  {friendResult.queries_remaining_today !== undefined && (
+                    <p className="text-gray-400 text-xs mt-2">Consultas restantes hoy: {friendResult.queries_remaining_today}</p>
+                  )}
+                </div>
+              )}
+
+              {friendResult?.error && (
+                <p className="mt-3 text-red-400 text-sm">{friendResult.error}</p>
+              )}
+            </div>
+
             {/* Tarjetas de bots */}
             {!botLoading && botStats.length === 0 && (
               <div className="text-center py-16 text-gray-500">
@@ -741,6 +840,18 @@ const Dashboard = () => {
                       <p className={`font-bold text-lg ${bot.is_pagado ? 'text-green-400' : 'text-red-400'}`}>
                         {bot.is_pagado ? 'Sí' : 'No'}
                       </p>
+                    </div>
+                    <div className="bg-gray-700 rounded-lg p-3 col-span-2">
+                      <p className="text-gray-400 text-xs mb-1">Regalos disponibles hoy</p>
+                      <div className="flex items-center gap-2">
+                        <div className="flex gap-1">
+                          {[...Array(5)].map((_, i) => (
+                            <div key={i} className={`w-5 h-5 rounded ${i < (bot.gifts_remaining ?? 5) ? 'bg-green-500' : 'bg-gray-600'}`} />
+                          ))}
+                        </div>
+                        <span className="text-white font-bold">{bot.gifts_remaining ?? 5}/5</span>
+                        <span className="text-gray-400 text-xs">({bot.gifts_today ?? 0} usados hoy)</span>
+                      </div>
                     </div>
                   </div>
 
