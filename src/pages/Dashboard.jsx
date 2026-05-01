@@ -32,10 +32,18 @@ const Dashboard = () => {
     direccion: 'desc'
   });
 
+  const [tabActivo, setTabActivo] = useState('pedidos');
+
+  // Bot states
+  const [botStats, setBotStats] = useState([]);
+  const [botLoading, setBotLoading] = useState(false);
+  const [botMsg, setBotMsg] = useState('');
+  const [pavosInput, setPavosInput] = useState({});
+
   const [pavosGastados, setPavosGastados] = useState({
     total_pavos_gastados: 0,
     total_pedidos_entregados: 0,
-    pavos_base_inicial: 0, // ✅ Agregar base inicial
+    pavos_base_inicial: 0,
     fecha_ultima_actualizacion: null
   });
 
@@ -50,6 +58,78 @@ const Dashboard = () => {
     style: "currency",
     currency: "CLP",
   });
+
+  const BACKEND = 'https://backendflash.onrender.com';
+
+  const getAdminToken = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    return session?.access_token || '';
+  };
+
+  const botFetch = async (path, options = {}) => {
+    const token = await getAdminToken();
+    const res = await fetch(`${BACKEND}${path}`, {
+      ...options,
+      headers: { 'Content-Type': 'application/json', 'x-admin-token': token, ...(options.headers || {}) },
+    });
+    return res.json();
+  };
+
+  const cargarBotStats = async () => {
+    setBotLoading(true);
+    try {
+      const data = await botFetch('/api/bot/stats');
+      setBotStats(Array.isArray(data) ? data : []);
+    } catch (e) {
+      setBotMsg('Error conectando al bot');
+    } finally {
+      setBotLoading(false);
+    }
+  };
+
+  const refreshBalances = async () => {
+    setBotLoading(true);
+    setBotMsg('');
+    try {
+      const data = await botFetch('/api/bot/refresh-balances', { method: 'POST' });
+      setBotMsg('Saldos actualizados');
+      cargarBotStats();
+    } catch (e) {
+      setBotMsg('Error actualizando saldos');
+    } finally {
+      setBotLoading(false);
+    }
+  };
+
+  const reactivarBot = async (accountId, nombre) => {
+    if (!confirm(`¿Reactivar bot ${nombre}?`)) return;
+    try {
+      await botFetch(`/api/bot/reactivar/${accountId}`, { method: 'POST' });
+      setBotMsg(`${nombre} reactivado`);
+      cargarBotStats();
+    } catch (e) {
+      setBotMsg('Error reactivando bot');
+    }
+  };
+
+  const setPavos = async (accountId, nombre) => {
+    const pavos = parseInt(pavosInput[accountId]);
+    if (!pavos || isNaN(pavos)) { setBotMsg('Ingresá un número válido'); return; }
+    try {
+      await botFetch(`/api/bot/set-pavos/${accountId}`, {
+        method: 'POST',
+        body: JSON.stringify({ pavos }),
+      });
+      setBotMsg(`${nombre}: saldo actualizado a ${pavos} V-Bucks`);
+      cargarBotStats();
+    } catch (e) {
+      setBotMsg('Error actualizando saldo');
+    }
+  };
+
+  useEffect(() => {
+    if (tabActivo === 'bot' && isAdmin) cargarBotStats();
+  }, [tabActivo, isAdmin]);
 
   // Verificar si el usuario es administrador
   useEffect(() => {
@@ -555,6 +635,150 @@ const Dashboard = () => {
           <p className="text-gray-400">Gestiona todos los pedidos de la tienda</p>
         </div>
 
+        {/* Tabs */}
+        <div className="flex gap-2 mb-8 border-b border-gray-700">
+          <button
+            onClick={() => setTabActivo('pedidos')}
+            className={`px-6 py-3 font-semibold transition rounded-t-lg ${tabActivo === 'pedidos' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-700'}`}
+          >
+            Pedidos
+          </button>
+          <button
+            onClick={() => setTabActivo('bot')}
+            className={`px-6 py-3 font-semibold transition rounded-t-lg ${tabActivo === 'bot' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-700'}`}
+          >
+            Bot Manager
+          </button>
+        </div>
+
+        {/* ===== BOT MANAGER TAB ===== */}
+        {tabActivo === 'bot' && (
+          <div>
+            {/* Mensaje de estado */}
+            {botMsg && (
+              <div className="mb-4 px-4 py-3 bg-blue-900 border border-blue-500 rounded-lg text-blue-200">
+                {botMsg}
+              </div>
+            )}
+
+            {/* Acciones globales */}
+            <div className="flex gap-3 mb-6">
+              <button
+                onClick={cargarBotStats}
+                disabled={botLoading}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+              >
+                Actualizar
+              </button>
+              <button
+                onClick={refreshBalances}
+                disabled={botLoading}
+                className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition disabled:opacity-50"
+              >
+                Sincronizar Saldos
+              </button>
+              <button
+                onClick={async () => {
+                  if (!confirm('¿Recargar todos los bots?')) return;
+                  const data = await botFetch('/api/bot/reload', { method: 'POST' });
+                  setBotMsg(data?.message || 'Recarga enviada');
+                }}
+                disabled={botLoading}
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition disabled:opacity-50"
+              >
+                Recargar Bots
+              </button>
+            </div>
+
+            {/* Cargando */}
+            {botLoading && (
+              <div className="flex items-center gap-2 text-gray-400 mb-4">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
+                Cargando...
+              </div>
+            )}
+
+            {/* Tarjetas de bots */}
+            {!botLoading && botStats.length === 0 && (
+              <div className="text-center py-16 text-gray-500">
+                No hay bots registrados o no se pudo conectar al servidor.
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {botStats.map((bot) => (
+                <div
+                  key={bot.account_id}
+                  className={`bg-gray-800 rounded-xl border p-6 ${bot.online ? 'border-green-500' : 'border-gray-600'}`}
+                >
+                  {/* Nombre + estado */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="text-lg font-bold text-white">{bot.display_name || bot.account_id}</h3>
+                      <p className="text-xs text-gray-400 truncate max-w-[180px]">{bot.account_id}</p>
+                    </div>
+                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${bot.online ? 'bg-green-900 text-green-300' : 'bg-gray-700 text-gray-400'}`}>
+                      {bot.online ? 'Online' : 'Offline'}
+                    </span>
+                  </div>
+
+                  {/* Stats */}
+                  <div className="grid grid-cols-2 gap-3 mb-4 text-sm">
+                    <div className="bg-gray-700 rounded-lg p-3">
+                      <p className="text-gray-400 text-xs">V-Bucks</p>
+                      <p className="text-yellow-400 font-bold text-lg">{(bot.vbucks ?? 0).toLocaleString()}</p>
+                    </div>
+                    <div className="bg-gray-700 rounded-lg p-3">
+                      <p className="text-gray-400 text-xs">Regalos enviados</p>
+                      <p className="text-purple-400 font-bold text-lg">{bot.gifts_sent ?? 0}</p>
+                    </div>
+                    <div className="bg-gray-700 rounded-lg p-3">
+                      <p className="text-gray-400 text-xs">Amigos</p>
+                      <p className="text-blue-400 font-bold text-lg">{bot.friends_count ?? 0}</p>
+                    </div>
+                    <div className="bg-gray-700 rounded-lg p-3">
+                      <p className="text-gray-400 text-xs">Pagado</p>
+                      <p className={`font-bold text-lg ${bot.is_pagado ? 'text-green-400' : 'text-red-400'}`}>
+                        {bot.is_pagado ? 'Sí' : 'No'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Reactivar si no está pagado */}
+                  {!bot.is_pagado && (
+                    <button
+                      onClick={() => reactivarBot(bot.account_id, bot.display_name)}
+                      className="w-full mb-3 px-3 py-2 bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700 transition"
+                    >
+                      Reactivar bot
+                    </button>
+                  )}
+
+                  {/* Actualizar V-Bucks manualmente */}
+                  <div className="flex gap-2 mt-2">
+                    <input
+                      type="number"
+                      placeholder="V-Bucks"
+                      value={pavosInput[bot.account_id] || ''}
+                      onChange={(e) => setPavosInput(prev => ({ ...prev, [bot.account_id]: e.target.value }))}
+                      className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:ring-2 focus:ring-yellow-500 focus:outline-none"
+                    />
+                    <button
+                      onClick={() => setPavos(bot.account_id, bot.display_name)}
+                      className="px-3 py-2 bg-yellow-600 text-white text-sm rounded-lg hover:bg-yellow-700 transition"
+                    >
+                      Guardar
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ===== PEDIDOS TAB ===== */}
+        {tabActivo === 'pedidos' && <>
+
         {/* Resumen */}
         <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-8">
           <div className="bg-gray-800 rounded-lg shadow p-6 border border-gray-700">
@@ -907,6 +1131,8 @@ const Dashboard = () => {
             </div>
           </div>
         )}
+
+        </>}
       </div>
     </div>
   );
