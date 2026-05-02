@@ -145,6 +145,21 @@ const Dashboard = () => {
     }
   };
 
+  const sincronizarGifts = async (accountId, nombre) => {
+    setBotMsg('');
+    try {
+      const data = await botFetch(`/api/bot/sync-gifts/${accountId}`, { method: 'POST' });
+      if (data.error) {
+        setBotMsg(`${nombre}: ${data.error}`);
+      } else {
+        setBotMsg(`${nombre}: sincronizado — ${data.gifts_today} usado(s) hoy, ${data.gifts_remaining} disponibles`);
+        cargarBotStats();
+      }
+    } catch (e) {
+      setBotMsg('Error sincronizando historial de gifts');
+    }
+  };
+
   const ajustarSlots = async (accountId, nombre) => {
     const slots = slotsInput[accountId];
     if (slots === undefined || slots === '') { setBotMsg('Selecciona un valor'); return; }
@@ -858,16 +873,42 @@ const Dashboard = () => {
                       </p>
                     </div>
                     <div className="bg-gray-700 rounded-lg p-3 col-span-2">
-                      <p className="text-gray-400 text-xs mb-1">Regalos disponibles hoy</p>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center justify-between mb-1">
+                        <p className="text-gray-400 text-xs">Regalos disponibles hoy</p>
+                        <button
+                          onClick={() => sincronizarGifts(bot.account_id, bot.display_name)}
+                          className="text-xs text-blue-400 hover:text-blue-300 transition"
+                          title="Sincronizar desde Epic"
+                        >
+                          ↻ Sync Epic
+                        </button>
+                      </div>
+                      <div className="flex items-center gap-2 mb-2">
                         <div className="flex gap-1">
                           {[...Array(5)].map((_, i) => (
                             <div key={i} className={`w-5 h-5 rounded ${i < (bot.gifts_remaining ?? 5) ? 'bg-green-500' : 'bg-gray-600'}`} />
                           ))}
                         </div>
                         <span className="text-white font-bold">{bot.gifts_remaining ?? 5}/5</span>
-                        <span className="text-gray-400 text-xs">({bot.gifts_today ?? 0} usados hoy)</span>
+                        <span className="text-gray-400 text-xs">({bot.gifts_today ?? 0} usados)</span>
                       </div>
+                      {bot.gift_timestamps && bot.gift_timestamps.length > 0 && (
+                        <div className="flex flex-col gap-1 mt-1 border-t border-gray-600 pt-2">
+                          {bot.gift_timestamps.map((ts, i) => {
+                            const enviado = new Date(ts);
+                            const libera = new Date(enviado.getTime() + 24 * 60 * 60 * 1000);
+                            const horaEnviado = enviado.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+                            const horaLibera = libera.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+                            const diaLibera = libera.toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit' });
+                            return (
+                              <div key={i} className="flex justify-between text-xs">
+                                <span className="text-gray-400">Slot {i + 1}: enviado {horaEnviado}</span>
+                                <span className="text-yellow-400">libera {diaLibera} {horaLibera}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
                   </div>
 
