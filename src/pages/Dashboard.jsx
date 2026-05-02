@@ -42,6 +42,7 @@ const Dashboard = () => {
   const [friendInput, setFriendInput] = useState('');
   const [friendResult, setFriendResult] = useState(null);
   const [friendLoading, setFriendLoading] = useState(false);
+  const [slotsInput, setSlotsInput] = useState({});
 
   const [pavosGastados, setPavosGastados] = useState({
     total_pavos_gastados: 0,
@@ -141,6 +142,21 @@ const Dashboard = () => {
       setBotMsg(data?.message || 'Solicitud programada');
     } catch (e) {
       setBotMsg('Error enviando solicitud');
+    }
+  };
+
+  const ajustarSlots = async (accountId, nombre) => {
+    const slots = slotsInput[accountId];
+    if (slots === undefined || slots === '') { setBotMsg('Selecciona un valor'); return; }
+    try {
+      await botFetch(`/api/bot/set-slots/${accountId}`, {
+        method: 'POST',
+        body: JSON.stringify({ slots_usados: parseInt(slots) }),
+      });
+      setBotMsg(`${nombre}: slots ajustados a ${slots} usados hoy`);
+      cargarBotStats();
+    } catch (e) {
+      setBotMsg('Error ajustando slots');
     }
   };
 
@@ -879,6 +895,26 @@ const Dashboard = () => {
                       className="px-3 py-2 bg-yellow-600 text-white text-sm rounded-lg hover:bg-yellow-700 transition"
                     >
                       Guardar
+                    </button>
+                  </div>
+
+                  {/* Ajustar slots usados hoy */}
+                  <div className="flex gap-2 mt-2 items-center">
+                    <span className="text-gray-400 text-xs whitespace-nowrap">Slots usados hoy:</span>
+                    <select
+                      value={slotsInput[bot.account_id] ?? bot.gifts_today ?? 0}
+                      onChange={(e) => setSlotsInput(prev => ({ ...prev, [bot.account_id]: e.target.value }))}
+                      className="flex-1 px-2 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    >
+                      {[0, 1, 2, 3, 4, 5].map(n => (
+                        <option key={n} value={n}>{n}</option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={() => ajustarSlots(bot.account_id, bot.display_name)}
+                      className="px-3 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 transition whitespace-nowrap"
+                    >
+                      Ajustar
                     </button>
                   </div>
                 </div>
