@@ -43,6 +43,16 @@ const Dashboard = () => {
   const [friendResult, setFriendResult] = useState(null);
   const [friendLoading, setFriendLoading] = useState(false);
   const [slotsInput, setSlotsInput] = useState({});
+  const [tabComando, setTabComando] = useState('herramientas');
+  const [selectedBotId, setSelectedBotId] = useState('');
+  const [tiendaItems, setTiendaItems] = useState([]);
+  const [tiendaLoading, setTiendaLoading] = useState(false);
+  const [tiendaBusqueda, setTiendaBusqueda] = useState('');
+  const [friendsList, setFriendsList] = useState([]);
+  const [friendsLoading, setFriendsLoading] = useState(false);
+  const [regaloEpicName, setRegaloEpicName] = useState('');
+  const [regaloSelectedItem, setRegaloSelectedItem] = useState(null);
+  const [regaloLoading, setRegaloLoading] = useState(false);
 
   const [pavosGastados, setPavosGastados] = useState({
     total_pavos_gastados: 0,
@@ -83,7 +93,11 @@ const Dashboard = () => {
     setBotLoading(true);
     try {
       const data = await botFetch('/api/bot/stats');
-      setBotStats(Array.isArray(data) ? data : []);
+      const stats = Array.isArray(data) ? data : [];
+      setBotStats(stats);
+      if (stats.length > 0) {
+        setSelectedBotId(prev => prev || stats[0].account_id);
+      }
     } catch (e) {
       setBotMsg('Error conectando al bot');
     } finally {
@@ -189,6 +203,80 @@ const Dashboard = () => {
       setBotMsg('Error actualizando saldo');
     }
   };
+
+  const cargarTienda = async () => {
+    setTiendaLoading(true);
+    try {
+      const data = await botFetch('/api/bot/tienda');
+      setTiendaItems(data.items || []);
+    } catch (e) {
+      setBotMsg('Error cargando tienda');
+    } finally {
+      setTiendaLoading(false);
+    }
+  };
+
+  const cargarAmigos = async (accountId) => {
+    if (!accountId) return;
+    setFriendsLoading(true);
+    setFriendsList([]);
+    try {
+      const data = await botFetch(`/api/bot/friends/${accountId}`);
+      setFriendsList(data.friends || []);
+    } catch (e) {
+      setBotMsg('Error cargando amigos');
+    } finally {
+      setFriendsLoading(false);
+    }
+  };
+
+  const eliminarAmigo = async (accountId, epicName) => {
+    if (!confirm(`¿Eliminar a ${epicName} de la lista de amigos?`)) return;
+    try {
+      const data = await botFetch(`/api/bot/remove-friend/${accountId}`, {
+        method: 'POST',
+        body: JSON.stringify({ epic_name: epicName }),
+      });
+      setBotMsg(data.message || data.error || 'Amigo eliminado');
+      cargarAmigos(accountId);
+    } catch (e) {
+      setBotMsg('Error eliminando amigo');
+    }
+  };
+
+  const enviarRegaloManual = async () => {
+    if (!regaloEpicName.trim()) { setBotMsg('Ingresa el nombre Epic del destinatario'); return; }
+    if (!regaloSelectedItem) { setBotMsg('Selecciona un item de la tienda'); return; }
+    if (!confirm(`¿Enviar "${regaloSelectedItem.nombre}" a ${regaloEpicName.trim()}?`)) return;
+    setRegaloLoading(true);
+    setBotMsg('');
+    try {
+      const data = await botFetch('/api/bot/regalar', {
+        method: 'POST',
+        body: JSON.stringify({
+          epic_name: regaloEpicName.trim(),
+          offer_id: regaloSelectedItem.offer_id,
+          price_vbucks: regaloSelectedItem.precio_vbucks,
+        }),
+      });
+      setBotMsg(data.message || data.error || 'Solicitud enviada');
+      if (data.success) {
+        cargarBotStats();
+        setRegaloEpicName('');
+        setRegaloSelectedItem(null);
+      }
+    } catch (e) {
+      setBotMsg('Error enviando regalo');
+    } finally {
+      setRegaloLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (tabComando === 'amigos' && selectedBotId) cargarAmigos(selectedBotId);
+    if (tabComando === 'tienda' && tiendaItems.length === 0) cargarTienda();
+    if (tabComando === 'herramientas' && tiendaItems.length === 0) cargarTienda();
+  }, [tabComando, selectedBotId]);
 
   useEffect(() => {
     if (tabActivo === 'bot' && isAdmin) cargarBotStats();
@@ -715,254 +803,380 @@ const Dashboard = () => {
         </div>
 
         {/* ===== BOT MANAGER TAB ===== */}
-        {tabActivo === 'bot' && (
-          <div>
-            {/* Mensaje de estado */}
-            {botMsg && (
-              <div className="mb-4 px-4 py-3 bg-blue-900 border border-blue-500 rounded-lg text-blue-200">
-                {botMsg}
-              </div>
-            )}
+        {tabActivo === 'bot' && (() => {
+          const selectedBot = botStats.find(b => b.account_id === selectedBotId);
+          const tiendaFiltrada = tiendaItems.filter(item =>
+            !tiendaBusqueda || item.nombre.toLowerCase().includes(tiendaBusqueda.toLowerCase())
+          );
 
-            {/* Acciones globales */}
-            <div className="flex gap-3 mb-6">
-              <button
-                onClick={cargarBotStats}
-                disabled={botLoading}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
-              >
-                Actualizar
-              </button>
-              <button
-                onClick={refreshBalances}
-                disabled={botLoading}
-                className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition disabled:opacity-50"
-              >
-                Sincronizar Saldos
-              </button>
-              <button
-                onClick={async () => {
-                  if (!confirm('¿Recargar todos los bots?')) return;
-                  const data = await botFetch('/api/bot/reload', { method: 'POST' });
-                  setBotMsg(data?.message || 'Recarga enviada');
-                }}
-                disabled={botLoading}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition disabled:opacity-50"
-              >
-                Recargar Bots
-              </button>
-            </div>
-
-            {/* Cargando */}
-            {botLoading && (
-              <div className="flex items-center gap-2 text-gray-400 mb-4">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
-                Cargando...
-              </div>
-            )}
-
-            {/* Herramientas */}
-            <div className="bg-gray-800 rounded-xl border border-gray-600 p-6 mb-6">
-              <h3 className="text-lg font-semibold text-white mb-4">Herramientas</h3>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <input
-                  type="text"
-                  placeholder="Nombre de usuario Fortnite..."
-                  value={friendInput}
-                  onChange={(e) => { setFriendInput(e.target.value); setFriendResult(null); }}
-                  onKeyDown={(e) => e.key === 'Enter' && verificarAmigo()}
-                  className="flex-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                />
-                <button
-                  onClick={verificarAmigo}
-                  disabled={friendLoading}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 whitespace-nowrap"
-                >
-                  {friendLoading ? 'Buscando...' : 'Ver si es amigo'}
-                </button>
-                <button
-                  onClick={agregarAmigo}
-                  disabled={friendLoading}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:opacity-50 whitespace-nowrap"
-                >
-                  Agregar amigo
-                </button>
-              </div>
-
-              {/* Resultado de verificar amistad */}
-              {friendResult && (
-                <div className="mt-4 p-4 bg-gray-700 rounded-lg">
-                  <p className="text-white font-semibold mb-2">
-                    {friendResult.display_name || friendInput}
-                    <span className="text-gray-400 text-sm ml-2">({friendResult.epic_id})</span>
-                  </p>
-                  <div className="flex flex-col gap-2">
-                    {(friendResult.bots || []).map((b) => (
-                      <div key={b.bot_account_id} className="flex items-center justify-between bg-gray-600 rounded-lg px-4 py-2">
-                        <span className="text-white text-sm">{b.bot_display_name}</span>
-                        {b.es_amigo ? (
-                          <div className="text-right">
-                            <span className="text-green-400 font-semibold">Amigos</span>
-                            {b.tiempo_amistad_horas !== null && (
-                              <span className={`ml-2 text-xs ${b.tiempo_amistad_horas >= 48 ? 'text-green-400' : 'text-yellow-400'}`}>
-                                {b.tiempo_amistad_horas >= 48
-                                  ? `${Math.floor(b.tiempo_amistad_horas / 24)}d — puede regalar`
-                                  : `${b.tiempo_amistad_horas.toFixed(0)}h — faltan ${(48 - b.tiempo_amistad_horas).toFixed(0)}h para regalar`}
-                              </span>
-                            )}
-                          </div>
-                        ) : (
-                          <span className="text-red-400 font-semibold">No es amigo</span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                  {friendResult.queries_remaining_today !== undefined && (
-                    <p className="text-gray-400 text-xs mt-2">Consultas restantes hoy: {friendResult.queries_remaining_today}</p>
-                  )}
+          return (
+            <div className="space-y-6">
+              {/* Mensaje de estado */}
+              {botMsg && (
+                <div className="px-4 py-3 bg-blue-900 border border-blue-500 rounded-lg text-blue-200 flex items-center justify-between">
+                  <span>{botMsg}</span>
+                  <button onClick={() => setBotMsg('')} className="text-blue-400 hover:text-white ml-4">✕</button>
                 </div>
               )}
 
-              {friendResult?.error && (
-                <p className="mt-3 text-red-400 text-sm">{friendResult.error}</p>
-              )}
-            </div>
-
-            {/* Tarjetas de bots */}
-            {!botLoading && botStats.length === 0 && (
-              <div className="text-center py-16 text-gray-500">
-                No hay bots registrados o no se pudo conectar al servidor.
+              {/* Acciones globales */}
+              <div className="flex flex-wrap gap-3">
+                <button onClick={cargarBotStats} disabled={botLoading} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50">
+                  {botLoading ? '...' : 'Actualizar'}
+                </button>
+                <button onClick={refreshBalances} disabled={botLoading} className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition disabled:opacity-50">
+                  Sincronizar Saldos
+                </button>
+                <button onClick={async () => { if (!confirm('¿Recargar todos los bots?')) return; const d = await botFetch('/api/bot/reload', { method: 'POST' }); setBotMsg(d?.message || 'Recarga enviada'); }} disabled={botLoading} className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition disabled:opacity-50">
+                  Recargar Bots
+                </button>
               </div>
-            )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {botStats.map((bot) => (
-                <div
-                  key={bot.account_id}
-                  className={`bg-gray-800 rounded-xl border p-6 ${bot.online ? 'border-green-500' : 'border-gray-600'}`}
-                >
-                  {/* Nombre + estado */}
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <h3 className="text-lg font-bold text-white">{bot.display_name || bot.account_id}</h3>
-                      <p className="text-xs text-gray-400 truncate max-w-[180px]">{bot.account_id}</p>
+              {/* Tarjetas de bots (compactas) */}
+              {!botLoading && botStats.length === 0 && (
+                <div className="text-center py-16 text-gray-500">No hay bots registrados o no se pudo conectar.</div>
+              )}
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                {botStats.map((bot) => (
+                  <div key={bot.account_id} className={`bg-gray-800 rounded-xl border p-5 ${bot.online ? 'border-green-600' : 'border-gray-600'} ${selectedBotId === bot.account_id ? 'ring-2 ring-blue-500' : ''}`}>
+                    {/* Header */}
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <h3 className="font-bold text-white text-base">{bot.display_name || bot.account_id}</h3>
+                        <p className="text-xs text-gray-500 truncate max-w-[180px]">{bot.account_id}</p>
+                      </div>
+                      <div className="flex flex-col gap-1 items-end">
+                        <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${bot.online ? 'bg-green-900 text-green-300' : 'bg-gray-700 text-gray-400'}`}>
+                          {bot.online ? 'Online' : 'Offline'}
+                        </span>
+                        <span className={`px-2 py-0.5 text-xs rounded-full ${bot.is_pagado ? 'bg-red-900 text-red-300' : 'bg-emerald-900 text-emerald-300'}`}>
+                          {bot.is_pagado ? 'Sin saldo' : 'Con saldo'}
+                        </span>
+                      </div>
                     </div>
-                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${bot.online ? 'bg-green-900 text-green-300' : 'bg-gray-700 text-gray-400'}`}>
-                      {bot.online ? 'Online' : 'Offline'}
-                    </span>
-                  </div>
 
-                  {/* Stats */}
-                  <div className="grid grid-cols-2 gap-3 mb-4 text-sm">
-                    <div className="bg-gray-700 rounded-lg p-3">
-                      <p className="text-gray-400 text-xs">V-Bucks</p>
-                      <p className="text-yellow-400 font-bold text-lg">{(bot.pavos ?? 0).toLocaleString()}</p>
+                    {/* Stats row */}
+                    <div className="flex gap-4 mb-3">
+                      <div>
+                        <p className="text-xs text-gray-400">V-Bucks</p>
+                        <p className="text-yellow-400 font-bold text-xl">{(bot.pavos ?? 0).toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400">Regalos</p>
+                        <p className="text-purple-400 font-bold text-xl">{bot.gifts_sent ?? 0}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400">Amigos</p>
+                        <p className="text-blue-400 font-bold text-xl">{bot.friends_count ?? 0}</p>
+                      </div>
                     </div>
-                    <div className="bg-gray-700 rounded-lg p-3">
-                      <p className="text-gray-400 text-xs">Regalos enviados</p>
-                      <p className="text-purple-400 font-bold text-lg">{bot.gifts_sent ?? 0}</p>
-                    </div>
-                    <div className="bg-gray-700 rounded-lg p-3">
-                      <p className="text-gray-400 text-xs">Amigos</p>
-                      <p className="text-blue-400 font-bold text-lg">{bot.friends_count ?? 0}</p>
-                    </div>
-                    <div className="bg-gray-700 rounded-lg p-3">
-                      <p className="text-gray-400 text-xs">Pagado</p>
-                      <p className={`font-bold text-lg ${bot.is_pagado ? 'text-green-400' : 'text-red-400'}`}>
-                        {bot.is_pagado ? 'Sí' : 'No'}
-                      </p>
-                    </div>
-                    <div className="bg-gray-700 rounded-lg p-3 col-span-2">
+
+                    {/* Slots */}
+                    <div className="bg-gray-700 rounded-lg p-3 mb-3">
                       <div className="flex items-center justify-between mb-1">
-                        <p className="text-gray-400 text-xs">Regalos disponibles hoy</p>
-                        <button
-                          onClick={() => sincronizarGifts(bot.account_id, bot.display_name)}
-                          className="text-xs text-blue-400 hover:text-blue-300 transition"
-                          title="Sincronizar desde Epic"
-                        >
-                          ↻ Sync Epic
-                        </button>
+                        <p className="text-xs text-gray-400">Slots de regalo hoy</p>
+                        <button onClick={() => sincronizarGifts(bot.account_id, bot.display_name)} className="text-xs text-blue-400 hover:text-blue-300">↻ Sync</button>
                       </div>
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="flex gap-1">
-                          {[...Array(5)].map((_, i) => (
-                            <div key={i} className={`w-5 h-5 rounded ${i < (bot.gifts_remaining ?? 5) ? 'bg-green-500' : 'bg-gray-600'}`} />
-                          ))}
-                        </div>
-                        <span className="text-white font-bold">{bot.gifts_remaining ?? 5}/5</span>
-                        <span className="text-gray-400 text-xs">({bot.gifts_today ?? 0} usados)</span>
+                      <div className="flex items-center gap-1.5 mb-1">
+                        {[...Array(5)].map((_, i) => (
+                          <div key={i} className={`w-6 h-6 rounded ${i < (bot.gifts_remaining ?? 5) ? 'bg-green-500' : 'bg-gray-600'}`} />
+                        ))}
+                        <span className="text-white font-bold ml-1 text-sm">{bot.gifts_remaining ?? 5}/5</span>
                       </div>
-                      {bot.gift_timestamps && bot.gift_timestamps.length > 0 && (
-                        <div className="flex flex-col gap-1 mt-1 border-t border-gray-600 pt-2">
+                      {bot.gift_timestamps?.length > 0 && (
+                        <div className="mt-2 space-y-1 border-t border-gray-600 pt-2">
                           {bot.gift_timestamps.map((ts, i) => {
-                            const enviado = new Date(ts);
-                            const libera = new Date(enviado.getTime() + 24 * 60 * 60 * 1000);
-                            const horaEnviado = enviado.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
-                            const horaLibera = libera.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
-                            const diaLibera = libera.toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit' });
+                            const env = new Date(ts);
+                            const lib = new Date(env.getTime() + 86400000);
                             return (
                               <div key={i} className="flex justify-between text-xs">
-                                <span className="text-gray-400">Slot {i + 1}: enviado {horaEnviado}</span>
-                                <span className="text-yellow-400">libera {diaLibera} {horaLibera}</span>
+                                <span className="text-gray-400">Slot {i+1}: {env.toLocaleTimeString('es-CL', {hour:'2-digit',minute:'2-digit'})}</span>
+                                <span className="text-yellow-400">↺ {lib.toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit'})} {lib.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'})}</span>
                               </div>
                             );
                           })}
                         </div>
                       )}
                     </div>
+
+                    {/* Botones de acción */}
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setSelectedBotId(bot.account_id)}
+                        className={`flex-1 px-3 py-1.5 text-xs rounded-lg transition ${selectedBotId === bot.account_id ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}
+                      >
+                        Seleccionar
+                      </button>
+                      {bot.is_pagado && (
+                        <button onClick={() => reactivarBot(bot.account_id, bot.display_name)} className="flex-1 px-3 py-1.5 bg-orange-600 text-white text-xs rounded-lg hover:bg-orange-700 transition">
+                          Reactivar
+                        </button>
+                      )}
+                    </div>
                   </div>
+                ))}
+              </div>
 
-                  {/* Reactivar si no está pagado */}
-                  {!bot.is_pagado && (
-                    <button
-                      onClick={() => reactivarBot(bot.account_id, bot.display_name)}
-                      className="w-full mb-3 px-3 py-2 bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700 transition"
-                    >
-                      Reactivar bot
-                    </button>
-                  )}
-
-                  {/* Actualizar V-Bucks manualmente */}
-                  <div className="flex gap-2 mt-2">
-                    <input
-                      type="number"
-                      placeholder="V-Bucks"
-                      value={pavosInput[bot.account_id] || ''}
-                      onChange={(e) => setPavosInput(prev => ({ ...prev, [bot.account_id]: e.target.value }))}
-                      className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:ring-2 focus:ring-yellow-500 focus:outline-none"
-                    />
-                    <button
-                      onClick={() => setPavos(bot.account_id, bot.display_name)}
-                      className="px-3 py-2 bg-yellow-600 text-white text-sm rounded-lg hover:bg-yellow-700 transition"
-                    >
-                      Guardar
-                    </button>
-                  </div>
-
-                  {/* Ajustar slots usados hoy */}
-                  <div className="flex gap-2 mt-2 items-center">
-                    <span className="text-gray-400 text-xs whitespace-nowrap">Slots usados hoy:</span>
-                    <select
-                      value={slotsInput[bot.account_id] ?? bot.gifts_today ?? 0}
-                      onChange={(e) => setSlotsInput(prev => ({ ...prev, [bot.account_id]: e.target.value }))}
-                      className="flex-1 px-2 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                    >
-                      {[0, 1, 2, 3, 4, 5].map(n => (
-                        <option key={n} value={n}>{n}</option>
+              {/* Panel de comandos */}
+              {botStats.length > 0 && (
+                <div className="bg-gray-800 rounded-xl border border-gray-700">
+                  {/* Sub-tabs + selector de bot */}
+                  <div className="flex items-center justify-between px-5 pt-4 pb-0 border-b border-gray-700 flex-wrap gap-3">
+                    <div className="flex gap-1">
+                      {[
+                        { id: 'herramientas', label: 'Herramientas' },
+                        { id: 'tienda', label: 'Tienda' },
+                        { id: 'amigos', label: `Amigos${friendsList.length > 0 ? ` (${friendsList.length})` : ''}` },
+                      ].map(t => (
+                        <button
+                          key={t.id}
+                          onClick={() => setTabComando(t.id)}
+                          className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition ${tabComando === t.id ? 'border-blue-500 text-blue-400' : 'border-transparent text-gray-400 hover:text-white'}`}
+                        >
+                          {t.label}
+                        </button>
                       ))}
-                    </select>
-                    <button
-                      onClick={() => ajustarSlots(bot.account_id, bot.display_name)}
-                      className="px-3 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 transition whitespace-nowrap"
-                    >
-                      Ajustar
-                    </button>
+                    </div>
+                    {botStats.length > 1 && (
+                      <select
+                        value={selectedBotId}
+                        onChange={(e) => setSelectedBotId(e.target.value)}
+                        className="px-3 py-1.5 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:outline-none mb-1"
+                      >
+                        {botStats.map(b => (
+                          <option key={b.account_id} value={b.account_id}>{b.display_name}</option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
+
+                  <div className="p-6">
+
+                    {/* === HERRAMIENTAS === */}
+                    {tabComando === 'herramientas' && (
+                      <div className="space-y-8">
+
+                        {/* Verificar / Agregar amigo */}
+                        <div>
+                          <h4 className="text-sm font-semibold text-gray-300 mb-3">Verificar / Agregar amigo</h4>
+                          <div className="flex flex-col sm:flex-row gap-3">
+                            <input
+                              type="text"
+                              placeholder="Nombre de usuario Epic..."
+                              value={friendInput}
+                              onChange={(e) => { setFriendInput(e.target.value); setFriendResult(null); }}
+                              onKeyDown={(e) => e.key === 'Enter' && verificarAmigo()}
+                              className="flex-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                            />
+                            <button onClick={verificarAmigo} disabled={friendLoading} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 whitespace-nowrap">
+                              {friendLoading ? 'Buscando...' : 'Ver si es amigo'}
+                            </button>
+                            <button onClick={agregarAmigo} disabled={friendLoading} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:opacity-50 whitespace-nowrap">
+                              Agregar amigo
+                            </button>
+                          </div>
+                          {friendResult && (
+                            <div className="mt-4 p-4 bg-gray-700 rounded-lg">
+                              <p className="text-white font-semibold mb-2">
+                                {friendResult.display_name || friendInput}
+                                <span className="text-gray-400 text-sm ml-2">({friendResult.epic_id})</span>
+                              </p>
+                              <div className="flex flex-col gap-2">
+                                {(friendResult.bots || []).map((b) => (
+                                  <div key={b.bot_account_id} className="flex items-center justify-between bg-gray-600 rounded-lg px-4 py-2">
+                                    <span className="text-white text-sm">{b.bot_display_name}</span>
+                                    {b.es_amigo ? (
+                                      <span className={`text-xs ${b.tiempo_amistad_horas >= 48 ? 'text-green-400' : 'text-yellow-400'}`}>
+                                        {b.tiempo_amistad_horas >= 48
+                                          ? `${Math.floor(b.tiempo_amistad_horas / 24)}d — puede regalar`
+                                          : `${b.tiempo_amistad_horas?.toFixed(0)}h — faltan ${(48 - b.tiempo_amistad_horas).toFixed(0)}h`}
+                                      </span>
+                                    ) : (
+                                      <span className="text-red-400 text-xs">No es amigo</span>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                              {friendResult.queries_remaining_today !== undefined && (
+                                <p className="text-gray-500 text-xs mt-2">Consultas restantes hoy: {friendResult.queries_remaining_today}</p>
+                              )}
+                            </div>
+                          )}
+                          {friendResult?.error && <p className="mt-3 text-red-400 text-sm">{friendResult.error}</p>}
+                        </div>
+
+                        <div className="border-t border-gray-700" />
+
+                        {/* Enviar regalo manual */}
+                        <div>
+                          <h4 className="text-sm font-semibold text-gray-300 mb-3">Enviar regalo manualmente</h4>
+                          <input
+                            type="text"
+                            placeholder="Nombre Epic del destinatario..."
+                            value={regaloEpicName}
+                            onChange={(e) => setRegaloEpicName(e.target.value)}
+                            className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:outline-none mb-3"
+                          />
+                          <input
+                            type="text"
+                            placeholder="Buscar item en tienda..."
+                            value={tiendaBusqueda}
+                            onChange={(e) => setTiendaBusqueda(e.target.value)}
+                            className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:outline-none mb-3"
+                          />
+                          {tiendaLoading ? (
+                            <p className="text-gray-400 text-sm">Cargando tienda...</p>
+                          ) : (
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-64 overflow-y-auto pr-1">
+                              {tiendaFiltrada.slice(0, 60).map((item) => (
+                                <div
+                                  key={item.offer_id}
+                                  onClick={() => setRegaloSelectedItem(item)}
+                                  className={`p-2.5 rounded-lg cursor-pointer border transition ${regaloSelectedItem?.offer_id === item.offer_id ? 'border-purple-500 bg-purple-900/30' : 'border-gray-600 bg-gray-700 hover:border-gray-500'}`}
+                                >
+                                  <p className="text-white text-xs font-medium leading-tight">{item.nombre}</p>
+                                  <p className="text-yellow-400 text-xs mt-1">{item.precio_vbucks.toLocaleString()} V-Bucks</p>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          {regaloSelectedItem && (
+                            <div className="mt-3 p-3 bg-purple-900/20 border border-purple-700 rounded-lg flex items-center justify-between gap-3">
+                              <div>
+                                <p className="text-white text-sm font-semibold">{regaloSelectedItem.nombre}</p>
+                                <p className="text-yellow-400 text-xs">{regaloSelectedItem.precio_vbucks.toLocaleString()} V-Bucks</p>
+                              </div>
+                              <button
+                                onClick={enviarRegaloManual}
+                                disabled={regaloLoading || !regaloEpicName.trim()}
+                                className="px-4 py-2 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 disabled:opacity-50 transition whitespace-nowrap"
+                              >
+                                {regaloLoading ? 'Enviando...' : 'Enviar Regalo'}
+                              </button>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="border-t border-gray-700" />
+
+                        {/* Actualizar V-Bucks manualmente */}
+                        <div>
+                          <h4 className="text-sm font-semibold text-gray-300 mb-3">
+                            Actualizar V-Bucks — {selectedBot?.display_name}
+                          </h4>
+                          <div className="flex gap-3 max-w-sm">
+                            <input
+                              type="number"
+                              placeholder="V-Bucks"
+                              value={pavosInput[selectedBotId] || ''}
+                              onChange={(e) => setPavosInput(prev => ({ ...prev, [selectedBotId]: e.target.value }))}
+                              className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:ring-2 focus:ring-yellow-500 focus:outline-none"
+                            />
+                            <button
+                              onClick={() => setPavos(selectedBotId, selectedBot?.display_name)}
+                              className="px-4 py-2 bg-yellow-600 text-white text-sm rounded-lg hover:bg-yellow-700 transition"
+                            >
+                              Guardar
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* === TIENDA === */}
+                    {tabComando === 'tienda' && (
+                      <div>
+                        <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+                          <h4 className="text-sm font-semibold text-gray-300">
+                            Tienda actual — {tiendaItems.length} items
+                          </h4>
+                          <button onClick={cargarTienda} disabled={tiendaLoading} className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition disabled:opacity-50">
+                            {tiendaLoading ? 'Cargando...' : 'Actualizar'}
+                          </button>
+                        </div>
+                        <input
+                          type="text"
+                          placeholder="Buscar item..."
+                          value={tiendaBusqueda}
+                          onChange={(e) => setTiendaBusqueda(e.target.value)}
+                          className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:outline-none mb-4"
+                        />
+                        {tiendaLoading ? (
+                          <div className="flex items-center gap-2 text-gray-400"><div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500" /> Cargando tienda...</div>
+                        ) : (
+                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 max-h-[500px] overflow-y-auto pr-1">
+                            {tiendaFiltrada.map((item) => (
+                              <div key={item.offer_id} className="bg-gray-700 rounded-lg p-3 border border-gray-600 flex flex-col justify-between">
+                                <div>
+                                  <p className="text-white text-xs font-medium leading-tight mb-1">{item.nombre}</p>
+                                  <p className="text-yellow-400 text-xs font-bold">{item.precio_vbucks.toLocaleString()} V-Bucks</p>
+                                  <p className="text-gray-500 text-xs mt-0.5 truncate">{item.seccion}</p>
+                                </div>
+                                <button
+                                  onClick={() => { setTabComando('herramientas'); setRegaloSelectedItem(item); setTiendaBusqueda(''); }}
+                                  className="mt-2 w-full px-2 py-1 bg-purple-700/60 text-white text-xs rounded hover:bg-purple-600 transition"
+                                >
+                                  Regalar
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* === AMIGOS === */}
+                    {tabComando === 'amigos' && (
+                      <div>
+                        <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+                          <h4 className="text-sm font-semibold text-gray-300">
+                            Amigos de {selectedBot?.display_name} — {friendsList.length} amigos
+                          </h4>
+                          <button onClick={() => cargarAmigos(selectedBotId)} disabled={friendsLoading} className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition disabled:opacity-50">
+                            {friendsLoading ? 'Cargando...' : 'Actualizar'}
+                          </button>
+                        </div>
+                        {friendsLoading ? (
+                          <div className="flex items-center gap-2 text-gray-400"><div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500" /> Cargando amigos...</div>
+                        ) : friendsList.length === 0 ? (
+                          <p className="text-gray-500 text-sm">No hay amigos cargados.</p>
+                        ) : (
+                          <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
+                            {friendsList.map((f) => (
+                              <div key={f.id} className="flex items-center justify-between bg-gray-700 rounded-lg px-4 py-2.5">
+                                <div>
+                                  <p className="text-white text-sm font-medium">{f.display_name}</p>
+                                  <p className="text-xs text-gray-400">
+                                    {f.hours !== null
+                                      ? `${f.hours >= 24 ? Math.floor(f.hours / 24) + 'd ' : ''}${Math.floor(f.hours % 24)}h de amistad`
+                                      : 'Tiempo desconocido'}
+                                  </p>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                  <span className={`text-xs px-2 py-0.5 rounded-full ${f.can_gift ? 'bg-green-900 text-green-300' : 'bg-yellow-900 text-yellow-300'}`}>
+                                    {f.can_gift ? 'Puede regalar' : `Faltan ${Math.ceil(48 - (f.hours || 0))}h`}
+                                  </span>
+                                  <button
+                                    onClick={() => eliminarAmigo(selectedBotId, f.display_name)}
+                                    className="text-red-400 hover:text-red-300 text-xs transition"
+                                    title="Eliminar amigo"
+                                  >
+                                    Eliminar
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                   </div>
                 </div>
-              ))}
+              )}
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* ===== PEDIDOS TAB ===== */}
         {tabActivo === 'pedidos' && <>
