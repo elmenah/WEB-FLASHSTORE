@@ -997,10 +997,7 @@ const Dashboard = () => {
                                   </div>
                                 ))}
                               </div>
-                              {friendResult.queries_remaining_today !== undefined && (
-                                <p className="text-gray-500 text-xs mt-2">Consultas restantes hoy: {friendResult.queries_remaining_today}</p>
-                              )}
-                            </div>
+                                        </div>
                           )}
                           {friendResult?.error && <p className="mt-3 text-red-400 text-sm">{friendResult.error}</p>}
                         </div>
@@ -1010,34 +1007,39 @@ const Dashboard = () => {
                         {/* Enviar regalo manual */}
                         <div>
                           <h4 className="text-sm font-semibold text-gray-300 mb-3">Enviar regalo manualmente</h4>
-                          <input
-                            type="text"
-                            placeholder="Nombre Epic del destinatario..."
-                            value={regaloEpicName}
-                            onChange={(e) => setRegaloEpicName(e.target.value)}
-                            className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:outline-none mb-3"
-                          />
-                          <input
-                            type="text"
-                            placeholder="Buscar item en tienda..."
-                            value={tiendaBusqueda}
-                            onChange={(e) => setTiendaBusqueda(e.target.value)}
-                            className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:outline-none mb-3"
-                          />
+                          <div className="flex gap-2 mb-3">
+                            <input
+                              type="text"
+                              placeholder="Nombre Epic del destinatario..."
+                              value={regaloEpicName}
+                              onChange={(e) => setRegaloEpicName(e.target.value)}
+                              className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:outline-none text-sm"
+                            />
+                            <input
+                              type="text"
+                              placeholder="Buscar item..."
+                              value={tiendaBusqueda}
+                              onChange={(e) => setTiendaBusqueda(e.target.value)}
+                              className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:outline-none text-sm"
+                            />
+                          </div>
                           {tiendaLoading ? (
                             <p className="text-gray-400 text-sm">Cargando tienda...</p>
                           ) : (
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-72 overflow-y-auto pr-1">
-                              {tiendaFiltrada.slice(0, 60).map((item) => (
+                            <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2 max-h-56 overflow-y-auto pr-1">
+                              {tiendaFiltrada.slice(0, 80).map((item) => (
                                 <div
                                   key={item.offer_id}
                                   onClick={() => setRegaloSelectedItem(item)}
-                                  className={`rounded-lg cursor-pointer border transition overflow-hidden ${regaloSelectedItem?.offer_id === item.offer_id ? 'border-purple-500 bg-purple-900/30' : 'border-gray-600 bg-gray-700 hover:border-gray-500'}`}
+                                  title={`${item.nombre} — ${item.precio_vbucks.toLocaleString()} V-Bucks`}
+                                  className={`rounded-lg cursor-pointer border transition overflow-hidden ${regaloSelectedItem?.offer_id === item.offer_id ? 'border-purple-500 ring-1 ring-purple-500' : 'border-gray-600 hover:border-gray-400'}`}
                                 >
-                                  {item.imagen && <img src={item.imagen} alt={item.nombre} className="w-full h-20 object-cover" />}
-                                  <div className="p-2">
-                                    <p className="text-white text-xs font-medium leading-tight">{item.nombre}</p>
-                                    <p className="text-yellow-400 text-xs mt-0.5">{item.precio_vbucks.toLocaleString()} V-Bucks</p>
+                                  {item.imagen
+                                    ? <img src={item.imagen} alt={item.nombre} className="w-full aspect-square object-cover" />
+                                    : <div className="w-full aspect-square bg-gray-700 flex items-center justify-center"><span className="text-gray-500 text-xs text-center px-1 leading-tight">{item.nombre}</span></div>
+                                  }
+                                  <div className="px-1 py-0.5 bg-gray-800">
+                                    <p className="text-yellow-400 text-xs font-bold text-center">{item.precio_vbucks.toLocaleString()}</p>
                                   </div>
                                 </div>
                               ))}

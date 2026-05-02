@@ -827,7 +827,9 @@ app.post('/api/bot/set-slots/:accountId', async (req, res) => {
 app.get('/api/bot/es-amigo/:epicName', async (req, res) => {
     if (!await verifyAdmin(req, res)) return;
     try {
-        const r = await fetch(`${BOT_URL}/es-amigo/${encodeURIComponent(req.params.epicName)}`);
+        const r = await fetch(`${BOT_URL}/es-amigo/${encodeURIComponent(req.params.epicName)}`, {
+            headers: { 'X-Bot-Secret': BOT_SECRET }
+        });
         res.json(await r.json());
     } catch (e) { res.status(503).json({ error: 'Bot no disponible' }); }
 });
