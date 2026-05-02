@@ -1027,15 +1027,18 @@ const Dashboard = () => {
                           {tiendaLoading ? (
                             <p className="text-gray-400 text-sm">Cargando tienda...</p>
                           ) : (
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-64 overflow-y-auto pr-1">
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-72 overflow-y-auto pr-1">
                               {tiendaFiltrada.slice(0, 60).map((item) => (
                                 <div
                                   key={item.offer_id}
                                   onClick={() => setRegaloSelectedItem(item)}
-                                  className={`p-2.5 rounded-lg cursor-pointer border transition ${regaloSelectedItem?.offer_id === item.offer_id ? 'border-purple-500 bg-purple-900/30' : 'border-gray-600 bg-gray-700 hover:border-gray-500'}`}
+                                  className={`rounded-lg cursor-pointer border transition overflow-hidden ${regaloSelectedItem?.offer_id === item.offer_id ? 'border-purple-500 bg-purple-900/30' : 'border-gray-600 bg-gray-700 hover:border-gray-500'}`}
                                 >
-                                  <p className="text-white text-xs font-medium leading-tight">{item.nombre}</p>
-                                  <p className="text-yellow-400 text-xs mt-1">{item.precio_vbucks.toLocaleString()} V-Bucks</p>
+                                  {item.imagen && <img src={item.imagen} alt={item.nombre} className="w-full h-20 object-cover" />}
+                                  <div className="p-2">
+                                    <p className="text-white text-xs font-medium leading-tight">{item.nombre}</p>
+                                    <p className="text-yellow-400 text-xs mt-0.5">{item.precio_vbucks.toLocaleString()} V-Bucks</p>
+                                  </div>
                                 </div>
                               ))}
                             </div>
@@ -1106,18 +1109,23 @@ const Dashboard = () => {
                         ) : (
                           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 max-h-[500px] overflow-y-auto pr-1">
                             {tiendaFiltrada.map((item) => (
-                              <div key={item.offer_id} className="bg-gray-700 rounded-lg p-3 border border-gray-600 flex flex-col justify-between">
-                                <div>
-                                  <p className="text-white text-xs font-medium leading-tight mb-1">{item.nombre}</p>
-                                  <p className="text-yellow-400 text-xs font-bold">{item.precio_vbucks.toLocaleString()} V-Bucks</p>
-                                  <p className="text-gray-500 text-xs mt-0.5 truncate">{item.seccion}</p>
+                              <div key={item.offer_id} className="bg-gray-700 rounded-lg border border-gray-600 flex flex-col justify-between overflow-hidden">
+                                {item.imagen && (
+                                  <img src={item.imagen} alt={item.nombre} className="w-full h-28 object-cover" />
+                                )}
+                                <div className="p-2.5 flex flex-col flex-1 justify-between">
+                                  <div>
+                                    <p className="text-white text-xs font-medium leading-tight mb-1">{item.nombre}</p>
+                                    <p className="text-yellow-400 text-xs font-bold">{item.precio_vbucks.toLocaleString()} V-Bucks</p>
+                                    {item.seccion && <p className="text-gray-500 text-xs mt-0.5 truncate">{item.seccion}</p>}
+                                  </div>
+                                  <button
+                                    onClick={() => { setTabComando('herramientas'); setRegaloSelectedItem(item); setTiendaBusqueda(''); }}
+                                    className="mt-2 w-full px-2 py-1 bg-purple-700/60 text-white text-xs rounded hover:bg-purple-600 transition"
+                                  >
+                                    Regalar
+                                  </button>
                                 </div>
-                                <button
-                                  onClick={() => { setTabComando('herramientas'); setRegaloSelectedItem(item); setTiendaBusqueda(''); }}
-                                  className="mt-2 w-full px-2 py-1 bg-purple-700/60 text-white text-xs rounded hover:bg-purple-600 transition"
-                                >
-                                  Regalar
-                                </button>
                               </div>
                             ))}
                           </div>
