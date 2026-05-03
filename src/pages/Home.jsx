@@ -73,7 +73,7 @@ const Home = () => {
   // Beneficios rápidos
   const beneficios = [
     { icon: "💸", text: "Precios bajos garantizados" },
-    { icon: "⚡", text: "Entrega rápida" },
+    { icon: "🤖", text: "Envío automático" },
     { icon: "🔒", text: "Compra 100% segura" },
     { icon: "📱", text: "Soporte personalizado" },
     { icon: "⭐", text: "Clientes felices" },
@@ -154,6 +154,31 @@ const Home = () => {
           </div>
         )}
       </div>
+
+      {/* 🤖 Banner envío automático */}
+      <section className="bg-gradient-to-r from-blue-900 via-indigo-900 to-purple-900 border-y border-blue-700/50">
+        <div className="container mx-auto px-4 py-5 max-w-5xl">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-center sm:text-left">
+            <div className="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500/20 border border-blue-400/40 flex items-center justify-center text-2xl">
+              🤖
+            </div>
+            <div>
+              <p className="text-white font-bold text-lg leading-tight">
+                ¡Ahora los regalos se envían automáticamente!
+              </p>
+              <p className="text-blue-200 text-sm mt-0.5">
+                Tras confirmar tu pago, nuestro bot entrega tu skin directamente en tu cuenta de Fortnite — sin esperas ni intervención manual.
+              </p>
+            </div>
+            <div className="flex-shrink-0">
+              <span className="inline-flex items-center gap-1.5 bg-green-500/20 border border-green-400/40 text-green-300 text-xs font-semibold px-3 py-1.5 rounded-full">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
+                Bot activo 24/7
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* 💎 Beneficios rápidos */}
       <section className="py-6 sm:py-10 bg-gray-900">
@@ -246,10 +271,14 @@ const Home = () => {
                   </div>
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-white mb-2">Recibe tu pedido</h3>
+                  <h3 className="text-xl font-bold text-white mb-2">Recibe tu pedido automáticamente</h3>
                   <p className="text-gray-400 leading-relaxed">
-                    Recibe las skins y/o lotes que hayas elegido directamente en tu cuenta enviadas por nuestro equipo especializado.
+                    Nuestro bot envía el regalo directo a tu cuenta de Fortnite en minutos tras confirmar el pago — sin intervención manual, las 24 horas del día.
                   </p>
+                  <span className="inline-flex items-center gap-1.5 mt-2 bg-green-500/10 border border-green-500/30 text-green-400 text-xs font-semibold px-2.5 py-1 rounded-full">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
+                    Envío automático activado
+                  </span>
                 </div>
               </div>
             </div>
@@ -307,6 +336,24 @@ const Home = () => {
                   </div>
                 </div>
               </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center mt-1">
+                    <svg className="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-white font-semibold flex items-center gap-2">
+                      Envío automático con bot propio
+                      <span className="inline-flex items-center gap-1 bg-green-500/15 border border-green-500/30 text-green-400 text-xs px-2 py-0.5 rounded-full">
+                        <span className="w-1 h-1 rounded-full bg-green-400 animate-pulse"></span>
+                        Nuevo
+                      </span>
+                    </p>
+                    <p className="text-gray-400 text-sm">Tu skin llega en minutos tras el pago, sin esperas</p>
+                  </div>
+                </div>
 
               <div className="mt-8 pt-6 border-t border-gray-700">
                 <div className="flex items-center justify-center gap-2 text-green-400">
