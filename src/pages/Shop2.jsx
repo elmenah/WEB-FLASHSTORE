@@ -57,8 +57,12 @@ const Shop2 = () => {
 
       // La API ahora devuelve los productos en 'data.data.entries'
       if (data?.data?.entries && Array.isArray(data.data.entries)) {
-        setProducts(data.data.entries);
-        sessionStorage.setItem("shopProducts", JSON.stringify(data.data.entries));
+        // Solo guardar items con offerId válido y precio > 0
+        const validEntries = data.data.entries.filter(
+          (e) => e.offerId && e.finalPrice && e.finalPrice > 0
+        );
+        setProducts(validEntries);
+        sessionStorage.setItem("shopProducts", JSON.stringify(validEntries));
       } else {
         console.error("⚠️ La API no devolvió 'entries' como arreglo");
         setProducts([]);
@@ -207,6 +211,8 @@ const Shop2 = () => {
   const organizeProductsByCategory = () => {
     const categorias = {};
     products.forEach((item) => {
+      // Solo items con offerId válido y precio > 0 (los regalables por bot)
+      if (!item.offerId || !item.finalPrice || item.finalPrice === 0) return;
       const categoria = item.layout?.name || "Otros";
       if (categoria === "Pistas de improvisación") return;
       const layoutColor =
@@ -244,6 +250,11 @@ const Shop2 = () => {
 
   const filteredProducts = () => {
     let filtered = products;
+
+    // Solo items con offerId válido y precio > 0 (regalables por bot)
+    filtered = filtered.filter(
+      (product) => product.offerId && product.finalPrice && product.finalPrice > 0
+    );
 
     // Filtrar productos cuya categoría sea 'Pistas de improvisación'
     filtered = filtered.filter(

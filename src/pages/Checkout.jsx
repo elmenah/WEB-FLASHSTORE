@@ -718,12 +718,12 @@ const Checkout = () => {
                   <svg className="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                   </svg>
-                  Nombre en Fortnite
+                  Usuario de Epic Games
                 </label>
                 <input
                   id="fortniteusername"
                   type="text"
-                  placeholder="TuNombreEnFortnite"
+                  placeholder="Usuario De Epic"
                   value={fortniteUsername}
                   onChange={(e) => setFortniteUsername(e.target.value)}
                   className={`w-full rounded-xl bg-gray-900/80 border-2 p-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all ${
@@ -1525,7 +1525,7 @@ const Checkout = () => {
                          !nombre.includes('v-bucks') &&
                          !nombre.includes('vbucks') &&
                          !nombre.includes('pavos');
-                }) && " y confirmo que mi nombre de Fortnite es correcto"}
+                }) && " y confirmo que mi usuario de Epic Games es correcto"}
                 .
               </span>
             </label>
