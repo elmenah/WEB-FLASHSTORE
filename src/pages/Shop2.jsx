@@ -57,9 +57,9 @@ const Shop2 = () => {
 
       // La API ahora devuelve los productos en 'data.data.entries'
       if (data?.data?.entries && Array.isArray(data.data.entries)) {
-        // Solo guardar items con offerId válido y precio > 0
+        // Solo guardar items regalables: con offerId, giftable y precio > 0
         const validEntries = data.data.entries.filter(
-          (e) => e.offerId && e.finalPrice && e.finalPrice > 0
+          (e) => e.offerId && e.giftable === true && e.finalPrice && e.finalPrice > 0
         );
         setProducts(validEntries);
         sessionStorage.setItem("shopProducts", JSON.stringify(validEntries));
@@ -156,6 +156,8 @@ const Shop2 = () => {
           precio: product.finalPrice,
           imagen: product.bundle.image || "URL_IMAGEN_DEFAULT",
           descripcion: product.bundle.info || "Sin descripción disponible",
+          offer_id: product.offerId || null,
+          pavos: product.finalPrice || 0,
 
           contenido: contenidoLimpio,
           partede: `Incluye ${contenidoLimpio.length} objetos`,
@@ -180,6 +182,8 @@ const Shop2 = () => {
             "URL_IMAGEN_DEFAULT",
           descripcion:
             product.brItems?.[0]?.description || "Sin descripción disponible",
+          offer_id: product.offerId || null,
+          pavos: product.finalPrice || 0,
 
           // ✅ ITEM → Parte del conjunto
           partede:
@@ -211,8 +215,8 @@ const Shop2 = () => {
   const organizeProductsByCategory = () => {
     const categorias = {};
     products.forEach((item) => {
-      // Solo items con offerId válido y precio > 0 (los regalables por bot)
-      if (!item.offerId || !item.finalPrice || item.finalPrice === 0) return;
+      // Solo items regalables: offerId + giftable + precio > 0
+      if (!item.offerId || item.giftable !== true || !item.finalPrice || item.finalPrice === 0) return;
       const categoria = item.layout?.name || "Otros";
       if (categoria === "Pistas de improvisación") return;
       const layoutColor =
@@ -251,9 +255,9 @@ const Shop2 = () => {
   const filteredProducts = () => {
     let filtered = products;
 
-    // Solo items con offerId válido y precio > 0 (regalables por bot)
+    // Solo items regalables: offerId + giftable + precio > 0
     filtered = filtered.filter(
-      (product) => product.offerId && product.finalPrice && product.finalPrice > 0
+      (product) => product.offerId && product.giftable === true && product.finalPrice && product.finalPrice > 0
     );
 
     // Filtrar productos cuya categoría sea 'Pistas de improvisación'

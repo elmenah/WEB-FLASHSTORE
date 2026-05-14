@@ -691,7 +691,7 @@ app.get('/api/bot/tienda', async (req, res) => {
         for (const entry of (data.data?.entries || [])) {
             const offerId = entry.offerId;
             const precio = entry.finalPrice ?? entry.regularPrice ?? 0;
-            if (!offerId || precio === 0) continue;
+            if (!offerId || precio === 0 || entry.giftable === false) continue;
 
             const categoria = entry.layout?.name || 'Otros';
             if (categoria === 'Pistas de improvisación') continue;

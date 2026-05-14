@@ -50,6 +50,8 @@ const ProductDetail = () => {
       nombre: productData.nombre,
       precio: convertVBuckToCLP(productData.precio),
       imagen: productData.imagen,
+      offer_id: productData.offer_id || null,
+      pavos: productData.pavos || productData.precio || 0,
     };
     addToCart(product);
     showNotification();

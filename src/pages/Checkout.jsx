@@ -220,6 +220,21 @@ const Checkout = () => {
       return;
     }
 
+    // Validar que todos los items de Fortnite tengan offer_id válido
+    const itemsSinOfferId = cart.filter(item => {
+      const nombre = item.nombre?.toLowerCase() || '';
+      const esFortnite = !nombre.includes('crunchyroll') && !nombre.includes('iptv') &&
+                         !nombre.includes('chatgpt') && !nombre.includes('v-bucks') &&
+                         !nombre.includes('vbucks') && !nombre.includes('crew') &&
+                         !nombre.includes('xbox') && !nombre.includes('pavos');
+      return esFortnite && !item.offer_id;
+    });
+    if (itemsSinOfferId.length > 0) {
+      const nombres = itemsSinOfferId.map(i => i.nombre).join(', ');
+      alert(`⚠️ Los siguientes items ya no están disponibles en la tienda actual:\n\n${nombres}\n\nPor favor vacía el carrito y agrégalos nuevamente desde la tienda.`);
+      return;
+    }
+
     try {
       // 1️⃣ Obtener el usuario logueado
       const {
