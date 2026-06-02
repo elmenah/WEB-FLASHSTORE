@@ -1,4 +1,4 @@
-export const VBUCK_TO_CLP_RATE = 4.6;
+export const VBUCK_TO_CLP_RATE = 4.3;
 
 export const convertVBuckToCLP = (vbucks) => {
   return vbucks * VBUCK_TO_CLP_RATE;

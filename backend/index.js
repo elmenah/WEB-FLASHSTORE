@@ -847,6 +847,66 @@ app.post('/api/bot/agregar', async (req, res) => {
 });
 
 // ==========================================
+// BOT ACTIVITY LOG
+// ==========================================
+
+// POST /api/bot/log — recibe eventos del bot (VPS) y los muestra en logs de Render + Supabase
+app.post('/api/bot/log', async (req, res) => {
+    const secret = req.headers['x-bot-secret'];
+    if (!BOT_SECRET || secret !== BOT_SECRET) {
+        return res.status(401).json({ error: 'No autorizado' });
+    }
+    const { tipo, mensaje, datos } = req.body;
+    const timestamp = new Date().toISOString();
+
+    // Log visible en Render dashboard
+    console.log(`[BotLog][${tipo || 'INFO'}] ${mensaje}`, datos ? JSON.stringify(datos) : '');
+
+    // Guardar en Supabase tabla bot_logs (si existe)
+    try {
+        await supabase.from('bot_logs').insert([{
+            tipo: tipo || 'INFO',
+            mensaje,
+            datos: datos || null,
+            created_at: timestamp,
+        }]);
+    } catch (e) {
+        // Si la tabla no existe, ignorar silenciosamente
+    }
+
+    res.json({ ok: true, timestamp });
+});
+
+// GET /api/bot/logs — devuelve los últimos logs del bot para el Dashboard
+app.get('/api/bot/logs', async (req, res) => {
+    if (!await verifyAdmin(req, res)) return;
+    try {
+        const limit = parseInt(req.query.limit) || 50;
+        const { data, error } = await supabase
+            .from('bot_logs')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(limit);
+        if (error) throw error;
+        res.json({ logs: data || [] });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// POST /api/bot/retry-pending — dispara manualmente el escáner de pedidos pendientes
+app.post('/api/bot/retry-pending', async (req, res) => {
+    if (!await verifyAdmin(req, res)) return;
+    try {
+        const r = await fetch(`${BOT_URL}/retry-pending`, {
+            method: 'POST',
+            headers: { 'X-Bot-Secret': BOT_SECRET }
+        });
+        res.json(await r.json());
+    } catch (e) { res.status(503).json({ error: 'Bot no disponible' }); }
+});
+
+// ==========================================
 // SCRAPING IMAGEN CREW DE FORTNITE
 // ==========================================
 let cachedCrewImage = { url: null, timestamp: 0 };
