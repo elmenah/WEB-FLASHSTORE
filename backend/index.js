@@ -6,7 +6,17 @@ require('dotenv').config();
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+const ALLOWED_ORIGINS = (process.env.CORS_ORIGINS || 'https://tioflashstore.netlify.app')
+    .split(',')
+    .map(origin => origin.trim())
+    .filter(Boolean);
+
+app.use(cors({
+    origin: (origin, callback) => {
+        if (!origin || ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+        return callback(new Error('Origen no permitido por CORS'));
+    }
+}));
 
 // Configurar Mercado Pago con credenciales de Chile
 const client = new MercadoPagoConfig({
@@ -25,6 +35,8 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 // ==========================================
 const BOT_URL = process.env.BOT_URL || 'http://localhost:8000';
 const BOT_SECRET = process.env.BOT_SECRET || '';
+const MERCADOPAGO_WEBHOOK_SECRET = process.env.MERCADOPAGO_WEBHOOK_SECRET || '';
+const ZENOBANK_WEBHOOK_SECRET = process.env.ZENOBANK_WEBHOOK_SECRET || '';
 
 async function triggerBotGifts(orderId) {
     try {
@@ -111,6 +123,44 @@ function getStoreExitDate(item) {
     );
 }
 
+function getItemPavos(item) {
+    if (!item || typeof item !== 'object') return 0;
+    const rawValue = item.pavos ?? item.precio_vbucks ?? item.vbucks ?? item.cantidad_pavos ?? 0;
+    const pavos = Number(rawValue);
+    return Number.isFinite(pavos) ? pavos : 0;
+}
+
+function formatPavos(value) {
+    return new Intl.NumberFormat('es-CL').format(Number(value) || 0);
+}
+
+function parsePositiveAmount(value) {
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed) || parsed <= 0) return null;
+    return Math.round(parsed);
+}
+
+function isExpectedWebhookSecret(req, expectedSecret) {
+    if (!expectedSecret) return true;
+    const headerSecret = req.headers['x-webhook-secret'];
+    const auth = req.headers.authorization;
+    const bearerSecret = typeof auth === 'string' && auth.startsWith('Bearer ')
+        ? auth.slice(7)
+        : '';
+    return String(headerSecret || bearerSecret || '') === expectedSecret;
+}
+
+async function fetchPedidoConItems(pedidoId) {
+    const { data, error } = await supabase
+        .from('pedidos')
+        .select('*, pedido_items(*)')
+        .eq('id', pedidoId)
+        .single();
+
+    if (error || !data) return null;
+    return data;
+}
+
 // ==========================================
 // TASA DE CAMBIO DINÁMICA CLP → USD
 // ==========================================
@@ -158,7 +208,10 @@ app.post('/api/mercadopago-order', async (req, res) => {
             });
         }
 
-        const unitPrice = Math.round(Number(amount));
+        const unitPrice = parsePositiveAmount(amount);
+        if (!unitPrice) {
+            return res.status(400).json({ error: 'Monto inválido' });
+        }
         console.log('Creando preferencia con:', { orderId, subject, unitPrice, email });
 
         const preference = new Preference(client);
@@ -189,6 +242,10 @@ app.post('/api/mercadopago-order', async (req, res) => {
 
 app.post('/api/mercadopago-webhook', async (req, res) => {
     try {
+        if (!isExpectedWebhookSecret(req, MERCADOPAGO_WEBHOOK_SECRET)) {
+            return res.status(401).send('No autorizado');
+        }
+
         const { type, data } = req.body;
         console.log('Webhook recibido:', { type, data });
 
@@ -234,15 +291,15 @@ app.get('/mercadopago-success', async (req, res) => {
     try {
         let wspParams = '';
         if (pedidoId) {
-            const { data: pedidoData, error: pedidoError } = await supabase
-                .from('pedidos')
-                .select('*, pedido_items(*)')
-                .eq('id', pedidoId)
-                .single();
+            const pedidoData = await fetchPedidoConItems(pedidoId);
+            if (pedidoData?.estado !== 'Pagado') {
+                return res.redirect('https://tioflashstore.netlify.app/pago-pendiente');
+            }
 
-            if (!pedidoError && pedidoData) {
+            if (pedidoData) {
                 const CLP = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' });
                 const total = pedidoData.pedido_items.reduce((sum, item) => sum + (item.precio_unitario * item.cantidad), 0);
+                const totalPavos = pedidoData.pedido_items.reduce((sum, item) => sum + (getItemPavos(item) * item.cantidad), 0);
 
                 let mensaje = `🎉 ¡PAGO EXITOSO! - Tio Flashstore%0A`;
                 mensaje += `========================================%0A`;
@@ -250,17 +307,19 @@ app.get('/mercadopago-success', async (req, res) => {
                 mensaje += `========================================%0A`;
                 pedidoData.pedido_items.forEach((item) => {
                     mensaje += `• ${item.nombre_producto} x${item.cantidad} - ${CLP.format(item.precio_unitario)}%0A`;
+                    const itemPavos = getItemPavos(item);
+                    if (itemPavos > 0) mensaje += `  💎 ${formatPavos(itemPavos)} pavos c/u (${formatPavos(itemPavos * item.cantidad)} total)%0A`;
                     if (item.imagen_url) mensaje += `  🖼️ ${item.imagen_url}%0A`;
                     const storeExitDate = getStoreExitDate(item);
                     if (storeExitDate) mensaje += `  📅 Se va de la tienda: ${formatStoreExitDate(storeExitDate)}%0A`;
                 });
                 mensaje += `========================================%0A`;
                 mensaje += `💰 Total pagado: ${CLP.format(total)}%0A`;
+                if (totalPavos > 0) mensaje += `💎 Total de pavos: ${formatPavos(totalPavos)}%0A`;
                 mensaje += `💳 Método: Mercado Pago%0A`;
                 mensaje += `========================================%0A`;
                 mensaje += `📧 Email: ${pedidoData.correo}%0A`;
                 mensaje += `🎮 Usuario Fortnite: ${pedidoData.username_fortnite}%0A`;
-                mensaje += `🆔 RUT: ${pedidoData.rut}%0A`;
 
                 if (pedidoData.xbox_option) {
                     mensaje += `------------------------------------%0A`;
@@ -268,7 +327,6 @@ app.get('/mercadopago-success', async (req, res) => {
                     mensaje += `Opción: ${pedidoData.xbox_option}%0A`;
                     if (pedidoData.xbox_option === 'cuenta-existente') {
                         mensaje += pedidoData.xbox_email ? `Correo Xbox: ${pedidoData.xbox_email}%0A` : `Correo Xbox: No tengo cuenta de xbox%0A`;
-                        if (pedidoData.xbox_password) mensaje += `Contraseña Xbox: ${pedidoData.xbox_password}%0A`;
                     } else {
                         mensaje += `Correo Xbox: No tengo cuenta de xbox%0A`;
                     }
@@ -337,8 +395,13 @@ app.post('/api/zenobank-checkout', async (req, res) => {
             return res.status(400).json({ error: 'Faltan parámetros requeridos', required: ['orderId', 'subject', 'amount', 'email'] });
         }
 
+        const amountClp = parsePositiveAmount(amount);
+        if (!amountClp) {
+            return res.status(400).json({ error: 'Monto inválido' });
+        }
+
         const rate = await getExchangeRate();
-        const amountUSD = (Number(amount) / rate).toFixed(2);
+        const amountUSD = (amountClp / rate).toFixed(2);
         console.log('Creando checkout Zenobank:', { orderId, amountUSD, rate, email });
 
         const response = await fetch('https://api.zenobank.io/api/v1/checkouts', {
@@ -369,6 +432,10 @@ app.post('/api/zenobank-checkout', async (req, res) => {
 
 app.post('/api/zenobank-webhook', async (req, res) => {
     try {
+        if (!isExpectedWebhookSecret(req, ZENOBANK_WEBHOOK_SECRET)) {
+            return res.status(401).send('No autorizado');
+        }
+
         const payload = req.body;
         console.log('Webhook Zenobank recibido:', payload);
 
@@ -410,18 +477,15 @@ app.get('/zenobank-success', async (req, res) => {
         let wspParams = '';
 
         if (pedidoId) {
-            await supabase.from('pedidos').update({ estado: 'Pagado' }).eq('id', pedidoId);
-            triggerBotGifts(pedidoId);
+            const pedidoData = await fetchPedidoConItems(pedidoId);
+            if (pedidoData?.estado !== 'Pagado') {
+                return res.redirect('https://tioflashstore.netlify.app/pago-pendiente');
+            }
 
-            const { data: pedidoData, error: pedidoError } = await supabase
-                .from('pedidos')
-                .select('*, pedido_items(*)')
-                .eq('id', pedidoId)
-                .single();
-
-            if (!pedidoError && pedidoData) {
+            if (pedidoData) {
                 const CLP = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' });
                 const total = pedidoData.pedido_items.reduce((sum, item) => sum + (item.precio_unitario * item.cantidad), 0);
+                const totalPavos = pedidoData.pedido_items.reduce((sum, item) => sum + (getItemPavos(item) * item.cantidad), 0);
 
                 let mensaje = `🎉 ¡PAGO EXITOSO! - Tio Flashstore%0A`;
                 mensaje += `========================================%0A`;
@@ -429,23 +493,24 @@ app.get('/zenobank-success', async (req, res) => {
                 mensaje += `========================================%0A`;
                 pedidoData.pedido_items.forEach((item) => {
                     mensaje += `• ${item.nombre_producto} x${item.cantidad} - ${CLP.format(item.precio_unitario)}%0A`;
+                    const itemPavos = getItemPavos(item);
+                    if (itemPavos > 0) mensaje += `  💎 ${formatPavos(itemPavos)} pavos c/u (${formatPavos(itemPavos * item.cantidad)} total)%0A`;
                     if (item.imagen_url) mensaje += `  🖼️ ${item.imagen_url}%0A`;
                     const storeExitDate = getStoreExitDate(item);
                     if (storeExitDate) mensaje += `  📅 Se va de la tienda: ${formatStoreExitDate(storeExitDate)}%0A`;
                 });
                 mensaje += `========================================%0A`;
                 mensaje += `💰 Total pagado: ${CLP.format(total)}%0A`;
+                if (totalPavos > 0) mensaje += `💎 Total de pavos: ${formatPavos(totalPavos)}%0A`;
                 mensaje += `💳 Método: Criptomonedas (Zenobank)%0A`;
                 mensaje += `========================================%0A`;
                 mensaje += `📧 Email: ${pedidoData.correo}%0A`;
                 mensaje += `🎮 Usuario Fortnite: ${pedidoData.username_fortnite}%0A`;
-                mensaje += `🆔 RUT: ${pedidoData.rut}%0A`;
                 if (pedidoData.xbox_option) {
                     mensaje += `------------------------------------%0A`;
                     mensaje += `🎮 Fortnite Crew: ${pedidoData.xbox_option}%0A`;
                     if (pedidoData.xbox_option === 'cuenta-existente') {
                         mensaje += pedidoData.xbox_email ? `Correo Xbox: ${pedidoData.xbox_email}%0A` : `Correo Xbox: No tengo cuenta de xbox%0A`;
-                        if (pedidoData.xbox_password) mensaje += `Contraseña Xbox: ${pedidoData.xbox_password}%0A`;
                     }
                 }
                 if (pedidoData.crunchyroll_option) mensaje += `========================================%0A🎬 Crunchyroll: ${pedidoData.crunchyroll_option === 'cuenta-nueva' ? 'Cuenta nueva' : 'Activación en cuenta propia'}%0A`;
@@ -497,8 +562,13 @@ app.post('/api/paypal/create-order', async (req, res) => {
             return res.status(400).json({ error: 'Faltan parámetros requeridos', required: ['orderId', 'amount', 'email'] });
         }
 
+        const amountClp = parsePositiveAmount(amount);
+        if (!amountClp) {
+            return res.status(400).json({ error: 'Monto inválido' });
+        }
+
         const rate = await getExchangeRate();
-        const baseUSD = Number((Number(amount) / rate).toFixed(2));
+        const baseUSD = Number((amountClp / rate).toFixed(2));
         const amountUSD = ((baseUSD + 0.30) / (1 - 0.054)).toFixed(2);
         console.log('Creando orden PayPal:', { orderId, baseUSD, amountUSD, rate, email });
 
@@ -580,30 +650,42 @@ app.get('/paypal-success', async (req, res) => {
     const { order, email, token } = req.query;
     console.log('PayPal pago exitoso:', { order, email, token });
     try {
+        const pedidoId = order;
+
         if (token) {
             const accessToken = await getPayPalAccessToken();
-            await fetch(`${PAYPAL_API_BASE}/v2/checkout/orders/${token}/capture`, {
+            const captureResponse = await fetch(`${PAYPAL_API_BASE}/v2/checkout/orders/${token}/capture`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` }
             });
-        }
 
-        const pedidoId = order;
+            const captureData = await captureResponse.json();
+            if (captureData.status === 'COMPLETED') {
+                const referenceId = captureData.purchase_units?.[0]?.reference_id;
+                if (referenceId && (!pedidoId || String(referenceId) === String(pedidoId))) {
+                    const { error } = await supabase
+                        .from('pedidos')
+                        .update({ estado: 'Pagado' })
+                        .eq('id', referenceId);
+
+                    if (!error) {
+                        triggerBotGifts(referenceId);
+                    }
+                }
+            }
+        }
         let wspParams = '';
 
         if (pedidoId) {
-            await supabase.from('pedidos').update({ estado: 'Pagado' }).eq('id', pedidoId);
-            triggerBotGifts(pedidoId);
+            const pedidoData = await fetchPedidoConItems(pedidoId);
+            if (pedidoData?.estado !== 'Pagado') {
+                return res.redirect('https://tioflashstore.netlify.app/pago-pendiente');
+            }
 
-            const { data: pedidoData, error: pedidoError } = await supabase
-                .from('pedidos')
-                .select('*, pedido_items(*)')
-                .eq('id', pedidoId)
-                .single();
-
-            if (!pedidoError && pedidoData) {
+            if (pedidoData) {
                 const CLP = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' });
                 const total = pedidoData.pedido_items.reduce((sum, item) => sum + (item.precio_unitario * item.cantidad), 0);
+                const totalPavos = pedidoData.pedido_items.reduce((sum, item) => sum + (getItemPavos(item) * item.cantidad), 0);
 
                 let mensaje = `🎉 ¡PAGO EXITOSO! - Tio Flashstore%0A`;
                 mensaje += `========================================%0A`;
@@ -611,23 +693,24 @@ app.get('/paypal-success', async (req, res) => {
                 mensaje += `========================================%0A`;
                 pedidoData.pedido_items.forEach((item) => {
                     mensaje += `• ${item.nombre_producto} x${item.cantidad} - ${CLP.format(item.precio_unitario)}%0A`;
+                    const itemPavos = getItemPavos(item);
+                    if (itemPavos > 0) mensaje += `  💎 ${formatPavos(itemPavos)} pavos c/u (${formatPavos(itemPavos * item.cantidad)} total)%0A`;
                     if (item.imagen_url) mensaje += `  🖼️ ${item.imagen_url}%0A`;
                     const storeExitDate = getStoreExitDate(item);
                     if (storeExitDate) mensaje += `  📅 Se va de la tienda: ${formatStoreExitDate(storeExitDate)}%0A`;
                 });
                 mensaje += `========================================%0A`;
                 mensaje += `💰 Total pagado: ${CLP.format(total)}%0A`;
+                if (totalPavos > 0) mensaje += `💎 Total de pavos: ${formatPavos(totalPavos)}%0A`;
                 mensaje += `💳 Método: PayPal%0A`;
                 mensaje += `========================================%0A`;
                 mensaje += `📧 Email: ${pedidoData.correo}%0A`;
                 mensaje += `🎮 Usuario Fortnite: ${pedidoData.username_fortnite}%0A`;
-                mensaje += `🆔 RUT: ${pedidoData.rut}%0A`;
                 if (pedidoData.xbox_option) {
                     mensaje += `------------------------------------%0A`;
                     mensaje += `🎮 Fortnite Crew: ${pedidoData.xbox_option}%0A`;
                     if (pedidoData.xbox_option === 'cuenta-existente') {
                         mensaje += pedidoData.xbox_email ? `Correo Xbox: ${pedidoData.xbox_email}%0A` : `Correo Xbox: No tengo cuenta de xbox%0A`;
-                        if (pedidoData.xbox_password) mensaje += `Contraseña Xbox: ${pedidoData.xbox_password}%0A`;
                     }
                 }
                 if (pedidoData.crunchyroll_option) mensaje += `========================================%0A🎬 Crunchyroll: ${pedidoData.crunchyroll_option === 'cuenta-nueva' ? 'Cuenta nueva' : 'Activación en cuenta propia'}%0A`;
