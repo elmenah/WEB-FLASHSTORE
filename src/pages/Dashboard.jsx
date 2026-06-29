@@ -311,7 +311,7 @@ const Dashboard = () => {
     try {
       const { error } = await supabase
         .from('pedido_items')
-        .update({ entregado: true })
+        .update({ entregado: true, delivered_at: new Date().toISOString() })
         .eq('id', item.id);
       if (error) { setBotMsg(`Error: ${error.message}`); return; }
       setBotMsg(`✓ Marcado como entregado: ${item.nombre_producto}`);
@@ -326,17 +326,12 @@ const Dashboard = () => {
     try {
       const { data, error } = await supabase
         .from('pedido_items')
-        .select('id, nombre_producto, pedidos!inner(id, username_fortnite, estado, created_at)')
+        .select('id, nombre_producto, delivered_at, pedidos!inner(id, username_fortnite, estado, created_at)')
         .eq('entregado', true)
         .not('offer_id', 'is', null)
-        .order('id', { ascending: false })
+        .order('delivered_at', { ascending: false, nullsFirst: false })
         .limit(30);
-      if (!error) {
-        const sorted = (data || []).sort((a, b) =>
-          new Date(b.pedidos?.created_at || 0) - new Date(a.pedidos?.created_at || 0)
-        );
-        setGiftHistory(sorted);
-      }
+      if (!error) setGiftHistory(data || []);
     } catch (e) {
       console.error('Error cargando historial:', e);
     } finally {
@@ -1291,11 +1286,17 @@ const Dashboard = () => {
                                     <span className="text-gray-600 mx-1">·</span>
                                     Pedido <span className="text-gray-300">#{item.pedidos?.id}</span>
                                   </p>
-                                  {item.pedidos?.created_at && (
-                                    <p className="text-xs text-gray-500 mt-0.5">
-                                      {new Date(item.pedidos.created_at).toLocaleString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                                    </p>
-                                  )}
+                                  <p className="text-xs mt-0.5">
+                                    {item.delivered_at ? (
+                                      <span className="text-green-500/80">
+                                        Entregado: {new Date(item.delivered_at).toLocaleString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                      </span>
+                                    ) : item.pedidos?.created_at ? (
+                                      <span className="text-gray-500">
+                                        Pedido: {new Date(item.pedidos.created_at).toLocaleString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                      </span>
+                                    ) : null}
+                                  </p>
                                 </div>
                                 <span className="text-xs px-2.5 py-1 rounded-full bg-green-900/40 text-green-400 border border-green-700/30 whitespace-nowrap ml-3">
                                   ✓ Entregado
