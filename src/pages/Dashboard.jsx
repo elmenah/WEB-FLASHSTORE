@@ -281,7 +281,7 @@ const Dashboard = () => {
     try {
       const { data, error } = await supabase
         .from('pedido_items')
-        .select('id, nombre_producto, pedidos!inner(id, username_fortnite, estado)')
+        .select('id, nombre_producto, pedidos!inner(id, username_fortnite, estado, created_at)')
         .eq('entregado', true)
         .not('offer_id', 'is', null)
         .order('id', { ascending: false })
@@ -1241,6 +1241,11 @@ const Dashboard = () => {
                                     <span className="text-gray-600 mx-1">·</span>
                                     Pedido <span className="text-gray-300">#{item.pedidos?.id}</span>
                                   </p>
+                                  {item.pedidos?.created_at && (
+                                    <p className="text-xs text-gray-500 mt-0.5">
+                                      {new Date(item.pedidos.created_at).toLocaleString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                    </p>
+                                  )}
                                 </div>
                                 <span className="text-xs px-2.5 py-1 rounded-full bg-green-900/40 text-green-400 border border-green-700/30 whitespace-nowrap ml-3">
                                   ✓ Entregado
