@@ -284,9 +284,14 @@ const Dashboard = () => {
         .select('id, nombre_producto, pedidos!inner(id, username_fortnite, estado, created_at)')
         .eq('entregado', true)
         .not('offer_id', 'is', null)
-        .order('created_at', { referencingTable: 'pedidos', ascending: false })
+        .order('id', { ascending: false })
         .limit(30);
-      if (!error) setGiftHistory(data || []);
+      if (!error) {
+        const sorted = (data || []).sort((a, b) =>
+          new Date(b.pedidos?.created_at || 0) - new Date(a.pedidos?.created_at || 0)
+        );
+        setGiftHistory(sorted);
+      }
     } catch (e) {
       console.error('Error cargando historial:', e);
     } finally {
