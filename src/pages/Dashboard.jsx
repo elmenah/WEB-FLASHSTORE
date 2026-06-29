@@ -284,7 +284,7 @@ const Dashboard = () => {
         .select('id, nombre_producto, pedidos!inner(id, username_fortnite, estado, created_at)')
         .eq('entregado', true)
         .not('offer_id', 'is', null)
-        .order('id', { ascending: false })
+        .order('created_at', { referencingTable: 'pedidos', ascending: false })
         .limit(30);
       if (!error) setGiftHistory(data || []);
     } catch (e) {
