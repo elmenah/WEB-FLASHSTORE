@@ -265,14 +265,44 @@ const Dashboard = () => {
       });
       setBotMsg(data.message || data.error || 'Solicitud enviada');
       if (data.success) {
-        cargarBotStats();
         setRegaloEpicName('');
         setRegaloSelectedItem(null);
+        const botNombre = botStats.find(b => b.account_id === selectedBotId)?.display_name;
+        await sincronizarGifts(selectedBotId, botNombre);
+        await cargarBotStats();
       }
     } catch (e) {
       setBotMsg('Error enviando regalo');
     } finally {
       setRegaloLoading(false);
+    }
+  };
+
+  const enviarRegaloDesdePendiente = async (item) => {
+    const epicName = item.pedidos?.username_fortnite;
+    if (!epicName || !item.offer_id) { setBotMsg('Este item no tiene usuario Fortnite u offer_id'); return; }
+    if (!confirm(`¿Enviar "${item.nombre_producto}" a ${epicName}?`)) return;
+    setBotMsg('');
+    try {
+      const data = await botFetch('/api/bot/regalar', {
+        method: 'POST',
+        body: JSON.stringify({
+          epic_name: epicName,
+          offer_id: item.offer_id,
+          price_vbucks: item.pavos || 0,
+          item_id: String(item.id),
+        }),
+      });
+      if (data.success) {
+        setBotMsg(`✓ Regalo enviado a ${epicName}: ${item.nombre_producto}`);
+        const botNombrePend = botStats.find(b => b.account_id === selectedBotId)?.display_name;
+        await sincronizarGifts(selectedBotId, botNombrePend);
+        await Promise.all([cargarPendientes(), cargarHistorialGifts(), cargarBotStats()]);
+      } else {
+        setBotMsg(`Error: ${data.error}`);
+      }
+    } catch (e) {
+      setBotMsg('Error enviando regalo');
     }
   };
 
@@ -304,7 +334,7 @@ const Dashboard = () => {
     try {
       const { data, error } = await supabase
         .from('pedido_items')
-        .select('id, nombre_producto, bot_gift_attempts, offer_id, pedidos!inner(id, username_fortnite, estado)')
+        .select('id, nombre_producto, bot_gift_attempts, offer_id, pavos, pedidos!inner(id, username_fortnite, estado)')
         .eq('entregado', false)
         .not('offer_id', 'is', null)
         .eq('pedidos.estado', 'Pagado');
@@ -1292,13 +1322,14 @@ const Dashboard = () => {
                         ) : (
                           <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
                             {pendingGifts.map((item) => (
-                              <div key={item.id} className="flex items-center justify-between bg-yellow-900/10 hover:bg-yellow-900/20 rounded-xl px-4 py-3 border border-yellow-700/20 transition">
-                                <div className="min-w-0">
+                              <div key={item.id} className="flex items-center justify-between bg-yellow-900/10 hover:bg-yellow-900/20 rounded-xl px-4 py-3 border border-yellow-700/20 transition gap-3">
+                                <div className="min-w-0 flex-1">
                                   <p className="text-white text-sm font-medium truncate">{item.nombre_producto}</p>
                                   <p className="text-xs text-gray-400 mt-0.5">
                                     🎮 <span className="text-gray-300">{item.pedidos?.username_fortnite || '—'}</span>
                                     <span className="text-gray-600 mx-1">·</span>
-                                    Pedido <span className="text-gray-300">#{item.pedidos?.id}</span>
+                                    Pedido <span className="text-gray-300">#{item.pedidos?.id?.slice(0, 8)}…</span>
+                                    {item.pavos > 0 && <span className="text-yellow-500 ml-1">· {item.pavos.toLocaleString()} V-Bucks</span>}
                                   </p>
                                   {item.bot_gift_attempts > 0 && (
                                     <p className="text-xs text-orange-400 mt-0.5">
@@ -1306,9 +1337,12 @@ const Dashboard = () => {
                                     </p>
                                   )}
                                 </div>
-                                <span className="text-xs px-2.5 py-1 rounded-full bg-yellow-900/40 text-yellow-400 border border-yellow-700/30 whitespace-nowrap ml-3">
-                                  ⏳ Pendiente
-                                </span>
+                                <button
+                                  onClick={() => enviarRegaloDesdePendiente(item)}
+                                  className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg transition whitespace-nowrap shrink-0"
+                                >
+                                  Enviar
+                                </button>
                               </div>
                             ))}
                           </div>
