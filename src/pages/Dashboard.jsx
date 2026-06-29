@@ -1048,8 +1048,12 @@ const Dashboard = () => {
                               const lib = new Date(env.getTime() + 86400000);
                               return (
                                 <div key={i} className="flex justify-between text-xs">
-                                  <span className="text-gray-400">Slot {i+1}: {env.toLocaleTimeString('es-CL', {hour:'2-digit', minute:'2-digit'})}</span>
-                                  <span className="text-yellow-500">↺ {lib.toLocaleDateString('es-CL', {day:'2-digit', month:'2-digit'})} {lib.toLocaleTimeString('es-CL', {hour:'2-digit', minute:'2-digit'})}</span>
+                                  <span className="text-gray-400">
+                                    Slot {i+1}: {env.toLocaleDateString('es-CL', {day:'2-digit', month:'2-digit'})} {env.toLocaleTimeString('es-CL', {hour:'2-digit', minute:'2-digit'})}
+                                  </span>
+                                  <span className="text-yellow-500/70" title="Libera slot">
+                                    ↺ libera {lib.toLocaleDateString('es-CL', {day:'2-digit', month:'2-digit'})} {lib.toLocaleTimeString('es-CL', {hour:'2-digit', minute:'2-digit'})}
+                                  </span>
                                 </div>
                               );
                             })}
