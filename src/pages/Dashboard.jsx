@@ -306,6 +306,21 @@ const Dashboard = () => {
     }
   };
 
+  const marcarItemEntregado = async (item) => {
+    if (!confirm(`¿Marcar "${item.nombre_producto}" para ${item.pedidos?.username_fortnite || '?'} como ya entregado?`)) return;
+    try {
+      const { error } = await supabase
+        .from('pedido_items')
+        .update({ entregado: true })
+        .eq('id', item.id);
+      if (error) { setBotMsg(`Error: ${error.message}`); return; }
+      setBotMsg(`✓ Marcado como entregado: ${item.nombre_producto}`);
+      await Promise.all([cargarPendientes(), cargarHistorialGifts()]);
+    } catch (e) {
+      setBotMsg('Error al marcar como entregado');
+    }
+  };
+
   const cargarHistorialGifts = async () => {
     setHistorialLoading(true);
     try {
@@ -1337,12 +1352,21 @@ const Dashboard = () => {
                                     </p>
                                   )}
                                 </div>
-                                <button
-                                  onClick={() => enviarRegaloDesdePendiente(item)}
-                                  className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg transition whitespace-nowrap shrink-0"
-                                >
-                                  Enviar
-                                </button>
+                                <div className="flex gap-1.5 shrink-0">
+                                  <button
+                                    onClick={() => enviarRegaloDesdePendiente(item)}
+                                    className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg transition whitespace-nowrap"
+                                  >
+                                    Enviar
+                                  </button>
+                                  <button
+                                    onClick={() => marcarItemEntregado(item)}
+                                    title="Marcar como ya entregado (no envía el regalo)"
+                                    className="px-3 py-1.5 bg-green-700/60 hover:bg-green-700 text-green-300 text-xs font-semibold rounded-lg border border-green-600/40 transition whitespace-nowrap"
+                                  >
+                                    ✓ Ya enviado
+                                  </button>
+                                </div>
                               </div>
                             ))}
                           </div>
