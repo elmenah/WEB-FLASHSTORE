@@ -57,6 +57,8 @@ const Dashboard = () => {
   const [pendingGifts, setPendingGifts] = useState([]);
   const [historialLoading, setHistorialLoading] = useState(false);
   const [pendientesLoading, setPendientesLoading] = useState(false);
+  const [marcarFechaItem, setMarcarFechaItem] = useState(null);
+  const [marcarFechaValue, setMarcarFechaValue] = useState('');
 
   const [pavosGastados, setPavosGastados] = useState({
     total_pavos_gastados: 0,
@@ -306,15 +308,26 @@ const Dashboard = () => {
     }
   };
 
-  const marcarItemEntregado = async (item) => {
-    if (!confirm(`¿Marcar "${item.nombre_producto}" para ${item.pedidos?.username_fortnite || '?'} como ya entregado?`)) return;
+  const abrirMarcarFecha = (item) => {
+    const now = new Date();
+    const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    setMarcarFechaItem(item);
+    setMarcarFechaValue(local);
+  };
+
+  const confirmarMarcarEntregado = async () => {
+    if (!marcarFechaItem) return;
     try {
+      const deliveredAt = marcarFechaValue
+        ? new Date(marcarFechaValue).toISOString()
+        : new Date().toISOString();
       const { error } = await supabase
         .from('pedido_items')
-        .update({ entregado: true, delivered_at: new Date().toISOString() })
-        .eq('id', item.id);
+        .update({ entregado: true, delivered_at: deliveredAt })
+        .eq('id', marcarFechaItem.id);
       if (error) { setBotMsg(`Error: ${error.message}`); return; }
-      setBotMsg(`✓ Marcado como entregado: ${item.nombre_producto}`);
+      setBotMsg(`✓ Marcado como entregado: ${marcarFechaItem.nombre_producto}`);
+      setMarcarFechaItem(null);
       await Promise.all([cargarPendientes(), cargarHistorialGifts()]);
     } catch (e) {
       setBotMsg('Error al marcar como entregado');
@@ -1361,7 +1374,7 @@ const Dashboard = () => {
                                     Enviar
                                   </button>
                                   <button
-                                    onClick={() => marcarItemEntregado(item)}
+                                    onClick={() => abrirMarcarFecha(item)}
                                     title="Marcar como ya entregado (no envía el regalo)"
                                     className="px-3 py-1.5 bg-green-700/60 hover:bg-green-700 text-green-300 text-xs font-semibold rounded-lg border border-green-600/40 transition whitespace-nowrap"
                                   >
@@ -1370,6 +1383,43 @@ const Dashboard = () => {
                                 </div>
                               </div>
                             ))}
+                          </div>
+                        )}
+
+                        {/* Panel marcar fecha */}
+                        {marcarFechaItem && (
+                          <div className="mt-4 p-4 bg-green-900/20 border border-green-600/40 rounded-xl">
+                            <p className="text-sm text-green-300 font-semibold mb-1">
+                              ✓ Marcar como entregado
+                            </p>
+                            <p className="text-xs text-gray-400 mb-3">
+                              <span className="text-white">{marcarFechaItem.nombre_producto}</span> → {marcarFechaItem.pedidos?.username_fortnite}
+                            </p>
+                            <div className="flex items-center gap-3 flex-wrap">
+                              <div>
+                                <label className="text-xs text-gray-400 block mb-1">Fecha y hora de entrega</label>
+                                <input
+                                  type="datetime-local"
+                                  value={marcarFechaValue}
+                                  onChange={e => setMarcarFechaValue(e.target.value)}
+                                  className="bg-gray-800 border border-gray-600 text-white text-sm rounded-lg px-3 py-1.5"
+                                />
+                              </div>
+                              <div className="flex gap-2 mt-4">
+                                <button
+                                  onClick={confirmarMarcarEntregado}
+                                  className="px-4 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-lg transition"
+                                >
+                                  Confirmar
+                                </button>
+                                <button
+                                  onClick={() => setMarcarFechaItem(null)}
+                                  className="px-4 py-1.5 bg-gray-700 hover:bg-gray-600 text-gray-300 text-sm rounded-lg transition"
+                                >
+                                  Cancelar
+                                </button>
+                              </div>
+                            </div>
                           </div>
                         )}
                       </div>
