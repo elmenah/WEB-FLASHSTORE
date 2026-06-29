@@ -53,6 +53,10 @@ const Dashboard = () => {
   const [regaloEpicName, setRegaloEpicName] = useState('');
   const [regaloSelectedItem, setRegaloSelectedItem] = useState(null);
   const [regaloLoading, setRegaloLoading] = useState(false);
+  const [giftHistory, setGiftHistory] = useState([]);
+  const [pendingGifts, setPendingGifts] = useState([]);
+  const [historialLoading, setHistorialLoading] = useState(false);
+  const [pendientesLoading, setPendientesLoading] = useState(false);
 
   const [pavosGastados, setPavosGastados] = useState({
     total_pavos_gastados: 0,
@@ -272,10 +276,47 @@ const Dashboard = () => {
     }
   };
 
+  const cargarHistorialGifts = async () => {
+    setHistorialLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('pedido_items')
+        .select('id, nombre_producto, pedidos!inner(id, username_fortnite, estado)')
+        .eq('entregado', true)
+        .not('offer_id', 'is', null)
+        .order('id', { ascending: false })
+        .limit(30);
+      if (!error) setGiftHistory(data || []);
+    } catch (e) {
+      console.error('Error cargando historial:', e);
+    } finally {
+      setHistorialLoading(false);
+    }
+  };
+
+  const cargarPendientes = async () => {
+    setPendientesLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('pedido_items')
+        .select('id, nombre_producto, bot_gift_attempts, offer_id, pedidos!inner(id, username_fortnite, estado)')
+        .eq('entregado', false)
+        .not('offer_id', 'is', null)
+        .eq('pedidos.estado', 'Pagado');
+      if (!error) setPendingGifts(data || []);
+    } catch (e) {
+      console.error('Error cargando pendientes:', e);
+    } finally {
+      setPendientesLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (tabComando === 'amigos' && selectedBotId) cargarAmigos(selectedBotId);
     if (tabComando === 'tienda' && tiendaItems.length === 0) cargarTienda();
     if (tabComando === 'herramientas' && tiendaItems.length === 0) cargarTienda();
+    if (tabComando === 'historial') cargarHistorialGifts();
+    if (tabComando === 'pendientes') cargarPendientes();
   }, [tabComando, selectedBotId]);
 
   useEffect(() => {
@@ -808,110 +849,176 @@ const Dashboard = () => {
           const tiendaFiltrada = tiendaItems.filter(item =>
             !tiendaBusqueda || item.nombre.toLowerCase().includes(tiendaBusqueda.toLowerCase())
           );
+          const botsOnline = botStats.filter(b => b.online).length;
 
           return (
             <div className="space-y-6">
+
               {/* Mensaje de estado */}
               {botMsg && (
-                <div className="px-4 py-3 bg-blue-900 border border-blue-500 rounded-lg text-blue-200 flex items-center justify-between">
-                  <span>{botMsg}</span>
-                  <button onClick={() => setBotMsg('')} className="text-blue-400 hover:text-white ml-4">✕</button>
+                <div className="px-4 py-3 bg-blue-950 border border-blue-500/50 rounded-xl text-blue-200 flex items-center justify-between">
+                  <span className="text-sm">{botMsg}</span>
+                  <button onClick={() => setBotMsg('')} className="text-blue-400 hover:text-white ml-4 text-lg leading-none">×</button>
                 </div>
               )}
 
-              {/* Acciones globales */}
-              <div className="flex flex-wrap gap-3">
-                <button onClick={cargarBotStats} disabled={botLoading} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50">
-                  {botLoading ? '...' : 'Actualizar'}
-                </button>
-                <button onClick={refreshBalances} disabled={botLoading} className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition disabled:opacity-50">
-                  Sincronizar Saldos
-                </button>
-                <button onClick={async () => { if (!confirm('¿Recargar todos los bots?')) return; const d = await botFetch('/api/bot/reload', { method: 'POST' }); setBotMsg(d?.message || 'Recarga enviada'); }} disabled={botLoading} className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition disabled:opacity-50">
-                  Recargar Bots
-                </button>
+              {/* Header */}
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div>
+                  <h2 className="text-2xl font-bold text-white">Bot Manager</h2>
+                  <p className="text-sm text-gray-400 mt-0.5">
+                    <span className={`inline-flex items-center gap-1.5 ${botsOnline > 0 ? 'text-green-400' : 'text-gray-500'}`}>
+                      <span className={`w-2 h-2 rounded-full ${botsOnline > 0 ? 'bg-green-400 animate-pulse' : 'bg-gray-500'}`} />
+                      {botsOnline} bot{botsOnline !== 1 ? 's' : ''} online
+                    </span>
+                  </p>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  <button
+                    onClick={cargarBotStats}
+                    disabled={botLoading}
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm rounded-xl border border-gray-600 transition disabled:opacity-50"
+                  >
+                    <span className={botLoading ? 'animate-spin' : ''}>↻</span> Actualizar
+                  </button>
+                  <button
+                    onClick={refreshBalances}
+                    disabled={botLoading}
+                    className="flex items-center gap-2 px-4 py-2 bg-yellow-600/20 hover:bg-yellow-600/30 text-yellow-400 text-sm rounded-xl border border-yellow-600/40 transition disabled:opacity-50"
+                  >
+                    💰 Sincronizar Saldos
+                  </button>
+                  <button
+                    onClick={async () => { if (!confirm('¿Recargar todos los bots?')) return; const d = await botFetch('/api/bot/reload', { method: 'POST' }); setBotMsg(d?.message || 'Recarga enviada'); }}
+                    disabled={botLoading}
+                    className="flex items-center gap-2 px-4 py-2 bg-purple-600/20 hover:bg-purple-600/30 text-purple-400 text-sm rounded-xl border border-purple-600/40 transition disabled:opacity-50"
+                  >
+                    ⟳ Recargar Bots
+                  </button>
+                </div>
               </div>
 
-              {/* Tarjetas de bots (compactas) */}
+              {/* Bot cards */}
               {!botLoading && botStats.length === 0 && (
-                <div className="text-center py-16 text-gray-500">No hay bots registrados o no se pudo conectar.</div>
+                <div className="text-center py-20 text-gray-500 bg-gray-800/30 rounded-2xl border border-gray-700/50">
+                  <p className="text-4xl mb-3">🤖</p>
+                  <p>No hay bots registrados o no se pudo conectar.</p>
+                </div>
               )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {botStats.map((bot) => (
-                  <div key={bot.account_id} className={`bg-gray-800 rounded-xl border p-5 ${bot.online ? 'border-green-600' : 'border-gray-600'} ${selectedBotId === bot.account_id ? 'ring-2 ring-blue-500' : ''}`}>
-                    {/* Header */}
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <h3 className="font-bold text-white text-base">{bot.display_name || bot.account_id}</h3>
-                        <p className="text-xs text-gray-500 truncate max-w-[180px]">{bot.account_id}</p>
-                      </div>
-                      <div className="flex flex-col gap-1 items-end">
-                        <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${bot.online ? 'bg-green-900 text-green-300' : 'bg-gray-700 text-gray-400'}`}>
-                          {bot.online ? 'Online' : 'Offline'}
-                        </span>
-                        <span className={`px-2 py-0.5 text-xs rounded-full ${bot.is_pagado ? 'bg-red-900 text-red-300' : 'bg-emerald-900 text-emerald-300'}`}>
-                          {bot.is_pagado ? 'Sin saldo' : 'Con saldo'}
-                        </span>
-                      </div>
-                    </div>
+                  <div
+                    key={bot.account_id}
+                    className={`relative bg-gray-800/60 rounded-2xl border overflow-hidden transition-all
+                      ${bot.online ? 'border-green-500/25' : 'border-gray-700/50'}
+                      ${selectedBotId === bot.account_id ? 'ring-2 ring-blue-500 bg-gray-800' : 'hover:bg-gray-800/90'}
+                    `}
+                  >
+                    {/* Top accent bar */}
+                    <div className={`h-1 w-full ${bot.online ? 'bg-gradient-to-r from-green-500 to-emerald-400' : 'bg-gray-700'}`} />
 
-                    {/* Stats row */}
-                    <div className="flex gap-4 mb-3">
-                      <div>
-                        <p className="text-xs text-gray-400">V-Bucks</p>
-                        <p className="text-yellow-400 font-bold text-xl">{(bot.pavos ?? 0).toLocaleString()}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-400">Regalos</p>
-                        <p className="text-purple-400 font-bold text-xl">{bot.gifts_sent ?? 0}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-400">Amigos</p>
-                        <p className="text-blue-400 font-bold text-xl">{bot.friends_count ?? 0}</p>
-                      </div>
-                    </div>
-
-                    {/* Slots */}
-                    <div className="bg-gray-700 rounded-lg p-3 mb-3">
-                      <div className="flex items-center justify-between mb-1">
-                        <p className="text-xs text-gray-400">Slots de regalo hoy</p>
-                        <button onClick={() => sincronizarGifts(bot.account_id, bot.display_name)} className="text-xs text-blue-400 hover:text-blue-300">↻ Sync</button>
-                      </div>
-                      <div className="flex items-center gap-1.5 mb-1">
-                        {[...Array(5)].map((_, i) => (
-                          <div key={i} className={`w-6 h-6 rounded ${i < (bot.gifts_remaining ?? 5) ? 'bg-green-500' : 'bg-gray-600'}`} />
-                        ))}
-                        <span className="text-white font-bold ml-1 text-sm">{bot.gifts_remaining ?? 5}/5</span>
-                      </div>
-                      {bot.gift_timestamps?.length > 0 && (
-                        <div className="mt-2 space-y-1 border-t border-gray-600 pt-2">
-                          {bot.gift_timestamps.map((ts, i) => {
-                            const env = new Date(ts);
-                            const lib = new Date(env.getTime() + 86400000);
-                            return (
-                              <div key={i} className="flex justify-between text-xs">
-                                <span className="text-gray-400">Slot {i+1}: {env.toLocaleTimeString('es-CL', {hour:'2-digit',minute:'2-digit'})}</span>
-                                <span className="text-yellow-400">↺ {lib.toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit'})} {lib.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'})}</span>
-                              </div>
-                            );
-                          })}
+                    <div className="p-5">
+                      {/* Header */}
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-bold text-white text-base truncate">{bot.display_name || bot.account_id}</h3>
+                          <p className="text-xs text-gray-500 font-mono truncate">{bot.account_id}</p>
                         </div>
-                      )}
-                    </div>
+                        <div className="flex flex-col gap-1.5 items-end ml-3 shrink-0">
+                          <span className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full border
+                            ${bot.online
+                              ? 'bg-green-500/10 text-green-400 border-green-500/30'
+                              : 'bg-gray-700/50 text-gray-400 border-gray-600/50'}`}
+                          >
+                            <span className={`w-1.5 h-1.5 rounded-full ${bot.online ? 'bg-green-400 animate-pulse' : 'bg-gray-500'}`} />
+                            {bot.online ? 'Online' : 'Offline'}
+                          </span>
+                          <span className={`px-2.5 py-0.5 text-xs rounded-full border
+                            ${bot.is_pagado
+                              ? 'bg-red-500/10 text-red-400 border-red-500/30'
+                              : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'}`}
+                          >
+                            {bot.is_pagado ? 'Sin saldo' : 'Con saldo'}
+                          </span>
+                        </div>
+                      </div>
 
-                    {/* Botones de acción */}
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => setSelectedBotId(bot.account_id)}
-                        className={`flex-1 px-3 py-1.5 text-xs rounded-lg transition ${selectedBotId === bot.account_id ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}
-                      >
-                        Seleccionar
-                      </button>
-                      {bot.is_pagado && (
-                        <button onClick={() => reactivarBot(bot.account_id, bot.display_name)} className="flex-1 px-3 py-1.5 bg-orange-600 text-white text-xs rounded-lg hover:bg-orange-700 transition">
-                          Reactivar
+                      {/* Stats */}
+                      <div className="grid grid-cols-3 gap-2 mb-4">
+                        <div className="bg-gray-900/50 rounded-xl p-3 text-center border border-gray-700/30">
+                          <p className="text-yellow-400 font-bold text-lg leading-tight">{(bot.pavos ?? 0).toLocaleString()}</p>
+                          <p className="text-xs text-gray-500 mt-0.5">V-Bucks</p>
+                        </div>
+                        <div className="bg-gray-900/50 rounded-xl p-3 text-center border border-gray-700/30">
+                          <p className="text-purple-400 font-bold text-lg leading-tight">{bot.gifts_sent ?? 0}</p>
+                          <p className="text-xs text-gray-500 mt-0.5">Regalos</p>
+                        </div>
+                        <div className="bg-gray-900/50 rounded-xl p-3 text-center border border-gray-700/30">
+                          <p className="text-blue-400 font-bold text-lg leading-tight">{bot.friends_count ?? 0}</p>
+                          <p className="text-xs text-gray-500 mt-0.5">Amigos</p>
+                        </div>
+                      </div>
+
+                      {/* Gift slots */}
+                      <div className="bg-gray-900/40 rounded-xl p-3 mb-4 border border-gray-700/30">
+                        <div className="flex items-center justify-between mb-2.5">
+                          <p className="text-xs text-gray-400 font-medium">Slots de regalo hoy</p>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold text-white">{bot.gifts_remaining ?? 5}/5</span>
+                            <button
+                              onClick={() => sincronizarGifts(bot.account_id, bot.display_name)}
+                              className="text-xs text-blue-400 hover:text-blue-300 transition"
+                              title="Sincronizar"
+                            >
+                              ↻
+                            </button>
+                          </div>
+                        </div>
+                        <div className="flex gap-1.5">
+                          {[...Array(5)].map((_, i) => (
+                            <div
+                              key={i}
+                              className={`flex-1 h-2 rounded-full transition-all ${i < (bot.gifts_remaining ?? 5) ? 'bg-green-400' : 'bg-gray-600'}`}
+                            />
+                          ))}
+                        </div>
+                        {bot.gift_timestamps?.length > 0 && (
+                          <div className="mt-2.5 space-y-1 border-t border-gray-700/50 pt-2">
+                            {bot.gift_timestamps.map((ts, i) => {
+                              const env = new Date(ts);
+                              const lib = new Date(env.getTime() + 86400000);
+                              return (
+                                <div key={i} className="flex justify-between text-xs">
+                                  <span className="text-gray-400">Slot {i+1}: {env.toLocaleTimeString('es-CL', {hour:'2-digit', minute:'2-digit'})}</span>
+                                  <span className="text-yellow-500">↺ {lib.toLocaleDateString('es-CL', {day:'2-digit', month:'2-digit'})} {lib.toLocaleTimeString('es-CL', {hour:'2-digit', minute:'2-digit'})}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setSelectedBotId(bot.account_id)}
+                          className={`flex-1 py-2 text-xs font-semibold rounded-xl transition
+                            ${selectedBotId === bot.account_id
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-gray-700/80 text-gray-300 hover:bg-gray-700'}`}
+                        >
+                          {selectedBotId === bot.account_id ? '✓ Seleccionado' : 'Seleccionar'}
                         </button>
-                      )}
+                        {bot.is_pagado && (
+                          <button
+                            onClick={() => reactivarBot(bot.account_id, bot.display_name)}
+                            className="flex-1 py-2 bg-orange-600/80 text-white text-xs font-semibold rounded-xl hover:bg-orange-600 transition"
+                          >
+                            Reactivar
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -919,19 +1026,25 @@ const Dashboard = () => {
 
               {/* Panel de comandos */}
               {botStats.length > 0 && (
-                <div className="bg-gray-800 rounded-xl border border-gray-700">
-                  {/* Sub-tabs + selector de bot */}
-                  <div className="flex items-center justify-between px-5 pt-4 pb-0 border-b border-gray-700 flex-wrap gap-3">
-                    <div className="flex gap-1">
+                <div className="bg-gray-800/50 rounded-2xl border border-gray-700/50 overflow-hidden">
+
+                  {/* Sub-tabs */}
+                  <div className="flex items-center justify-between px-5 pt-1 pb-0 border-b border-gray-700/50 flex-wrap gap-2 overflow-x-auto">
+                    <div className="flex gap-0.5">
                       {[
-                        { id: 'herramientas', label: 'Herramientas' },
-                        { id: 'tienda', label: 'Tienda' },
-                        { id: 'amigos', label: `Amigos${friendsList.length > 0 ? ` (${friendsList.length})` : ''}` },
+                        { id: 'herramientas', label: '🔧 Herramientas' },
+                        { id: 'historial',    label: '📦 Historial' },
+                        { id: 'pendientes',   label: `⏳ Pendientes${pendingGifts.length > 0 ? ` (${pendingGifts.length})` : ''}` },
+                        { id: 'tienda',       label: '🛒 Tienda' },
+                        { id: 'amigos',       label: `👥 Amigos${friendsList.length > 0 ? ` (${friendsList.length})` : ''}` },
                       ].map(t => (
                         <button
                           key={t.id}
                           onClick={() => setTabComando(t.id)}
-                          className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition ${tabComando === t.id ? 'border-blue-500 text-blue-400' : 'border-transparent text-gray-400 hover:text-white'}`}
+                          className={`px-4 py-3 text-sm font-medium border-b-2 transition whitespace-nowrap
+                            ${tabComando === t.id
+                              ? 'border-blue-500 text-white'
+                              : 'border-transparent text-gray-400 hover:text-gray-200'}`}
                         >
                           {t.label}
                         </button>
@@ -958,7 +1071,7 @@ const Dashboard = () => {
 
                         {/* Verificar / Agregar amigo */}
                         <div>
-                          <h4 className="text-sm font-semibold text-gray-300 mb-3">Verificar / Agregar amigo</h4>
+                          <h4 className="text-sm font-semibold text-gray-200 mb-3">Verificar / Agregar amigo</h4>
                           <div className="flex flex-col sm:flex-row gap-3">
                             <input
                               type="text"
@@ -966,61 +1079,61 @@ const Dashboard = () => {
                               value={friendInput}
                               onChange={(e) => { setFriendInput(e.target.value); setFriendResult(null); }}
                               onKeyDown={(e) => e.key === 'Enter' && verificarAmigo()}
-                              className="flex-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                              className="flex-1 px-4 py-2.5 bg-gray-700/80 border border-gray-600/50 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
                             />
-                            <button onClick={verificarAmigo} disabled={friendLoading} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 whitespace-nowrap">
+                            <button onClick={verificarAmigo} disabled={friendLoading} className="px-4 py-2.5 bg-blue-600 text-white text-sm rounded-xl hover:bg-blue-700 transition disabled:opacity-50 whitespace-nowrap">
                               {friendLoading ? 'Buscando...' : 'Ver si es amigo'}
                             </button>
-                            <button onClick={agregarAmigo} disabled={friendLoading} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:opacity-50 whitespace-nowrap">
+                            <button onClick={agregarAmigo} disabled={friendLoading} className="px-4 py-2.5 bg-green-600 text-white text-sm rounded-xl hover:bg-green-700 transition disabled:opacity-50 whitespace-nowrap">
                               Agregar amigo
                             </button>
                           </div>
                           {friendResult && (
-                            <div className="mt-4 p-4 bg-gray-700 rounded-lg">
-                              <p className="text-white font-semibold mb-2">
+                            <div className="mt-4 p-4 bg-gray-700/50 rounded-xl border border-gray-600/30">
+                              <p className="text-white font-semibold mb-3">
                                 {friendResult.display_name || friendInput}
-                                <span className="text-gray-400 text-sm ml-2">({friendResult.epic_id})</span>
+                                <span className="text-gray-400 text-xs ml-2 font-mono">{friendResult.epic_id}</span>
                               </p>
                               <div className="flex flex-col gap-2">
                                 {(friendResult.bots || []).map((b) => (
-                                  <div key={b.bot_account_id} className="flex items-center justify-between bg-gray-600 rounded-lg px-4 py-2">
+                                  <div key={b.bot_account_id} className="flex items-center justify-between bg-gray-600/50 rounded-lg px-4 py-2.5">
                                     <span className="text-white text-sm">{b.bot_display_name}</span>
                                     {b.es_amigo ? (
-                                      <span className={`text-xs ${b.tiempo_amistad_horas >= 48 ? 'text-green-400' : 'text-yellow-400'}`}>
+                                      <span className={`text-xs px-2.5 py-1 rounded-full ${b.tiempo_amistad_horas >= 48 ? 'bg-green-900/50 text-green-400' : 'bg-yellow-900/50 text-yellow-400'}`}>
                                         {b.tiempo_amistad_horas >= 48
                                           ? `${Math.floor(b.tiempo_amistad_horas / 24)}d — puede regalar`
                                           : `${b.tiempo_amistad_horas?.toFixed(0)}h — faltan ${(48 - b.tiempo_amistad_horas).toFixed(0)}h`}
                                       </span>
                                     ) : (
-                                      <span className="text-red-400 text-xs">No es amigo</span>
+                                      <span className="text-xs px-2.5 py-1 rounded-full bg-red-900/50 text-red-400">No es amigo</span>
                                     )}
                                   </div>
                                 ))}
                               </div>
-                                        </div>
+                            </div>
                           )}
                           {friendResult?.error && <p className="mt-3 text-red-400 text-sm">{friendResult.error}</p>}
                         </div>
 
-                        <div className="border-t border-gray-700" />
+                        <div className="border-t border-gray-700/50" />
 
                         {/* Enviar regalo manual */}
                         <div>
-                          <h4 className="text-sm font-semibold text-gray-300 mb-3">Enviar regalo manualmente</h4>
+                          <h4 className="text-sm font-semibold text-gray-200 mb-3">Enviar regalo manualmente</h4>
                           <div className="flex gap-2 mb-3">
                             <input
                               type="text"
                               placeholder="Nombre Epic del destinatario..."
                               value={regaloEpicName}
                               onChange={(e) => setRegaloEpicName(e.target.value)}
-                              className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:outline-none text-sm"
+                              className="flex-1 px-3 py-2.5 bg-gray-700/80 border border-gray-600/50 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:outline-none text-sm"
                             />
                             <input
                               type="text"
                               placeholder="Buscar item..."
                               value={tiendaBusqueda}
                               onChange={(e) => setTiendaBusqueda(e.target.value)}
-                              className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:outline-none text-sm"
+                              className="flex-1 px-3 py-2.5 bg-gray-700/80 border border-gray-600/50 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:outline-none text-sm"
                             />
                           </div>
                           {tiendaLoading ? (
@@ -1032,13 +1145,16 @@ const Dashboard = () => {
                                   key={item.offer_id}
                                   onClick={() => setRegaloSelectedItem(item)}
                                   title={`${item.nombre} — ${item.precio_vbucks.toLocaleString()} V-Bucks`}
-                                  className={`rounded-lg cursor-pointer border transition overflow-hidden ${regaloSelectedItem?.offer_id === item.offer_id ? 'border-purple-500 ring-1 ring-purple-500' : 'border-gray-600 hover:border-gray-400'}`}
+                                  className={`rounded-xl cursor-pointer border transition overflow-hidden
+                                    ${regaloSelectedItem?.offer_id === item.offer_id
+                                      ? 'border-purple-500 ring-2 ring-purple-500/50'
+                                      : 'border-gray-600/50 hover:border-gray-400'}`}
                                 >
                                   {item.imagen
                                     ? <img src={item.imagen} alt={item.nombre} className="w-full aspect-square object-cover" />
                                     : <div className="w-full aspect-square bg-gray-700 flex items-center justify-center"><span className="text-gray-500 text-xs text-center px-1 leading-tight">{item.nombre}</span></div>
                                   }
-                                  <div className="px-1 py-0.5 bg-gray-800">
+                                  <div className="px-1 py-0.5 bg-gray-800/80">
                                     <p className="text-yellow-400 text-xs font-bold text-center">{item.precio_vbucks.toLocaleString()}</p>
                                   </div>
                                 </div>
@@ -1046,15 +1162,15 @@ const Dashboard = () => {
                             </div>
                           )}
                           {regaloSelectedItem && (
-                            <div className="mt-3 p-3 bg-purple-900/20 border border-purple-700 rounded-lg flex items-center justify-between gap-3">
+                            <div className="mt-3 p-3.5 bg-purple-900/20 border border-purple-700/40 rounded-xl flex items-center justify-between gap-3">
                               <div>
                                 <p className="text-white text-sm font-semibold">{regaloSelectedItem.nombre}</p>
-                                <p className="text-yellow-400 text-xs">{regaloSelectedItem.precio_vbucks.toLocaleString()} V-Bucks</p>
+                                <p className="text-yellow-400 text-xs mt-0.5">{regaloSelectedItem.precio_vbucks.toLocaleString()} V-Bucks</p>
                               </div>
                               <button
                                 onClick={enviarRegaloManual}
                                 disabled={regaloLoading || !regaloEpicName.trim()}
-                                className="px-4 py-2 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 disabled:opacity-50 transition whitespace-nowrap"
+                                className="px-4 py-2 bg-purple-600 text-white text-sm rounded-xl hover:bg-purple-700 disabled:opacity-50 transition whitespace-nowrap"
                               >
                                 {regaloLoading ? 'Enviando...' : 'Enviar Regalo'}
                               </button>
@@ -1062,12 +1178,12 @@ const Dashboard = () => {
                           )}
                         </div>
 
-                        <div className="border-t border-gray-700" />
+                        <div className="border-t border-gray-700/50" />
 
                         {/* Actualizar V-Bucks manualmente */}
                         <div>
-                          <h4 className="text-sm font-semibold text-gray-300 mb-3">
-                            Actualizar V-Bucks — {selectedBot?.display_name}
+                          <h4 className="text-sm font-semibold text-gray-200 mb-3">
+                            Actualizar V-Bucks — <span className="text-yellow-400">{selectedBot?.display_name}</span>
                           </h4>
                           <div className="flex gap-3 max-w-sm">
                             <input
@@ -1075,11 +1191,11 @@ const Dashboard = () => {
                               placeholder="V-Bucks"
                               value={pavosInput[selectedBotId] || ''}
                               onChange={(e) => setPavosInput(prev => ({ ...prev, [selectedBotId]: e.target.value }))}
-                              className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:ring-2 focus:ring-yellow-500 focus:outline-none"
+                              className="flex-1 px-3 py-2.5 bg-gray-700/80 border border-gray-600/50 rounded-xl text-white text-sm focus:ring-2 focus:ring-yellow-500 focus:outline-none"
                             />
                             <button
                               onClick={() => setPavos(selectedBotId, selectedBot?.display_name)}
-                              className="px-4 py-2 bg-yellow-600 text-white text-sm rounded-lg hover:bg-yellow-700 transition"
+                              className="px-4 py-2 bg-yellow-600 text-white text-sm rounded-xl hover:bg-yellow-700 transition"
                             >
                               Guardar
                             </button>
@@ -1088,15 +1204,117 @@ const Dashboard = () => {
                       </div>
                     )}
 
+                    {/* === HISTORIAL === */}
+                    {tabComando === 'historial' && (
+                      <div>
+                        <div className="flex items-center justify-between mb-5">
+                          <div>
+                            <h4 className="text-sm font-semibold text-white">Últimos regalos enviados</h4>
+                            <p className="text-xs text-gray-400 mt-0.5">{giftHistory.length} registros</p>
+                          </div>
+                          <button
+                            onClick={cargarHistorialGifts}
+                            disabled={historialLoading}
+                            className="px-3 py-1.5 bg-gray-700 text-white text-xs rounded-lg hover:bg-gray-600 transition disabled:opacity-50"
+                          >
+                            {historialLoading ? '...' : '↻ Actualizar'}
+                          </button>
+                        </div>
+                        {historialLoading ? (
+                          <div className="flex items-center gap-2 text-gray-400 py-8 justify-center">
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500" />
+                            Cargando historial...
+                          </div>
+                        ) : giftHistory.length === 0 ? (
+                          <div className="text-center py-12 text-gray-500">
+                            <p className="text-3xl mb-2">📦</p>
+                            <p>No hay regalos entregados aún.</p>
+                          </div>
+                        ) : (
+                          <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
+                            {giftHistory.map((item) => (
+                              <div key={item.id} className="flex items-center justify-between bg-gray-700/40 hover:bg-gray-700/60 rounded-xl px-4 py-3 border border-gray-600/20 transition">
+                                <div className="min-w-0">
+                                  <p className="text-white text-sm font-medium truncate">{item.nombre_producto}</p>
+                                  <p className="text-xs text-gray-400 mt-0.5">
+                                    🎮 <span className="text-gray-300">{item.pedidos?.username_fortnite || '—'}</span>
+                                    <span className="text-gray-600 mx-1">·</span>
+                                    Pedido <span className="text-gray-300">#{item.pedidos?.id}</span>
+                                  </p>
+                                </div>
+                                <span className="text-xs px-2.5 py-1 rounded-full bg-green-900/40 text-green-400 border border-green-700/30 whitespace-nowrap ml-3">
+                                  ✓ Entregado
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* === PENDIENTES === */}
+                    {tabComando === 'pendientes' && (
+                      <div>
+                        <div className="flex items-center justify-between mb-5">
+                          <div>
+                            <h4 className="text-sm font-semibold text-white">Regalos pendientes por enviar</h4>
+                            <p className="text-xs text-gray-400 mt-0.5">Pedidos pagados con items sin entregar</p>
+                          </div>
+                          <button
+                            onClick={cargarPendientes}
+                            disabled={pendientesLoading}
+                            className="px-3 py-1.5 bg-gray-700 text-white text-xs rounded-lg hover:bg-gray-600 transition disabled:opacity-50"
+                          >
+                            {pendientesLoading ? '...' : '↻ Actualizar'}
+                          </button>
+                        </div>
+                        {pendientesLoading ? (
+                          <div className="flex items-center gap-2 text-gray-400 py-8 justify-center">
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-yellow-500" />
+                            Cargando pendientes...
+                          </div>
+                        ) : pendingGifts.length === 0 ? (
+                          <div className="text-center py-12">
+                            <p className="text-3xl mb-2">✅</p>
+                            <p className="text-green-400 font-medium">¡Todo al día!</p>
+                            <p className="text-gray-500 text-sm mt-1">No hay pedidos pendientes de entregar.</p>
+                          </div>
+                        ) : (
+                          <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
+                            {pendingGifts.map((item) => (
+                              <div key={item.id} className="flex items-center justify-between bg-yellow-900/10 hover:bg-yellow-900/20 rounded-xl px-4 py-3 border border-yellow-700/20 transition">
+                                <div className="min-w-0">
+                                  <p className="text-white text-sm font-medium truncate">{item.nombre_producto}</p>
+                                  <p className="text-xs text-gray-400 mt-0.5">
+                                    🎮 <span className="text-gray-300">{item.pedidos?.username_fortnite || '—'}</span>
+                                    <span className="text-gray-600 mx-1">·</span>
+                                    Pedido <span className="text-gray-300">#{item.pedidos?.id}</span>
+                                  </p>
+                                  {item.bot_gift_attempts > 0 && (
+                                    <p className="text-xs text-orange-400 mt-0.5">
+                                      ⚠ {item.bot_gift_attempts} intento{item.bot_gift_attempts !== 1 ? 's' : ''} fallido{item.bot_gift_attempts !== 1 ? 's' : ''}
+                                    </p>
+                                  )}
+                                </div>
+                                <span className="text-xs px-2.5 py-1 rounded-full bg-yellow-900/40 text-yellow-400 border border-yellow-700/30 whitespace-nowrap ml-3">
+                                  ⏳ Pendiente
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     {/* === TIENDA === */}
                     {tabComando === 'tienda' && (
                       <div>
                         <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-                          <h4 className="text-sm font-semibold text-gray-300">
-                            Tienda actual — {tiendaItems.length} items
+                          <h4 className="text-sm font-semibold text-gray-200">
+                            Tienda actual — <span className="text-white">{tiendaItems.length} items</span>
                           </h4>
-                          <button onClick={cargarTienda} disabled={tiendaLoading} className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition disabled:opacity-50">
-                            {tiendaLoading ? 'Cargando...' : 'Actualizar'}
+                          <button onClick={cargarTienda} disabled={tiendaLoading} className="px-3 py-1.5 bg-gray-700 text-white text-sm rounded-lg hover:bg-gray-600 transition disabled:opacity-50">
+                            {tiendaLoading ? 'Cargando...' : '↻ Actualizar'}
                           </button>
                         </div>
                         <input
@@ -1104,14 +1322,16 @@ const Dashboard = () => {
                           placeholder="Buscar item..."
                           value={tiendaBusqueda}
                           onChange={(e) => setTiendaBusqueda(e.target.value)}
-                          className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:outline-none mb-4"
+                          className="w-full px-4 py-2.5 bg-gray-700/80 border border-gray-600/50 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:outline-none mb-4 text-sm"
                         />
                         {tiendaLoading ? (
-                          <div className="flex items-center gap-2 text-gray-400"><div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500" /> Cargando tienda...</div>
+                          <div className="flex items-center gap-2 text-gray-400">
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500" /> Cargando tienda...
+                          </div>
                         ) : (
                           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 max-h-[500px] overflow-y-auto pr-1">
                             {tiendaFiltrada.map((item) => (
-                              <div key={item.offer_id} className="bg-gray-700 rounded-lg border border-gray-600 flex flex-col justify-between overflow-hidden">
+                              <div key={item.offer_id} className="bg-gray-700/60 rounded-xl border border-gray-600/40 flex flex-col justify-between overflow-hidden hover:border-gray-500 transition">
                                 {item.imagen && (
                                   <img src={item.imagen} alt={item.nombre} className="w-full h-28 object-cover" />
                                 )}
@@ -1123,7 +1343,7 @@ const Dashboard = () => {
                                   </div>
                                   <button
                                     onClick={() => { setTabComando('herramientas'); setRegaloSelectedItem(item); setTiendaBusqueda(''); }}
-                                    className="mt-2 w-full px-2 py-1 bg-purple-700/60 text-white text-xs rounded hover:bg-purple-600 transition"
+                                    className="mt-2 w-full px-2 py-1.5 bg-purple-700/50 text-white text-xs rounded-lg hover:bg-purple-600 transition"
                                   >
                                     Regalar
                                   </button>
@@ -1139,31 +1359,38 @@ const Dashboard = () => {
                     {tabComando === 'amigos' && (
                       <div>
                         <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-                          <h4 className="text-sm font-semibold text-gray-300">
-                            Amigos de {selectedBot?.display_name} — {friendsList.length} amigos
+                          <h4 className="text-sm font-semibold text-gray-200">
+                            Amigos de <span className="text-white">{selectedBot?.display_name}</span>
+                            {friendsList.length > 0 && <span className="text-gray-400 ml-1">— {friendsList.length} amigos</span>}
                           </h4>
-                          <button onClick={() => cargarAmigos(selectedBotId)} disabled={friendsLoading} className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition disabled:opacity-50">
-                            {friendsLoading ? 'Cargando...' : 'Actualizar'}
+                          <button onClick={() => cargarAmigos(selectedBotId)} disabled={friendsLoading} className="px-3 py-1.5 bg-gray-700 text-white text-sm rounded-lg hover:bg-gray-600 transition disabled:opacity-50">
+                            {friendsLoading ? 'Cargando...' : '↻ Actualizar'}
                           </button>
                         </div>
                         {friendsLoading ? (
-                          <div className="flex items-center gap-2 text-gray-400"><div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500" /> Cargando amigos...</div>
+                          <div className="flex items-center gap-2 text-gray-400 py-8 justify-center">
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500" /> Cargando amigos...
+                          </div>
                         ) : friendsList.length === 0 ? (
-                          <p className="text-gray-500 text-sm">No hay amigos cargados.</p>
+                          <p className="text-gray-500 text-sm text-center py-8">No hay amigos cargados.</p>
                         ) : (
                           <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
                             {friendsList.map((f) => (
-                              <div key={f.id} className="flex items-center justify-between bg-gray-700 rounded-lg px-4 py-2.5">
+                              <div key={f.id} className="flex items-center justify-between bg-gray-700/40 hover:bg-gray-700/60 rounded-xl px-4 py-2.5 border border-gray-600/20 transition">
                                 <div>
                                   <p className="text-white text-sm font-medium">{f.display_name}</p>
-                                  <p className="text-xs text-gray-400">
+                                  <p className="text-xs text-gray-400 mt-0.5">
                                     {f.hours !== null
                                       ? `${f.hours >= 24 ? Math.floor(f.hours / 24) + 'd ' : ''}${Math.floor(f.hours % 24)}h de amistad`
                                       : 'Tiempo desconocido'}
                                   </p>
                                 </div>
                                 <div className="flex items-center gap-3">
-                                  <span className={`text-xs px-2 py-0.5 rounded-full ${f.can_gift ? 'bg-green-900 text-green-300' : 'bg-yellow-900 text-yellow-300'}`}>
+                                  <span className={`text-xs px-2.5 py-1 rounded-full border
+                                    ${f.can_gift
+                                      ? 'bg-green-900/40 text-green-400 border-green-700/30'
+                                      : 'bg-yellow-900/40 text-yellow-400 border-yellow-700/30'}`}
+                                  >
                                     {f.can_gift ? 'Puede regalar' : `Faltan ${Math.ceil(48 - (f.hours || 0))}h`}
                                   </span>
                                   <button
