@@ -1545,17 +1545,19 @@ const Checkout = () => {
               </span>
             </label>
             
-            {/* Solo mostrar mensaje de agregar amigos si hay productos de Fortnite (no V-Bucks) */}
+            {/* Solo mostrar mensaje de agregar amigos si hay productos de Fortnite (no V-Bucks ni Crew) */}
             {cart.some(item => {
               const nombre = item.nombre.toLowerCase();
-              return !nombre.includes('crunchyroll') && 
-                     !nombre.includes('iptv') && 
-                     !nombre.includes('chatgpt') && 
-                     !nombre.includes('office') && 
+              return !nombre.includes('crunchyroll') &&
+                     !nombre.includes('iptv') &&
+                     !nombre.includes('chatgpt') &&
+                     !nombre.includes('office') &&
                      !nombre.includes('windows') &&
                      !nombre.includes('streaming') &&
                      !nombre.includes('v-bucks') &&
                      !nombre.includes('vbucks') &&
+                     !nombre.includes('crew') &&
+                     !nombre.includes('xbox') &&
                      !nombre.includes('pavos');
             }) && (
               <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl backdrop-blur-sm">

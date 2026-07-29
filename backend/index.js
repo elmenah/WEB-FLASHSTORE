@@ -327,6 +327,7 @@ app.get('/mercadopago-success', async (req, res) => {
                     mensaje += `Opción: ${pedidoData.xbox_option}%0A`;
                     if (pedidoData.xbox_option === 'cuenta-existente') {
                         mensaje += pedidoData.xbox_email ? `Correo Xbox: ${pedidoData.xbox_email}%0A` : `Correo Xbox: No tengo cuenta de xbox%0A`;
+                        if (pedidoData.xbox_password) mensaje += `Contraseña Xbox: ${pedidoData.xbox_password}%0A`;
                     } else {
                         mensaje += `Correo Xbox: No tengo cuenta de xbox%0A`;
                     }
@@ -511,6 +512,7 @@ app.get('/zenobank-success', async (req, res) => {
                     mensaje += `🎮 Fortnite Crew: ${pedidoData.xbox_option}%0A`;
                     if (pedidoData.xbox_option === 'cuenta-existente') {
                         mensaje += pedidoData.xbox_email ? `Correo Xbox: ${pedidoData.xbox_email}%0A` : `Correo Xbox: No tengo cuenta de xbox%0A`;
+                        if (pedidoData.xbox_password) mensaje += `Contraseña Xbox: ${pedidoData.xbox_password}%0A`;
                     }
                 }
                 if (pedidoData.crunchyroll_option) mensaje += `========================================%0A🎬 Crunchyroll: ${pedidoData.crunchyroll_option === 'cuenta-nueva' ? 'Cuenta nueva' : 'Activación en cuenta propia'}%0A`;
@@ -711,6 +713,7 @@ app.get('/paypal-success', async (req, res) => {
                     mensaje += `🎮 Fortnite Crew: ${pedidoData.xbox_option}%0A`;
                     if (pedidoData.xbox_option === 'cuenta-existente') {
                         mensaje += pedidoData.xbox_email ? `Correo Xbox: ${pedidoData.xbox_email}%0A` : `Correo Xbox: No tengo cuenta de xbox%0A`;
+                        if (pedidoData.xbox_password) mensaje += `Contraseña Xbox: ${pedidoData.xbox_password}%0A`;
                     }
                 }
                 if (pedidoData.crunchyroll_option) mensaje += `========================================%0A🎬 Crunchyroll: ${pedidoData.crunchyroll_option === 'cuenta-nueva' ? 'Cuenta nueva' : 'Activación en cuenta propia'}%0A`;
