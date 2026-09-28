@@ -1,6 +1,6 @@
 // /src/api/fortnite.js
-export async function fetchFortniteShop() {
-  const res = await fetch("https://fortnite-api.com/v2/shop?language=es");
+export async function fetchFortniteShop(signal) {
+  const res = await fetch("https://fortnite-api.com/v2/shop?language=es", { signal });
   if (!res.ok) throw new Error("Error al obtener la tienda");
   const data = await res.json();
   return data?.data?.entries || [];

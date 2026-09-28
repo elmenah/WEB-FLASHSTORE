@@ -35,16 +35,16 @@ const App = () => {
       <div className="min-h-screen flex flex-col bg-gray-900 text-white">
         {/* Mostrar el header solo si no estamos en login o register */}
         {!hideHeaderFooter.includes(location.pathname) && <Header />}
-        <main className="flex-grow">
+        <main id="main-content" className={hideHeaderFooter.includes(location.pathname) ? "flex-grow" : "flex-grow flash-page-content"}>
           <Routes>
             {/* Rutas públicas */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/" element={ <AuthGuard> <Home /> </AuthGuard>} />
+            <Route path="/" element={<Home />} />
             <Route path="/terminos" element={  <TermsAndConditions /> } />
             <Route path="/metodos-de-pago" element={<MetodosPago />} />
-            <Route path="product/:id" element={<AuthGuard><ProductDetail /></AuthGuard>} />
-            <Route path="/shop" element={ <AuthGuard> <Shop2 /> </AuthGuard>} />
+            <Route path="product/:id" element={<ProductDetail />} />
+            <Route path="/shop" element={<Shop2 />} />
             <Route path="/club" element={ <AuthGuard> <Club /> </AuthGuard>} />
             <Route path="/recargas" element={ <AuthGuard> <Recargas /> </AuthGuard>} />
             <Route path="/streaming" element={ <AuthGuard> <Streaming /> </AuthGuard>} />

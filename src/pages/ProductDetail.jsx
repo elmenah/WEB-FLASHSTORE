@@ -1,266 +1,35 @@
-import React, { useState } from "react";
-import { useParams, useLocation } from "react-router-dom";
+import React from "react";
+import { Link, useLocation } from "react-router-dom";
+import { ArrowLeft, ArrowRight, ShoppingCart, ShieldCheck, Gift, Clock } from "lucide-react";
 import { useCart } from "../context/CartContext";
 import useScrollToTop from "../hooks/useScrollToTop";
-import {
-  VBUCK_TO_CLP_RATE,
-  formatCLP,
-  convertVBuckToCLP,
-  formatPriceCLP,
-} from "../config/prices";
+import { convertVBuckToCLP, formatPriceCLP } from "../config/prices";
 
-const ProductDetail = () => {
-  useScrollToTop(); // ✅ Agregar esta línea
-
-  const { id } = useParams();
+export default function ProductDetail() {
+  useScrollToTop();
   const { state } = useLocation();
-  const { addToCart } = useCart();
-  const [notification, setNotification] = useState(false);
-
-  const productData = state?.product;
-  const isBundle = productData.tipo === "Lote";
-
-  if (!productData) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-white">
-        Producto no encontrado
-      </div>
-    );
-  }
-
-  // 🎨 Crear gradiente dinámico igual que en Shop2
-  const gradientStyle = {
-    background: `linear-gradient(135deg, ${productData.color1} 0%, ${productData.color2} 50%, ${productData.color3} 100%)`,
+  const { addToCart, openCart } = useCart();
+  const product = state?.product;
+  if (!product) return <div className="flash-detail flash-empty"><h1>Producto no disponible</h1><p>Abre un producto desde la tienda para consultar sus detalles.</p><Link to="/shop" className="flash-button">Volver a la tienda <ArrowRight size={18} /></Link></div>;
+  const isBundle = product.tipo === "Lote";
+  const add = () => {
+    addToCart({ nombre: product.nombre, precio: convertVBuckToCLP(product.precio), imagen: product.imagen, offer_id: product.offer_id || null, pavos: product.pavos || product.precio || 0 });
+    openCart();
   };
-
-  const formatDate = (dateStr) => {
-    if (!dateStr) return "Fecha no disponible";
-    const fecha = new Date(dateStr);
-    const dia = String(fecha.getDate()).padStart(2, "0");
-    const mes = String(fecha.getMonth() + 1).padStart(2, "0");
-    const año = fecha.getFullYear();
-    const horas = String(fecha.getHours()).padStart(2, "0");
-    const minutos = String(fecha.getMinutes()).padStart(2, "0");
-    const segundos = String(fecha.getSeconds()).padStart(2, "0");
-    return `${dia}-${mes}-${año} ${horas}:${minutos}:${segundos}`;
-  };
-
-  const handleAddToCart = () => {
-    const product = {
-      nombre: productData.nombre,
-      precio: convertVBuckToCLP(productData.precio),
-      imagen: productData.imagen,
-      offer_id: productData.offer_id || null,
-      pavos: productData.pavos || productData.precio || 0,
-    };
-    addToCart(product);
-    showNotification();
-  };
-
-  const showNotification = () => {
-    setNotification(true);
-    setTimeout(() => setNotification(false), 3000);
-  };
-
-  const bundleImages = [
-    productData.bundle,
-    productData.bundle2,
-    productData.bundle3,
-    productData.bundle4,
-  ].filter((img) => img && img !== "undefined" && img !== "");
-
-  const InfoCard = ({ icon, label, value }) => (
-    <div className="bg-gray-700/50 rounded-lg p-3 border border-gray-600/50">
-      <div className="flex items-center gap-2 text-sm text-gray-400 mb-1">
-        <span>{icon}</span>
-        <span>{label}:</span>
-      </div>
-      <div className="text-white font-semibold">
-        {value || "No especificado"}
-      </div>
+  const date = value => value && !Number.isNaN(Date.parse(value)) ? new Date(value).toLocaleString("es-CL", {dateStyle:"medium", timeStyle:"short"}) : null;
+  return <div className="flash-detail"><div className="flash-container">
+    <nav className="flash-breadcrumb" aria-label="Ruta de navegación"><Link to="/shop"><ArrowLeft size={16} /> Tienda</Link><span>/</span><span>{product.nombre}</span></nav>
+    <div className="flash-detail-layout">
+      <div className="flash-detail-art" style={{"--product-accent": /^#[a-f0-9]{6}$/i.test(product.color1) ? product.color1 : "#383c36"}}><span className="flash-detail-badge">{isBundle ? "LOTE DE FORTNITE" : product.tipo}</span><img src={product.imagen} alt={product.nombre} /><span className="flash-detail-art-caption">FORTNITE · ELIGE TU ESTILO</span></div>
+      <section className="flash-detail-info"><p className="flash-eyebrow">{isBundle ? "MÁS ESTILO EN UN SOLO LOTE" : "DALE TU TOQUE A LA PARTIDA"}</p><h1>{product.nombre}</h1><p className="flash-detail-description">{product.descripcion}</p>
+        <div className="flash-detail-tags">{product.rareza && product.rareza !== "Sin rareza" && <span>{product.rareza}</span>}{product.partede && <span>{product.partede}</span>}</div>
+        <div className="flash-detail-price"><small>PRECIO TOTAL</small><strong>{formatPriceCLP(product.precio)}</strong><span>{product.precio.toLocaleString("es-CL")} paVos</span></div>
+        <button className="flash-button flash-buy-button" onClick={add}><ShoppingCart size={20} /> Añadir al carrito <ArrowRight size={20} /></button>
+        <div className="flash-detail-assurances"><span><Gift size={17} /> Entrega como regalo</span><Link to="/metodos-de-pago"><ShieldCheck size={17} /> Pagos seguros</Link></div>
+        <div className="flash-detail-warning"><Clock size={20} /><div><strong>Antes de comprar</strong><p>Agrega a Reydelosvbucks y pavostioflash2 al menos 48 horas antes de tu compra.</p></div></div>
+        {date(product.fin) && <p className="flash-detail-date">Disponible hasta: {date(product.fin)}</p>}{product.mensajeSalida && <p className="flash-detail-date">{product.mensajeSalida}</p>}
+      </section>
     </div>
-  );
-
-  const getRarityColor = (rarity) => {
-    const colors = {
-      legendario: "bg-orange-500 text-white",
-      épico: "bg-purple-500 text-white",
-      raro: "bg-blue-500 text-white",
-      "poco común": "bg-green-500 text-white",
-      común: "bg-gray-500 text-white",
-    };
-    return colors[rarity?.toLowerCase()] || "bg-gray-600 text-white";
-  };
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
-      {/* Notification */}
-      <div
-        className={`fixed top-20 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg transition-opacity duration-500 z-50 ${
-          notification ? "opacity-100" : "opacity-0 hidden"
-        }`}
-      >
-        Producto agregado al carrito
-      </div>
-
-      {/* Breadcrumbs */}
-      <div className="pt-20 pb-4 px-4">
-        <div className="max-w-7xl mx-auto">
-          <nav className="flex items-center gap-2 text-sm text-gray-400">
-            <a href="/" className="hover:text-white transition-colors">
-              🏠 Inicio
-            </a>
-            <span>›</span>
-            <a href="/shop" className="hover:text-white transition-colors">
-              🛒 Tienda
-            </a>
-            <span>›</span>
-            <span className="text-white">{productData.nombre}</span>
-          </nav>
-        </div>
-      </div>
-
-      <main className="max-w-7xl mx-auto px-4">
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Imagen del producto con gradiente dinámico */}
-          <div className="relative flex-shrink-0 w-full lg:w-1/2">
-            <div
-              className="relative w-full h-[400px] lg:h-[500px] rounded-2xl overflow-hidden shadow-xl border border-gray-700/50"
-              style={gradientStyle}
-            >
-              {/* Imagen centrada y más pequeña */}
-              <div className="absolute inset-0 flex items-center justify-center p-8">
-                <img
-                  src={productData.imagen}
-                  alt={productData.nombre}
-                  className="max-w-[80%] max-h-[80%] object-contain drop-shadow-2xl"
-                />
-              </div>
-
-              {/* Badge de rareza */}
-              {productData.rareza && (
-                <div
-                  className={`absolute top-4 right-4 py-2 px-3 rounded-lg text-xs font-bold shadow-lg ${getRarityColor(
-                    productData.rareza
-                  )}`}
-                >
-                  {productData.rareza.toUpperCase()}
-                </div>
-              )}
-
-              {/* Degradado inferior para mejor legibilidad */}
-              <div className="absolute bottom-0 left-0 w-full h-1/3 bg-gradient-to-t from-black/60 to-transparent" />
-            </div>
-          </div>
-
-          {/* Información del producto */}
-          <div className="flex flex-col w-full lg:w-1/2 bg-gray-800/90 p-6 rounded-2xl shadow-xl border border-gray-700/50 backdrop-blur-sm">
-            <h1 className="text-3xl font-bold text-white mb-4">
-              {productData.nombre}
-            </h1>
-            <p className="text-gray-400 mb-6">{productData.descripcion}</p>
-
-            <div className="space-y-4">
-              
-              <InfoCard
-                icon={<i className="fas fa-box"></i>}
-                label={isBundle ? "Contenido" : "Parte del conjunto"}
-                value={productData.partede}
-              />
-            </div>
-            {/* 📦 Contenido del lote */}
-            {productData.tipo === "Lote" &&
-              productData.contenido?.length > 0 && (
-                <div className="mt-6">
-                  <h3 className="text-blue-400 font-semibold mb-4 flex items-center gap-2">
-                    <i className="fas fa-box-open"></i>
-                    Contenido del lote
-                  </h3>
-
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                    {productData.contenido.map((item, index) => (
-                      <div
-                        key={index}
-                        className="bg-gray-700/50 rounded-lg p-3 border border-gray-600/50 flex flex-col items-center text-center hover:scale-105 transition-transform"
-                      >
-                        {item.imagen && (
-                          <img
-                            src={item.imagen}
-                            alt={item.nombre}
-                            className="w-6 h-6 object-contain mb-2"
-                          />
-                        )}
-                        <span className="text-sm text-white font-semibold">
-                          {item.nombre}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-            {bundleImages.length > 0 && (
-              <div className="mt-6">
-                <h3 className="text-blue-400 font-semibold mb-4 flex items-center gap-2">
-                  <i className="fas fa-gift"></i> Esta compra incluye:
-                </h3>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                  {bundleImages.map((img, index) => (
-                    <img
-                      key={index}
-                      src={img}
-                      alt={`Bundle ${index + 1}`}
-                      className="w-full h-24 object-cover rounded-lg border border-gray-700 hover:scale-105 transition-transform"
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <div className="mt-6 space-y-2">
-              <p className="text-gray-400">
-                Llegó a la tienda: {formatDate(productData.inicio)}
-              </p>
-              <p className="text-gray-400">
-                Se va de la tienda: {formatDate(productData.fin)}
-              </p>
-            </div>
-
-            {productData.mensajeSalida && (
-              <p className="mt-4 text-red-400 font-semibold text-center">
-                {productData.mensajeSalida}
-              </p>
-            )}
-
-            {/* Precio destacado */}
-            <div className="mt-6 text-center bg-gray-700/50 rounded-lg p-4 border border-gray-600/50">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <img
-                  src="https://fortnite-api.com/images/vbuck.png"
-                  alt="V-Bucks"
-                  className="w-6 h-6"
-                />
-                <span className="text-2xl font-bold text-white">
-                  {productData.precio.toLocaleString()}
-                </span>
-              </div>
-              <span className="text-3xl font-bold text-yellow-400">
-                {formatPriceCLP(productData.precio)}
-              </span>
-            </div>
-
-            <button
-              onClick={handleAddToCart}
-              className="mt-6 w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl font-bold shadow-lg hover:from-blue-700 hover:to-purple-700 transition-all flex items-center justify-center gap-2 transform hover:scale-[1.02]"
-            >
-              <i className="fas fa-shopping-cart"></i>
-              Añadir al Carrito
-            </button>
-          </div>
-        </div>
-      </main>
-    </div>
-  );
-};
-
-export default ProductDetail;
+    {isBundle && product.contenido?.length > 0 && <section className="flash-bundle-contents"><div className="flash-section-heading"><div><p className="flash-eyebrow">TODO ESTO ES PARTE DEL LOTE</p><h2>¿Qué incluye?</h2></div><span>{product.contenido.length} objetos</span></div><div className="flash-included-grid">{product.contenido.map((item,i) => <article key={i}>{item.imagen && <img src={item.imagen} alt="" loading="lazy" />}<h3>{item.nombre}</h3></article>)}</div></section>}
+  </div></div>;
+}

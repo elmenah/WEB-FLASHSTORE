@@ -1,587 +1,64 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import Marquee from "react-fast-marquee";
-import useScrollToTop from "../hooks/useScrollToTop";
-import { useCart } from "../context/CartContext";
-import FortnitePesadillas from "../components/FortnitePesadillas";
-import Testimonios from "../components/Testimonios";
-
-
-const Home = () => {
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowRight, Zap, ShieldCheck, Headphones, UserPlus, ShoppingBag, Gift, Gamepad2, MonitorPlay, KeyRound } from 'lucide-react';
+import { fetchFortniteShop } from '../api/fortnite';
+import { formatPriceCLP } from '../config/prices';
+import useScrollToTop from '../hooks/useScrollToTop';
+const collections = [
+  { name: 'Tienda de Fortnite', image: '/Imagenes/cap7.png', to: '/shop', label: 'Skins, lotes y accesorios' },
+  { name: 'Club Fortnite', image: '/Imagenes/fn crew/fnmarzo.png', to: '/club', label: 'Descubre el club' },
+  { name: 'Pases de Fortnite', image: '/Imagenes/pasebatalla.jpg', to: '/shop', label: 'Explora la tienda' },
+  { name: 'Juegos para PC', image: '/Imagenes/minecraft-java-bedrock.webp', to: '/juegos-pc', label: 'Tu próxima aventura' },
+];
+export default function Home() {
   useScrollToTop();
-  const { addToCart } = useCart();
-  const [notification, setNotification] = useState(false);
-  const [heroImages, setHeroImages] = useState([]);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Cargar noticias de Fortnite para el hero dinámico
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
-    const fetchNews = async () => {
-      try {
-        const res = await fetch("https://fortnite-api.com/v2/news/br?language=es");
-        if (!res.ok) throw new Error("Error al obtener noticias");
-        const data = await res.json();
-        const motds = data?.data?.motds || [];
-        if (motds.length > 0) {
-          setHeroImages(motds.map((item) => ({
-            image: item.image,
-            title: item.title,
-            body: item.body,
-          })));
-        }
-      } catch (err) {
-        console.error("Error al cargar noticias de Fortnite:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchNews();
+    let active = true;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12000);
+    fetchFortniteShop(controller.signal).then(entries => {
+      if (active) setProducts(entries.filter(p => p.offerId && p.giftable && p.finalPrice > 0 && p.bundle?.name && p.bundle?.image).slice(0, 4));
+    }).catch(() => {}).finally(() => { clearTimeout(timeout); if (active) setLoading(false); });
+    return () => { active = false; clearTimeout(timeout); controller.abort(); };
   }, []);
-
-  // Auto-rotar el carrusel cada 6 segundos
-  useEffect(() => {
-    if (heroImages.length <= 1) return;
-    const interval = setInterval(() => {
-      setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [heroImages]);
-
-  // Cargar script de Instagram
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://www.instagram.com/embed.js';
-    script.async = true;
-    document.body.appendChild(script);
-
-    // Procesar embeds cuando el script cargue
-    const timer = setTimeout(() => {
-      if (window.instgrm) {
-        window.instgrm.Embeds.process();
-      }
-    }, 1000);
-
-    return () => {
-      clearTimeout(timer);
-      if (document.body.contains(script)) {
-        document.body.removeChild(script);
-      }
-    };
-  }, []);
-
-  // Beneficios rápidos
-  const beneficios = [
-    { icon: "💸", text: "Precios bajos garantizados" },
-    { icon: "🤖", text: "Envío automático" },
-    { icon: "🔒", text: "Compra 100% segura" },
-    { icon: "📱", text: "Soporte personalizado" },
-    { icon: "⭐", text: "Clientes felices" },
-  ];
-
-  const showNotification = () => {
-    setNotification(true);
-    setTimeout(() => setNotification(false), 2000);
-  };
-
-  return (
-    <>
-      {/* 🔔 Notificación */}
-      <div
-        className={`fixed top-20 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg transition-opacity duration-500 z-50 ${
-          notification ? "opacity-100" : "opacity-0 hidden"
-        }`}
-      >
-        Producto agregado al carrito
+  return <div className="flash-home">
+    <section className="flash-hero">
+      <img className="flash-hero-art" src="/Imagenes/flash-hero.png" alt="" fetchPriority="high" />
+      <div className="flash-container flash-hero-content">
+        <p className="flash-eyebrow">FORTNITE · SKINS Y PASES</p>
+        <h1>Bienvenido a<br /><em>Tio Flashstore</em></h1>
+        <p className="flash-hero-description"><strong>Tu tienda confiable de skins, lotes y pases de Fortnite</strong></p>
+        <div className="flash-actions"><Link className="flash-button" to="/shop">Explorar tienda <ArrowRight size={20} /></Link><a className="flash-button flash-button-secondary" href="#como-comprar">Cómo comprar</a></div>
+        <p className="flash-hero-caption">TU ESTILO. TU SIGUIENTE NIVEL.</p>
       </div>
-
-      {/* 🎯 HERO - Carrusel dinámico */}
-      <div className="relative flex items-center justify-center h-[70vh] sm:h-screen bg-gray-900 text-white overflow-hidden animate-fade-in">
-        {/* Imágenes del carrusel */}
-        {heroImages.length > 0 ? (
-          heroImages.map((item, index) => (
-            <img
-              key={index}
-              src={item.image}
-              className={`absolute inset-0 w-full h-full object-cover z-0 transition-opacity duration-1000 ${
-                index === currentImageIndex ? "opacity-100" : "opacity-0"
-              }`}
-              alt={item.title || "Fortnite News"}
-            />
-          ))
-        ) : (
-          <img
-            src="/Imagenes/cap7.png"
-            className="w-full h-full object-cover z-0"
-            alt="Hero"
-          />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/30 to-transparent z-10"></div>
-
-        <div className="absolute left-0 top-1/2 transform -translate-y-1/2 z-20 w-11/12 sm:w-auto pl-4 sm:pl-10 pr-4 text-left animate-fade-in">
-          <h1 className="text-2xl xs:text-3xl md:text-5xl font-bold mb-3 sm:mb-4 italic drop-shadow-xl leading-tight">
-            Bienvenido a{" "}
-            <span className="bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500 bg-clip-text text-transparent">
-              Tio Flashstore
-            </span>
-          </h1>
-          <p className="text-base xs:text-lg md:text-2xl mb-4 sm:mb-6 text-white/80 font-semibold">
-            Tu tienda confiable de skins, lotes y pases de Fortnite
-          </p>
-          <Link
-            to="/shop"
-            className="bg-white text-gray-900 px-4 py-2 sm:px-6 sm:py-3 rounded-lg text-base sm:text-lg font-semibold shadow-lg hover:bg-gray-100 transition-colors animate-bounce"
-          >
-            Ver la tienda de hoy
-          </Link>
-        </div>
-
-        {/* Indicadores del carrusel */}
-        {heroImages.length > 1 && (
-          <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-20 flex gap-2">
-            {heroImages.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentImageIndex(index)}
-                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
-                  index === currentImageIndex
-                    ? "bg-white w-6"
-                    : "bg-white/40 hover:bg-white/60"
-                }`}
-                aria-label={`Slide ${index + 1}`}
-              />
-            ))}
-          </div>
-        )}
+    </section>
+    <div className="flash-trust"><div className="flash-container"><span><Zap /> Entrega automática</span><Link to="/metodos-de-pago"><ShieldCheck /> Métodos de pago seguros</Link><a href="https://instagram.com/tioflashstore" target="_blank" rel="noreferrer"><Headphones /> Soporte personalizado</a><small>JUEGA DIFERENTE.</small></div></div>
+    <section className="flash-container flash-section" aria-busy={loading}>
+      <div className="flash-section-heading"><div><p className="flash-eyebrow">ENCUENTRA TU ESTILO</p><h2>{loading || products.length ? 'Lotes destacados' : 'Explora Flashstore'}</h2></div><Link to="/shop">Ver tienda <ArrowRight size={18} /></Link></div>
+      <div className="flash-featured-grid">
+        {loading ? Array.from({length: 4}, (_, i) => <div key={i} className="flash-skeleton" aria-label="Cargando productos" />) : products.length ? products.map(p => {
+          const item = p.brItems?.[0];
+          const name = p.bundle?.name || item?.name;
+          return <Link to="/shop" className="flash-featured-card" key={p.offerId}><div className="flash-featured-image"><img loading="lazy" src={p.bundle?.image || item?.images?.featured || item?.images?.icon} alt={name} /><span>Lote</span></div><div className="flash-featured-info"><div><h3>{name}</h3><p>{formatPriceCLP(p.finalPrice)}</p></div><span className="flash-card-arrow"><ArrowRight size={20} /></span></div></Link>;
+        }) : collections.map(item => <Link to={item.to} className="flash-featured-card" key={item.name}><div className="flash-featured-image flash-collection-image"><img src={item.image} alt="" loading="lazy" /></div><div className="flash-featured-info"><div><h3>{item.name}</h3><p>{item.label}</p></div><span className="flash-card-arrow"><ArrowRight size={20} /></span></div></Link>)}
       </div>
-
-      {/* 🤖 Banner envío automático */}
-      <section className="bg-gradient-to-r from-blue-900 via-indigo-900 to-purple-900 border-y border-blue-700/50">
-        <div className="container mx-auto px-4 py-5 max-w-5xl">
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-center sm:text-left">
-            <div className="flex-shrink-0 w-12 h-12 rounded-full bg-blue-500/20 border border-blue-400/40 flex items-center justify-center text-2xl">
-              🤖
-            </div>
-            <div>
-              <p className="text-white font-bold text-lg leading-tight">
-                ¡Ahora los regalos se envían automáticamente!
-              </p>
-              <p className="text-blue-200 text-sm mt-0.5">
-                Tras confirmar tu pago, nuestro bot entrega tu skin directamente en tu cuenta de Fortnite — sin esperas ni intervención manual.
-              </p>
-            </div>
-            <div className="flex-shrink-0">
-              <span className="inline-flex items-center gap-1.5 bg-green-500/20 border border-green-400/40 text-green-300 text-xs font-semibold px-3 py-1.5 rounded-full">
-                <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
-                Bot activo 24/7
-              </span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 💎 Beneficios rápidos */}
-      <section className="py-6 sm:py-10 bg-gray-900">
-        <div className="max-w-8xl mx-auto flex flex-wrap justify-center gap-4 sm:gap-6 px-2">
-          {beneficios.map((b, i) => (
-            <div
-              key={i}
-              className="flex flex-col items-center rounded-xl px-4 py-3 sm:px-6 sm:py-4 animate-fade-in min-w-[120px]"
-            >
-              <span className="text-2xl sm:text-3xl mb-1 sm:mb-2">{b.icon}</span>
-              <span className="text-white font-semibold text-xs sm:text-base text-center">
-                {b.text}
-              </span>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      
-
-      
-        {/* Hero, Fortnite Pesadillas, etc */}
-      {/* <Testimonios /> */}
-      {/* Secciones siguientes */}
-      {/* ❓ Cómo funciona - Diseño moderno */}
-      <section className="py-16 bg-gradient-to-b from-gray-800 to-gray-900">
-        <div className="container mx-auto px-4 max-w-6xl">
-          {/* Header */}
-          <div className="text-center mb-12">
-            <div className="inline-block mb-4">
-              <span className="bg-blue-600/20 text-blue-400 px-4 py-2 rounded-full text-sm font-semibold tracking-wider uppercase">
-                Proceso de compra
-              </span>
-            </div>
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              Compra skins de Fortnite con
-              <br />
-              <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
-                entrega garantizada 24/7
-              </span>
-            </h2>
-            <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-              Proceso seguro y rápido con especialistas dedicados a tu pedido
-            </p>
-          </div>
-
-          {/* Content Grid */}
-          <div className="grid md:grid-cols-2 gap-12 items-start">
-            {/* Left side - Steps */}
-            <div className="space-y-6">
-              {/* Paso 1 */}
-              <div className="flex gap-4">
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-600 to-blue-500 flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                    1
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-white mb-2">Selecciona tu paquete</h3>
-                  <p className="text-gray-400 leading-relaxed">
-                    Asegúrate de haber agregado nuestras cuentas 48 hrs antes de realizar una compra.
-                    <br />
-                    <span className="text-sm text-gray-500 mt-1 inline-block">
-                      Usuario: <span className="text-white font-semibold">1. Reydelosvbucks</span> | <span className="text-white font-semibold">2. pavostioflash2</span>
-                    </span>
-                  </p>
-                </div>
-              </div>
-
-              {/* Paso 2 */}
-              <div className="flex gap-4">
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-600 to-purple-500 flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                    2
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-white mb-2">Completa tu compra</h3>
-                  <p className="text-gray-400 leading-relaxed">
-                    Elige la skin que quieras de la rotación diaria de la tienda. Agrega al carrito y termina el proceso de compra de forma segura.
-                  </p>
-                </div>
-              </div>
-
-              {/* Paso 3 */}
-              <div className="flex gap-4">
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-r from-pink-600 to-pink-500 flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                    3
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-white mb-2">Recibe tu pedido automáticamente</h3>
-                  <p className="text-gray-400 leading-relaxed">
-                    Nuestro bot envía el regalo directo a tu cuenta de Fortnite en minutos tras confirmar el pago — sin intervención manual, las 24 horas del día.
-                  </p>
-                  <span className="inline-flex items-center gap-1.5 mt-2 bg-green-500/10 border border-green-500/30 text-green-400 text-xs font-semibold px-2.5 py-1 rounded-full">
-                    <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
-                    Envío automático activado
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Right side - Highlights */}
-            <div className="bg-gray-800/50 rounded-2xl p-8 border border-gray-700 shadow-xl">
-              <h3 className="text-2xl font-bold text-white mb-6">Por qué elegirnos</h3>
-              
-              <div className="space-y-5">
-                <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center mt-1">
-                    <svg className="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-white font-semibold">Monitoreo 24/7 con actualizaciones en tiempo real</p>
-                    <p className="text-gray-400 text-sm">Seguimiento constante de tu pedido</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-500/20 flex items-center justify-center mt-1">
-                    <svg className="w-4 h-4 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-white font-semibold">Todas las regiones soportadas</p>
-                    <p className="text-gray-400 text-sm">Con instrucciones personalizadas de entrega</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-pink-500/20 flex items-center justify-center mt-1">
-                    <svg className="w-4 h-4 text-pink-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-white font-semibold">Checkout seguro en cada paso</p>
-                    <p className="text-gray-400 text-sm">Y manejo de credenciales confiable</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-orange-500/20 flex items-center justify-center mt-1">
-                    <svg className="w-4 h-4 text-orange-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-white font-semibold">Gerentes de éxito dedicados</p>
-                    <p className="text-gray-400 text-sm">Para pedidos grandes y soporte personalizado</p>
-                  </div>
-                </div>
-              </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center mt-1">
-                    <svg className="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-white font-semibold flex items-center gap-2">
-                      Envío automático con bot propio
-                      <span className="inline-flex items-center gap-1 bg-green-500/15 border border-green-500/30 text-green-400 text-xs px-2 py-0.5 rounded-full">
-                        <span className="w-1 h-1 rounded-full bg-green-400 animate-pulse"></span>
-                        Nuevo
-                      </span>
-                    </p>
-                    <p className="text-gray-400 text-sm">Tu skin llega en minutos tras el pago, sin esperas</p>
-                  </div>
-                </div>
-
-              <div className="mt-8 pt-6 border-t border-gray-700">
-                <div className="flex items-center justify-center gap-2 text-green-400">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
-                  </svg>
-                  <span className="font-semibold">Proceso 100% seguro y confiable</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-          {/* 🎮 Juegos de Steam */}
-          <section className="py-10 bg-gradient-to-b from-gray-900 to-gray-800">
-            <div className="container mx-auto px-4 max-w-6xl">
-              <div className="bg-gray-800/60 border border-gray-700 rounded-2xl overflow-hidden shadow-2xl">
-                <div className="grid grid-cols-1 lg:grid-cols-2">
-                  <div className="h-[280px] lg:h-full relative">
-                    <img
-                      src="/Imagenes/resident-evil-requiem.jpg"
-                      alt="Resident Evil Requiem"
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.target.src = "/Imagenes/og-s2-line-up-1920x1080-1114b1e89809.webp";
-                      }}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-br from-black/20 via-black/35 to-black/85"></div>
-                    <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/80 to-transparent"></div>
-                  </div>
-    
-                  <div className="p-6 sm:p-8">
-                    <h2 className="text-3xl sm:text-4xl font-bold text-white italic mb-2">
-                      Juegos de Steam
-                    </h2>
-                    <p className="text-blue-400 font-semibold mb-4">
-                      Instalacion remota, juegos locales (No online)
-                    </p>
-    
-                    <div className="space-y-2 text-gray-200 mb-6">
-                      <p className="font-semibold">Más de 100.000 juegos disponibles</p>
-                      <p>1 juego: <span className="text-white font-bold text-xl">$6.000</span></p>
-                      <p>3 juegos: <span className="text-white font-bold text-xl">$12.000</span></p>
-                      <p>6 juegos: <span className="text-white font-bold text-xl">$18.000</span></p>
-                      <p className="text-yellow-400 font-semibold pt-1">
-                        Desde 3 juegos incluye 1 juego extra de regalo.
-                      </p>
-                    </div>
-    
-                    <Link
-                      to="/juegos-pc"
-                      className="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-3 rounded-lg transition-colors"
-                    >
-                      Ver lista de juegos
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </div><br />
-
-        <div className="container mx-auto px-4 max-w-5xl">
-          <div className="text-center mb-6">
-            <h2 className="text-2xl sm:text-3xl font-bold text-white">¿Buscando cuentas de streaming?</h2>
-            <p className="text-gray-400 mt-2">
-              También tenemos Crunchyroll, IPTV y activaciones de Windows con entrega rápida.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[
-              {
-                name: "Crunchyroll",
-                image: "/Imagenes/IPTV/Crunchyroll_Logo.png",
-                desc: "Planes premium para disfrutar anime sin interrupciones.",
-                href: "/streaming",
-                cta: "Ir a Streaming",
-              },
-              {
-                name: "IPTV",
-                image: "/Imagenes/IPTV/Group-81-768x618.png",
-                desc: "Acceso a canales y contenido en vivo para todos los gustos.",
-                href: "/streaming",
-                cta: "Ir a Streaming",
-              },
-              {
-                name: "Activaciones de Windows",
-                image: "/Imagenes/windows-11-professional.png",
-                desc: "Licencias y activaciones para Windows de forma segura.",
-                href: "/activaciones",
-                cta: "Ir a Activaciones",
-              },
-            ].map((item) => (
-              <div
-                key={item.name}
-                className="bg-gray-800/60 border border-gray-700 rounded-xl p-5 flex flex-col justify-between"
-              >
-                <div>
-                  <div className="mb-3 h-16 bg-white rounded-lg p-2 flex items-center justify-center overflow-hidden">
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="h-full w-full object-contain"
-                    />
-                  </div>
-                  <h3 className="text-xl font-bold text-white">{item.name}</h3>
-                  <p className="text-gray-400 mt-2">{item.desc}</p>
-                </div>
-
-                <Link
-                  to={item.href}
-                  className="mt-4 inline-flex items-center justify-center bg-white text-gray-900 font-semibold px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors"
-                >
-                  {item.cta}
-                </Link>
-              </div>
-            ))}
-          </div>
-        </div>
-          </section>
-      {/* 📺 Accesos rápidos */}
-      
-
-      
-
-      {/* 💳 Métodos de pago - Diseño moderno */}
-      <section className="py-16 bg-gray-900">
-        <div className="container mx-auto px-4 max-w-5xl">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-8 text-white">
-            PAGOS SEGUROS PROCESADOS POR
-          </h2>
-
-          <div className="flex flex-wrap justify-center items-center gap-6 mb-8">
-            {[
-              "/Imagenes/Mercado_Pago.svg.png",
-              "/Imagenes/Visa_Logo.png",
-              "/Imagenes/MasterCard_early_1990s_logo.png",
-              "/Imagenes/logo-web-pay-plus.png",
-            ].map((img, i) => (
-              <div
-                key={i}
-                className="bg-white rounded-xl p-6 shadow-xl hover:scale-105 hover:shadow-2xl transition-all duration-300"
-              >
-                <img
-                  src={img}
-                  alt="Medio de pago"
-                  className="h-12 w-auto object-contain"
-                />
-              </div>
-            ))}
-          </div>
-
-          <div className="flex justify-center">
-            <div className="inline-flex items-center gap-3 bg-green-600/20 text-green-400 px-6 py-3 rounded-full border border-green-600/30">
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <span className="font-semibold">
-                Transacciones 100% seguras y cifradas
-              </span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ❓ FAQ - Diseño moderno */}
-      <section className="py-16 bg-gradient-to-b from-gray-900 to-gray-800">
-        <div className="container mx-auto px-4 max-w-4xl">
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-4 text-white italic">
-            Preguntas Frecuentes
-          </h2>
-          <p className="text-center text-gray-400 text-lg mb-12">
-            Todo lo que necesitas saber sobre nuestro servicio
-          </p>
-
-          <div className="space-y-4">
-            {[
-              {
-                q: "¿Cómo recibo los productos que compro?",
-                a: "Los productos adquiridos serán entregados directamente en tu cuenta de Fortnite mediante el nombre de usuario que proporciones al momento de la compra.",
-              },
-              {
-                q: "¿Cuánto tiempo tarda la entrega?",
-                a: "La entrega se realiza en un plazo máximo de 24 horas después de confirmar tu compra. En la mayoría de los casos, la entrega es inmediata.",
-              },
-              {
-                q: "¿Por qué es tan barato?",
-                a: "Aprovechamos precios regionales favorables en tiendas de otros países, siempre pagando el precio completo establecido por Epic Games. No utilizamos exploits ni métodos fraudulentos.",
-              },
-              {
-                q: "¿Esto es seguro?",
-                a: "Llevamos años vendiendo servicios digitales, tenemos cientos de clientes en @tioflashstore y cumplimos todas las reglas de Epic Games, sin riesgos para tu cuenta.",
-              },
-              {
-                q: "¿Cuáles son los métodos de pago?",
-                a: "Ofrecemos métodos locales para Chile y también aceptamos pagos con criptomonedas como USDT.",
-              },
-            ].map((item, i) => (
-              <div 
-                key={i}
-                className="bg-gray-800/50 border border-gray-700 rounded-xl p-6 hover:border-gray-600 transition-colors"
-              >
-                <h3 className="text-xl font-bold text-white mb-3">{item.q}</h3>
-                <p className="text-gray-400 leading-relaxed">{item.a}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ⚙️ Animación CSS */}
-      <style>{`
-        .animate-fade-in {
-          animation: fadeIn 1.2s ease;
-        }
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(30px); }
-          to { opacity: 1; transform: none; }
-        }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-      `}</style>
-    </>
-  );
-};
-
-export default Home;
+    </section>
+    <section id="como-comprar" className="flash-container flash-steps">
+      <div><p className="flash-eyebrow">FÁCIL, DE PRINCIPIO A FIN</p><h2>Listo en 3 pasos</h2><p>Recuerda agregarnos al menos 48 horas antes de comprar.</p></div>
+      <div className="flash-step"><UserPlus /><div><b>01</b><h3>Agrega nuestras cuentas</h3><p>Reydelosvbucks<br />pavostioflash2</p></div></div>
+      <div className="flash-step"><ShoppingBag /><div><b>02</b><h3>Elige tu producto</h3><p>Explora la tienda y completa tu compra.</p></div></div>
+      <div className="flash-step"><Gift /><div><b>03</b><h3>Recibe tu regalo</h3><p>Tras confirmar el pago y cumplir el requisito de amistad.</p></div></div>
+    </section>
+    <section className="flash-container flash-section"><div className="flash-section-heading"><div><p className="flash-eyebrow">MÁS FORMAS DE DISFRUTAR</p><h2>Tu mundo digital, aquí.</h2></div></div><div className="flash-services">
+      {[[Gamepad2, 'Juegos PC', 'Encuentra tu próxima aventura.', '/juegos-pc'], [MonitorPlay, 'Streaming', 'Tus series y anime favoritos.', '/streaming'], [KeyRound, 'Activaciones', 'Herramientas para tu día a día.', '/activaciones']].map(([Icon, title, description, to]) => <Link key={to} to={to}><Icon /><h3>{title}</h3><p>{description}</p><ArrowRight className="flash-service-arrow" size={20} /></Link>)}
+    </div></section>
+    <section className="flash-container flash-payments" aria-labelledby="payments-title"><div><p className="flash-eyebrow">COMPRA CON CONFIANZA</p><h2 id="payments-title">Métodos de pago seguros</h2><Link to="/metodos-de-pago">Consulta las opciones disponibles <ArrowRight size={16} /></Link></div><div className="flash-payment-logos">{[['Mercado Pago', 'Mercado_Pago.svg.png'], ['Visa', 'Visa_Logo.png'], ['Mastercard', 'MasterCard_early_1990s_logo.png'], ['Webpay', 'logo-web-pay-plus.png']].map(([name, file]) => <div key={name}><img src={'/Imagenes/' + file} alt={name} loading="lazy" /></div>)}</div></section>
+    <section className="flash-container flash-faq"><div><p className="flash-eyebrow">ANTES DE COMPRAR</p><h2>Todo claro.<br />A jugar.</h2></div><div>
+      <details><summary>¿Cómo recibo mi compra?</summary><p>Los cosméticos se envían como regalo a la cuenta de Fortnite que indiques al comprar. Revisa tu nombre de usuario antes de completar el pedido.</p></details>
+      <details><summary>¿Por qué debo agregar las cuentas antes?</summary><p>Debes tener agregadas nuestras cuentas Reydelosvbucks y pavostioflash2 al menos 48 horas antes de comprar para poder recibir regalos.</p></details>
+      <details><summary>¿Dónde puedo pedir ayuda?</summary><p>Escríbenos a <a href="https://instagram.com/tioflashstore" target="_blank" rel="noreferrer">@tioflashstore en Instagram</a> para recibir asistencia con tu pedido.</p></details>
+    </div></section>
+  </div>;
+}
