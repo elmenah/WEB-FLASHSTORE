@@ -26,8 +26,8 @@ body { margin: 0; }
 .flash-skip:focus { top: 10px; }
 .flash-header-error { padding: 10px; background: #502020; }
 .flash-hero { position: relative; overflow: hidden; padding-top: 76px; min-height: 600px; display: flex; align-items: center; isolation: isolate; }
-.flash-hero-art { position: absolute; z-index: -2; right: 0; top: 76px; height: calc(100% - 76px); width: 76%; object-fit: cover; object-position: center; }
-.flash-hero::after { content: ''; position: absolute; inset: 76px 0 0; z-index: -1; background: linear-gradient(90deg, #080a0f 0%, #080a0fed 24%, #080a0f82 47%, transparent 68%), linear-gradient(0deg, #080a0f, transparent 18%); }
+.flash-hero-art { position: absolute; z-index: -2; inset: 76px 0 0; height: calc(100% - 76px); width: 100%; object-fit: cover; object-position: center 35%; }
+.flash-hero::after { content: ''; position: absolute; inset: 76px 0 0; z-index: -1; background: linear-gradient(90deg, #080a0fb3 0%, #080a0f80 30%, #080a0f26 58%, transparent 80%), linear-gradient(0deg, #080a0f, transparent 18%); }
 .flash-hero-content { padding-block: 64px 44px; }
 .flash-eyebrow { font-size: 10px; letter-spacing: 3px; color: var(--flash-muted); margin: 0 0 20px; font-weight: 600; }
 .flash-hero h1 { font-size: clamp(42px, 5.1vw, 76px); font-weight: 700; line-height: 1.07; letter-spacing: -3px; margin: 0; }
@@ -103,14 +103,13 @@ body { margin: 0; }
 .flash-footer-links { display: flex; flex-wrap: wrap; gap: 24px; font-size: 12px; color: #bcc5d2; }
 .flash-footer a:hover { color: var(--flash-yellow); }
 :is(.flash-home,.flash-header,.flash-footer,.flash-shop) :is(a,button,summary,input,select):focus-visible { outline: 2px solid var(--flash-yellow); outline-offset: 4px; }
-@media (min-width: 1600px) { .flash-hero-art { object-fit: contain; object-position: right; } }
 @media (max-width: 1050px) {
  .flash-container { width: calc(100% - 48px); }
  .flash-desktop-nav { gap: 22px; } .flash-nav-actions { gap: 12px; }
  .flash-featured-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
  .flash-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
  .flash-trust > div { gap: 24px; } .flash-trust small { display: none; }
- .flash-hero h1 { font-size: 56px; } .flash-hero-art { width: 95%; opacity: .85; }
+ .flash-hero h1 { font-size: 56px; }
 }
 @media (max-width: 760px) {
  .flash-container { width: calc(100% - 32px); }
