@@ -1,3 +1,4 @@
+import { productPath } from '../api/products';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Zap, ShieldCheck, Headphones, UserPlus, ShoppingBag, Gift, Gamepad2, MonitorPlay, KeyRound } from 'lucide-react';
@@ -25,7 +26,7 @@ export default function Home() {
   }, []);
   return <div className="flash-home">
     <section className="flash-hero">
-      <img className="flash-hero-art" src="/Imagenes/flash-hero.png" alt="" fetchPriority="high" />
+      <img className="flash-hero-art" src="/Imagenes/flash-hero.webp" alt="" fetchPriority="high" />
       <div className="flash-container flash-hero-content">
         <p className="flash-eyebrow">FORTNITE · SKINS Y PASES</p>
         <h1>Bienvenido a<br /><em>Tio Flashstore</em></h1>
@@ -41,7 +42,7 @@ export default function Home() {
         {loading ? Array.from({length: 4}, (_, i) => <div key={i} className="flash-skeleton" aria-label="Cargando productos" />) : products.length ? products.map(p => {
           const item = p.brItems?.[0];
           const name = p.bundle?.name || item?.name;
-          return <Link to="/shop" className="flash-featured-card" key={p.offerId}><div className="flash-featured-image"><img loading="lazy" src={p.bundle?.image || item?.images?.featured || item?.images?.icon} alt={name} /><span>Lote</span></div><div className="flash-featured-info"><div><h3>{name}</h3><p>{formatPriceCLP(p.finalPrice)}</p></div><span className="flash-card-arrow"><ArrowRight size={20} /></span></div></Link>;
+          return <Link to={productPath(p)} className="flash-featured-card" key={p.offerId}><div className="flash-featured-image"><img loading="lazy" src={p.bundle?.image || item?.images?.featured || item?.images?.icon} alt={name} /><span>Lote</span></div><div className="flash-featured-info"><div><h3>{name}</h3><p>{formatPriceCLP(p.finalPrice)}</p></div><span className="flash-card-arrow"><ArrowRight size={20} /></span></div></Link>;
         }) : collections.map(item => <Link to={item.to} className="flash-featured-card" key={item.name}><div className="flash-featured-image flash-collection-image"><img src={item.image} alt="" loading="lazy" /></div><div className="flash-featured-info"><div><h3>{item.name}</h3><p>{item.label}</p></div><span className="flash-card-arrow"><ArrowRight size={20} /></span></div></Link>)}
       </div>
     </section>

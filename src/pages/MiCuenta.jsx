@@ -9,14 +9,16 @@ const MiCuenta = () => {
   const [totalSpent, setTotalSpent] = useState(0); // Total gastado
   const [loading, setLoading] = useState(true);
 
+  const [error, setError] = useState('');
+  const [refresh, setRefresh] = useState(0);
   useEffect(() => {
     const fetchUserData = async () => {
+      setLoading(true); setError('');
       try {
         // Obtener la sesión actual
         const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
         if (sessionError) {
-          console.error('Error al obtener sesión:', sessionError.message);
-          return;
+          throw sessionError;
         }
 
         if (sessionData.session) {
@@ -31,40 +33,40 @@ const MiCuenta = () => {
               id,
               created_at,
               estado,
+              entregado,
               pedido_items (
                 nombre_producto,
                 cantidad,
                 precio_unitario,
+                entregado,
                 subtotal
               )
             `)
-            .eq('correo', userEmail)
-            .eq('estado', 'Pagado'); // Filtrar solo los pedidos con estado "Pagado"
+            .eq('user_id', sessionData.session.user.id).order('created_at', { ascending: false });
 
           if (pedidosError) {
-            console.error('Error al obtener pedidos:', pedidosError.message);
-            return;
+            throw pedidosError;
           }
 
           setOrders(pedidosData);
 
           // Calcular el total gastado
-          const total = pedidosData.reduce((acc, pedido) => {
-            const subtotal = pedido.pedido_items.reduce((subAcc, item) => subAcc + item.subtotal, 0);
+          const total = pedidosData.filter(p => p.estado === 'Pagado').reduce((acc, pedido) => {
+            const subtotal = pedido.pedido_items.reduce((subAcc, item) => subAcc + Number(item.subtotal || 0), 0);
             return acc + subtotal;
           }, 0);
 
           setTotalSpent(total);
         }
       } catch (error) {
-        console.error('Error al obtener datos del usuario:', error.message);
+        setError('No pudimos cargar tus pedidos. Vuelve a intentarlo.');
       } finally {
         setLoading(false);
       }
     };
 
     fetchUserData();
-  }, []);
+  }, [refresh]);
 
   if (loading) {
     return <p className="text-center text-gray-500">Cargando...</p>;
@@ -97,8 +99,10 @@ const MiCuenta = () => {
           </div>
         </div>
 
+        <div className="flex justify-center mb-4"><button className="flash-button flash-button-secondary" onClick={() => setRefresh(n => n+1)}>Actualizar pedidos</button></div>
+        {error && <p role="alert" className="text-red-300 text-center mb-4">{error}</p>}
         <h2 className="text-2xl font-semibold mb-4 text-white text-center">Historial de Pedidos</h2>
-        {orders.length > 0 ? (
+        {error ? null : orders.length > 0 ? (
           <div className="flex flex-col gap-6">
             {orders.map((pedido) => (
               <div key={pedido.id} className="bg-gray-800 rounded-2xl shadow-lg border border-gray-700 p-6">
@@ -106,7 +110,7 @@ const MiCuenta = () => {
                   <div className="flex flex-col md:flex-row md:items-center gap-2">
                     <span className="text-sm text-gray-400">Pedido:</span>
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold text-white">#{pedido.id.slice(0, 8)}</span>
+                      <span className="font-semibold text-white">#{String(pedido.id).slice(0, 8)}</span>
                       <button
                         onClick={() => navigator.clipboard?.writeText(pedido.id)}
                         title="Copiar ID"
@@ -127,6 +131,7 @@ const MiCuenta = () => {
                   </div>
                 </div>
 
+                <p className="flash-order-progress" role="status">{pedido.estado === 'Pagado' ? ((pedido.entregado || (pedido.pedido_items.length && pedido.pedido_items.every(item => item.entregado))) ? 'Entregado · Todos los productos tienen entrega confirmada.' : pedido.pedido_items.some(item => item.entregado) ? 'Entrega parcial · Quedan productos por entregar.' : 'Pago confirmado · Pendiente de entrega.') : pedido.estado === 'Rechazado' ? 'Pago rechazado · No se confirmó el cobro.' : pedido.estado === 'Anulado' ? 'Pedido anulado.' : 'Pendiente de pago · La entrega comienza tras la confirmación.'}</p>
                 {/* Desktop / Tablet: table view */}
                 <div className="overflow-x-auto hidden md:block">
                   <table className="w-full text-left border-collapse text-sm">
@@ -145,7 +150,7 @@ const MiCuenta = () => {
                           <td className="border-b border-gray-700 py-2 text-white w-16">
                             <div className="w-10 h-10 bg-gray-700 rounded flex items-center justify-center text-sm text-white">{getInitials(item.nombre_producto)}</div>
                           </td>
-                          <td className="border-b border-gray-700 py-2 text-white">{item.nombre_producto}</td>
+                          <td className="border-b border-gray-700 py-2 text-white">{item.nombre_producto}<small className="block text-gray-400">{item.entregado ? 'Entregado' : 'Sin entrega confirmada'}</small></td>
                           <td className="border-b border-gray-700 py-2 text-white">{item.cantidad}</td>
                           <td className="border-b border-gray-700 py-2 text-white">{formatCLP(Number(item.precio_unitario) || 0)}</td>
                           <td className="border-b border-gray-700 py-2 text-white">{formatCLP(Number(item.subtotal) || 0)}</td>
@@ -162,7 +167,7 @@ const MiCuenta = () => {
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 bg-gray-700 rounded flex items-center justify-center text-sm text-white">{getInitials(item.nombre_producto)}</div>
                         <div className="flex-1">
-                          <div className="font-semibold text-white">{item.nombre_producto}</div>
+                          <div className="font-semibold text-white">{item.nombre_producto}</div><small className="text-gray-400">{item.entregado ? 'Entregado' : 'Sin entrega confirmada'}</small>
                           <div className="text-sm text-gray-400">{item.cantidad} × {formatCLP(Number(item.precio_unitario) || 0)}</div>
                         </div>
                         <div className="font-bold text-white">{formatCLP(Number(item.subtotal) || 0)}</div>

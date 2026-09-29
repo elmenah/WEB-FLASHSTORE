@@ -1,9 +1,15 @@
 // /src/api/fortnite.js
-export async function fetchFortniteShop(signal) {
-  const res = await fetch("https://fortnite-api.com/v2/shop?language=es", { signal });
+let cachedShop = null;
+export async function fetchFortniteShop(signal, { fresh = false } = {}) {
+  const day = new Date().toISOString().slice(0, 10);
+  if (!fresh && cachedShop?.day === day && Date.now() - cachedShop.time < 60000) return cachedShop.entries;
+  const timeout = AbortSignal.timeout(12000);
+  const res = await fetch("https://fortnite-api.com/v2/shop?language=es", { signal: signal ? AbortSignal.any([signal, timeout]) : timeout });
   if (!res.ok) throw new Error("Error al obtener la tienda");
   const data = await res.json();
-  return data?.data?.entries || [];
+  if (!Array.isArray(data?.data?.entries)) throw new Error('La tienda no respondió correctamente.');
+  cachedShop = { entries: data.data.entries, time: Date.now(), day };
+  return data.data.entries;
 }
 
 export function filterFortnitemares(entries) {

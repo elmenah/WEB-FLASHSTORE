@@ -1,5 +1,6 @@
+import { safeReturnTo, authUrl } from '../utils/authRedirect';
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "../supabaseCliente";
 
 const Login = () => {
@@ -8,6 +9,9 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
+  const returnTo = safeReturnTo(new URLSearchParams(location.search).get('returnTo'));
+  const loginUrl = authUrl('/login', returnTo);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -18,7 +22,7 @@ const Login = () => {
           return;
         }
         if (data?.session) {
-          navigate("/"); // Redirige al inicio si hay una sesión activa
+          navigate(returnTo, { replace: true }); // Redirige al inicio si hay una sesión activa
         }
       } catch (err) {
         console.error("Error inesperado al verificar la sesión:", err.message);
@@ -26,7 +30,7 @@ const Login = () => {
     };
 
     checkSession();
-  }, [navigate]);
+  }, [navigate, returnTo]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -42,7 +46,7 @@ const Login = () => {
       if (error) {
         setError("Credenciales incorrectas. Intenta nuevamente.");
       } else if (data.session) {
-        navigate("/"); // Redirige al inicio después del login exitoso
+        navigate(returnTo, { replace: true }); // Redirige al inicio después del login exitoso
       }
     } catch (err) {
       setError("Ocurrió un error al iniciar sesión.");
@@ -59,7 +63,7 @@ const Login = () => {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: "https://tioflashstore.netlify.app/login",
+          redirectTo: window.location.origin + loginUrl,
         },
       });
 
@@ -156,7 +160,7 @@ const Login = () => {
               </button>
               <p className="text-sm text-gray-400 text-center">
                 ¿No tienes una cuenta?{" "}
-                <Link to="/register" className="text-blue-500 underline">
+                <Link to={authUrl('/register', returnTo)} className="text-blue-500 underline">
                   Regístrate
                 </Link>
               </p>

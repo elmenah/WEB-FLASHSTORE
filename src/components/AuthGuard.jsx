@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
+import { authUrl } from '../utils/authRedirect';
 import { supabase } from '../supabaseCliente';
 
 const AuthGuard = ({ children }) => {
+  const location = useLocation();
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -26,7 +28,7 @@ const AuthGuard = ({ children }) => {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />; // Redirigir al login si no está autenticado
+    return <Navigate to={authUrl('/login', location.pathname + location.search + location.hash)} replace />;
   }
 
   return children; // Renderizar el contenido protegido si está autenticado

@@ -14,7 +14,10 @@ export const useCart = () => {
 };
 
 export const CartProvider = ({ children }) => {
-  const [cart, setCart] = useState([]);
+  const [cart, setCart] = useState(() => {
+    try { const saved = JSON.parse(localStorage.getItem('carrito') || '[]'); return Array.isArray(saved) ? saved : []; }
+    catch { return []; }
+  });
   const [isCartOpen, setIsCartOpen] = useState(false);
   const location = useLocation();
 
@@ -22,17 +25,9 @@ export const CartProvider = ({ children }) => {
     setIsCartOpen(false);
   }, [location.key]);
 
-  // Load cart from localStorage on mount
-  useEffect(() => {
-    const savedCart = localStorage.getItem('carrito');
-    if (savedCart) {
-      setCart(JSON.parse(savedCart));
-    }
-  }, []);
-
   // Save cart to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem('carrito', JSON.stringify(cart));
+    try { localStorage.setItem('carrito', JSON.stringify(cart)); } catch { /* Storage may be unavailable. */ }
   }, [cart]);
 
   const addToCart = (product) => {
@@ -47,7 +42,7 @@ export const CartProvider = ({ children }) => {
     if (!pavos) {
       // Calcular pavos basado en el precio: precio / 4.4
       const precio = product.precio || product.finalPrice || 0;
-      pavos = Math.round(precio / 4.4);
+      pavos = convertCLPToVBuck(precio);
     }
 
     setCart(prevCart => [
@@ -77,12 +72,12 @@ export const CartProvider = ({ children }) => {
     return cart.reduce((total, item) => {
       // Si el item tiene pavos definidos, usarlos
       if (item.pavos) {
-        return total + item.pavos;
+        return total + item.pavos * (item.cantidad || 1);
       }
       // Si no, calcular basado en el precio
       const precio = item.precio || item.finalPrice || 0;
-      const pavosCalculados = Math.round(precio / 4.4);
-      return total + pavosCalculados;
+      const pavosCalculados = convertCLPToVBuck(precio);
+      return total + pavosCalculados * (item.cantidad || 1);
     }, 0);
   };
 
@@ -91,6 +86,7 @@ export const CartProvider = ({ children }) => {
 
   const value = {
     cart,
+    updateCart: setCart,
     addToCart,
     removeFromCart,
     clearCart,

@@ -1,27 +1,28 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
+import RouteErrorBoundary from "./components/RouteErrorBoundary";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import Home from "./pages/Home";
-import Shop from "./pages/Shop";
-import Shop2 from "./pages/Shop2";
-import Club from "./pages/Club";
-import Recargas from "./pages/Recargas";
-import Streaming from "./pages/Streaming";
-import Activaciones from "./pages/Activaciones";
-import JuegosPC from "./pages/JuegosPC";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import MiCuenta from "./pages/MiCuenta";
-import Checkout from "./pages/Checkout";
-import PagoExitoso from "./pages/PagoExitoso";
-import Dashboard from "./pages/Dashboard"; // ✅ Importar Dashboard
+
+const Shop2 = lazy(() => import('./pages/Shop2'));
+const Club = lazy(() => import('./pages/Club'));
+const Recargas = lazy(() => import('./pages/Recargas'));
+const Streaming = lazy(() => import('./pages/Streaming'));
+const Activaciones = lazy(() => import('./pages/Activaciones'));
+const JuegosPC = lazy(() => import('./pages/JuegosPC'));
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const MiCuenta = lazy(() => import('./pages/MiCuenta'));
+const Checkout = lazy(() => import('./pages/Checkout'));
+const PagoExitoso = lazy(() => import('./pages/PagoExitoso'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
 import AuthGuard from "./components/AuthGuard";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import CartPopup from "./components/CartPopup";
-import TermsAndConditions from "./pages/TermsAndConditions";
-import ProductDetail from "./pages/ProductDetail";
-import PagoFallido from "./pages/PagoFallido";
-import MetodosPago from "./pages/MetodosPago";
+const TermsAndConditions = lazy(() => import('./pages/TermsAndConditions'));
+const ProductDetail = lazy(() => import('./pages/ProductDetail'));
+const PagoFallido = lazy(() => import('./pages/PagoFallido'));
+const MetodosPago = lazy(() => import('./pages/MetodosPago'));
 import { CartProvider } from './context/CartContext';
 
 const App = () => {
@@ -36,7 +37,7 @@ const App = () => {
         {/* Mostrar el header solo si no estamos en login o register */}
         {!hideHeaderFooter.includes(location.pathname) && <Header />}
         <main id="main-content" className={hideHeaderFooter.includes(location.pathname) ? "flex-grow" : "flex-grow flash-page-content"}>
-          <Routes>
+          <RouteErrorBoundary key={location.pathname}><Suspense fallback={<div className="flash-empty" role="status" aria-busy="true">Cargando página…</div>}><Routes>
             {/* Rutas públicas */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
@@ -79,7 +80,8 @@ const App = () => {
                 </AuthGuard>
               }
             />
-          </Routes>
+            <Route path="*" element={<div className="flash-empty"><h1>Página no encontrada</h1><a className="flash-button" href="/shop">Ir a la tienda</a></div>} />
+          </Routes></Suspense></RouteErrorBoundary>
         </main>
 
         {/* 👇 Carrito montado aquí */}

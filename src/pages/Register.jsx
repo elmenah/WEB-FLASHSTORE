@@ -1,5 +1,6 @@
+import { safeReturnTo, authUrl } from '../utils/authRedirect';
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "../supabaseCliente";
 
 const Register = () => {
@@ -10,6 +11,9 @@ const Register = () => {
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
+  const returnTo = safeReturnTo(new URLSearchParams(location.search).get('returnTo'));
+  const loginUrl = authUrl('/login', returnTo);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,6 +31,7 @@ const Register = () => {
       const { error } = await supabase.auth.signUp({
         email,
         password,
+        options: { emailRedirectTo: window.location.origin + loginUrl },
       });
 
       if (error) {
@@ -34,7 +39,7 @@ const Register = () => {
       } else {
         setSuccessMessage("Registro exitoso. Redirigiendo al login...");
         setTimeout(() => {
-          navigate("/login");
+          navigate(loginUrl);
         }, 2000);
       }
     } catch (err) {
@@ -52,7 +57,7 @@ const Register = () => {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: "https://tioflashstore.netlify.app/",
+          redirectTo: window.location.origin + loginUrl,
         },
       });
 
@@ -123,7 +128,7 @@ const Register = () => {
                 />
                 <label htmlFor="acceptTerms" className="ml-2 text-sm text-gray-300">
                   Acepto los{" "}
-                  <Link to="/terms" className="text-blue-500 underline">
+                  <Link to="/terminos" className="text-blue-500 underline">
                     términos y condiciones
                   </Link>.
                 </label>
@@ -150,7 +155,7 @@ const Register = () => {
               </button>
               <p className="text-sm text-gray-400 text-center">
                 ¿Ya tienes una cuenta?{" "}
-                <Link to="/login" className="text-blue-500 underline">
+                <Link to={loginUrl} className="text-blue-500 underline">
                   Inicia sesión
                 </Link>
               </p>
