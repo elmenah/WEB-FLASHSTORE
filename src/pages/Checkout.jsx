@@ -572,9 +572,9 @@ const Checkout = () => {
     const totalWithFee = (baseUSD + 0.30) / (1 - 0.054);
     const feeUSD = totalWithFee - baseUSD;
     return (
-      <div className="min-h-screen pt-24 bg-gradient-to-br bg-gray-900 flex flex-col items-center justify-center">
+      <div className="flash-checkout-payment min-h-screen flex flex-col items-center justify-center">
         <div className="w-full max-w-2xl mx-auto bg-white/10 backdrop-blur-lg border border-white/20 rounded-3xl shadow-2xl p-8">
-          <div className="text-center mb-6">
+          <div className="flash-payment-heading text-center mb-6">
             <h2 className="text-2xl font-bold text-white mb-2">
               Pagar con PayPal
             </h2>
@@ -626,9 +626,9 @@ const Checkout = () => {
       cart.length === 1 ? cart[0].nombre : `Pedido #${currentOrderId}`;
 
     return (
-      <div className="min-h-screen pt-24 bg-gradient-to-br bg-gray-900 flex flex-col items-center justify-center">
+      <div className="flash-checkout-payment min-h-screen flex flex-col items-center justify-center">
         <div className="w-full max-w-2xl mx-auto bg-white/90 rounded-3xl shadow-2xl p-8">
-          <div className="text-center mb-6">
+          <div className="flash-payment-heading text-center mb-6">
             <h2 className="text-2xl font-bold text-gray-800 mb-2">
               Finalizar Pago
             </h2>
@@ -663,9 +663,9 @@ const Checkout = () => {
   }
 
   return (
-    <div className="min-h-screen pt-24 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex flex-col items-center justify-center animate-fade-in">
+    <div className="flash-checkout min-h-screen flex flex-col items-center">
       {/* Header con gradiente y progreso */}
-      <div className="w-full max-w-7xl mx-auto mb-6 px-4">
+      <div className="flash-checkout-heading w-full max-w-7xl mx-auto mb-6 px-4">
         <div className="text-center">
           <div className="inline-block mb-3">
             <span className="bg-blue-600/20 text-blue-400 px-4 py-2 rounded-full text-sm font-semibold tracking-wider uppercase border border-blue-600/30">
@@ -681,8 +681,8 @@ const Checkout = () => {
 
       <div className="w-full max-w-7xl mx-auto flex flex-col lg:flex-row gap-6 p-4">
         {/* Formulario */}
-        <div className="w-full lg:w-2/3 flex flex-col gap-6 order-1 lg:order-1 bg-gray-800/50 backdrop-blur-lg rounded-2xl shadow-2xl p-6 md:p-8 border border-gray-700/50">
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="flash-checkout-form w-full lg:w-2/3 flex flex-col gap-6 order-1 lg:order-1 bg-gray-800/50 backdrop-blur-lg rounded-2xl shadow-2xl p-6 md:p-8 border border-gray-700/50">
+          <form onSubmit={handleSubmit} className="space-y-6 flash-checkout-fields"><div className="flash-checkout-section-title"><span>01</span><div><h2>Datos de tu pedido</h2><p>Completa la información para recibir tus productos.</p></div></div>
             {/* Grid de 2 columnas para campos principales en pantallas grandes */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
             <div>
@@ -1442,7 +1442,7 @@ const Checkout = () => {
               
 
               {/* Resumen del pedido SOLO en móvil */}
-              <div className="block md:hidden mt-6">
+              <div className="flash-checkout-mobile-summary block lg:hidden mt-6">
                 <div className="w-full bg-white/80 rounded-2xl shadow-lg p-6 flex flex-col gap-4 border border-gray-200 h-fit self-start">
                   <h2 className="text-xl font-bold mb-2 text-gray-800">
                     Resumen del pedido
@@ -1596,7 +1596,7 @@ const Checkout = () => {
                          !nombre.includes('streaming');
                 }) && !fortniteUsername.trim())
               }
-              className="group mt-6 w-full py-4 rounded-xl bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 hover:from-blue-700 hover:via-cyan-600 hover:to-blue-700 text-white font-bold text-lg shadow-xl hover:shadow-2xl hover:shadow-cyan-500/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-xl flex items-center justify-center gap-3 relative overflow-hidden"
+              className="flash-checkout-submit group mt-6 w-full py-4 rounded-xl bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 hover:from-blue-700 hover:via-cyan-600 hover:to-blue-700 text-white font-bold text-lg shadow-xl hover:shadow-2xl hover:shadow-cyan-500/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-xl flex items-center justify-center gap-3 relative overflow-hidden"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
               <svg className="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1642,7 +1642,7 @@ const Checkout = () => {
         </div>
 
         {/* Resumen del pedido SOLO en escritorio */}
-        <div className="hidden lg:block w-full lg:w-1/3 bg-gray-800/50 backdrop-blur-lg rounded-2xl shadow-2xl p-6 flex flex-col gap-4 border border-gray-700/50 h-fit self-start order-2 lg:order-2 sticky top-28">
+        <div className="flash-checkout-summary hidden lg:block w-full lg:w-1/3 bg-gray-800/50 backdrop-blur-lg rounded-2xl shadow-2xl p-6 flex flex-col gap-4 border border-gray-700/50 h-fit self-start order-2 lg:order-2 sticky top-28">
           <div className="flex items-center gap-2 mb-4">
             <svg className="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
@@ -1733,3 +1733,4 @@ const Checkout = () => {
 };
 
 export default Checkout;
+

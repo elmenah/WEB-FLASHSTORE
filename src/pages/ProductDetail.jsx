@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowLeft, ArrowRight, ShoppingCart, ShieldCheck, Gift, Clock } from "lucide-react";
 import { useCart } from "../context/CartContext";
@@ -8,16 +8,22 @@ import { convertVBuckToCLP, formatPriceCLP } from "../config/prices";
 export default function ProductDetail() {
   useScrollToTop();
   const { state } = useLocation();
-  const { addToCart, openCart } = useCart();
+  const { addToCart } = useCart();
+  const [notification, setNotification] = useState(false);
+  const notificationTimer = useRef(null);
+  useEffect(() => () => clearTimeout(notificationTimer.current), []);
   const product = state?.product;
   if (!product) return <div className="flash-detail flash-empty"><h1>Producto no disponible</h1><p>Abre un producto desde la tienda para consultar sus detalles.</p><Link to="/shop" className="flash-button">Volver a la tienda <ArrowRight size={18} /></Link></div>;
   const isBundle = product.tipo === "Lote";
   const add = () => {
     addToCart({ nombre: product.nombre, precio: convertVBuckToCLP(product.precio), imagen: product.imagen, offer_id: product.offer_id || null, pavos: product.pavos || product.precio || 0 });
-    openCart();
+    clearTimeout(notificationTimer.current);
+    setNotification(true);
+    notificationTimer.current = setTimeout(() => setNotification(false), 3000);
   };
   const date = value => value && !Number.isNaN(Date.parse(value)) ? new Date(value).toLocaleString("es-CL", {dateStyle:"medium", timeStyle:"short"}) : null;
   return <div className="flash-detail"><div className="flash-container">
+    {notification && <div className="flash-toast" role="status">Producto añadido al carrito</div>}
     <nav className="flash-breadcrumb" aria-label="Ruta de navegación"><Link to="/shop"><ArrowLeft size={16} /> Tienda</Link><span>/</span><span>{product.nombre}</span></nav>
     <div className="flash-detail-layout">
       <div className="flash-detail-art" style={{"--product-accent": /^#[a-f0-9]{6}$/i.test(product.color1) ? product.color1 : "#383c36"}}><span className="flash-detail-badge">{isBundle ? "LOTE DE FORTNITE" : product.tipo}</span><img src={product.imagen} alt={product.nombre} /><span className="flash-detail-art-caption">FORTNITE · ELIGE TU ESTILO</span></div>

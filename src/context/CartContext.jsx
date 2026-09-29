@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 import { convertVBuckToCLP, convertCLPToVBuck } from "../config/prices";
 
@@ -15,6 +16,11 @@ export const useCart = () => {
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    setIsCartOpen(false);
+  }, [location.key]);
 
   // Load cart from localStorage on mount
   useEffect(() => {
