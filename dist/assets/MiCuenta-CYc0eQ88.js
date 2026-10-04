@@ -1,4 +1,4 @@
-import{r,j as e,l,L as k,s as g}from"./index-BVpiAaRc.js";const L=()=>{const[b,p]=r.useState(null),[d,u]=r.useState([]),[f,j]=r.useState(0),[y,i]=r.useState(!0),[o,c]=r.useState(""),[N,w]=r.useState(0);if(r.useEffect(()=>{(async()=>{i(!0),c("");try{const{data:s,error:a}=await g.auth.getSession();if(a)throw a;if(s.session){const v=s.session.user.email;p({email:v});const{data:m,error:h}=await g.from("pedidos").select(`
+import{r,j as e,l,L as k,s as g}from"./index-TZ9mvHzJ.js";const L=()=>{const[b,p]=r.useState(null),[d,u]=r.useState([]),[f,j]=r.useState(0),[y,i]=r.useState(!0),[o,c]=r.useState(""),[N,w]=r.useState(0);if(r.useEffect(()=>{(async()=>{i(!0),c("");try{const{data:s,error:a}=await g.auth.getSession();if(a)throw a;if(s.session){const v=s.session.user.email;p({email:v});const{data:m,error:h}=await g.from("pedidos").select(`
               id,
               created_at,
               estado,

@@ -87,9 +87,9 @@ body { margin: 0; }
 .flash-shop h1 { background: none; color: var(--flash-yellow); }
 .flash-product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
 .flash-product-card { position: relative; }
-.flash-product-open { display: block; width: 100%; text-align: left; cursor: pointer; color: inherit; border: 0; background: none; }
-.flash-product-image { height: 250px; position: relative; background: radial-gradient(ellipse at center, var(--product-accent), #111721 85%); }
-.flash-product-image img { width: 100%; height: 100%; object-fit: contain; padding: 8px; }
+.flash-product-open { display: block; width: 100%; padding: 0; text-align: left; cursor: pointer; color: inherit; border: 0; background: none; }
+.flash-product-image { height: 250px; position: relative; overflow: hidden; background: radial-gradient(ellipse at center, var(--product-accent), #111721 85%); }
+.flash-product-image img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; max-width: none; max-height: none; object-fit: contain; object-position: center; padding: 0; }
 .flash-product-copy { padding: 18px 64px 18px 18px; }
 .flash-product-copy h3 { font-size: 14px; font-weight: 600; min-height: 42px; }
 .flash-product-copy p { margin-block: 8px 4px; font-weight: 700; font-size: 15px; }
@@ -192,8 +192,9 @@ body { margin: 0; }
 .flash-shop-group-title h2 { font-size: 22px; font-weight: 600; } .flash-shop-group-title span { color: var(--flash-muted); font-size: 11px; white-space: nowrap; }
 .flash-shop .flash-product-grid { grid-template-columns: repeat(4,minmax(0,1fr)); gap: 16px; }
 .flash-product-bundle { grid-column: span 2; }
-.flash-shop .flash-product-image { height: 245px; }
-.flash-product-bundle .flash-product-image img { padding: 14px; }
+.flash-shop .flash-product-image { height: 280px; }
+.flash-product-bundle .flash-product-image img { padding: 0; }
+.flash-bundle-artwork { position: absolute; inset: 8% 6%; width: 88%; height: 84%; overflow: hidden; }
 .flash-empty { text-align: center; padding: 70px 24px; } .flash-empty h1,.flash-empty h2 { font-size: 26px; font-weight: 600; } .flash-empty p { color: var(--flash-muted); margin: 16px 0 24px; }
 .flash-toast { position: fixed; right: 20px; top: calc(var(--flash-header-height) + 14px); z-index: 45; padding: 14px 22px; border: 1px solid var(--flash-yellow); border-radius: 9px; background: #141923; color: white; }
 .flash-breadcrumb { display: flex; align-items: center; gap: 14px; padding-block: 28px; font-size: 12px; color: var(--flash-muted); }
@@ -242,7 +243,7 @@ body { margin: 0; }
  .flash-shop-note { max-width: none; } .flash-shop-heading h1 { font-size: 38px; }
  .flash-shop-toolbar { flex-wrap: wrap; gap: 12px; } .flash-search { flex-basis: 100%; max-width: none; } .flash-category-select { flex: 1; max-width: none; }
  .flash-shop .flash-product-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
- .flash-shop .flash-product-image { height: 195px; }
+ .flash-shop .flash-product-image { height: 220px; }
  .flash-shop-group-title h2 { font-size: 18px; }
  .flash-detail-layout { grid-template-columns: 1fr; }
  .flash-detail-art { min-height: 310px; } .flash-detail-art > img { height: 310px; }
