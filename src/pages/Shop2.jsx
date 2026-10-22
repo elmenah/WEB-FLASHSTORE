@@ -8,6 +8,9 @@ import "../css/Shop.css";
 import useScrollToTop from "../hooks/useScrollToTop";
 import { VBUCK_TO_CLP_RATE } from "../config/prices";
 
+// 🔧 Interruptor temporal de la tienda: pon en false para reactivarla.
+const TIENDA_DESHABILITADA = true;
+
 const Shop2 = () => {
   useScrollToTop();
   const [products, setProducts] = useState([]);
@@ -82,6 +85,18 @@ const Shop2 = () => {
     items: matching.filter(p => (p.layout?.name || "Otros") === name).sort((a, b) => Number(!!b.bundle?.name) - Number(!!a.bundle?.name))
   })).filter(group => group.items.length);
   if (sort) groups = [{ name: 'Resultados', items: [...matching].sort((a,b) => sort === 'asc' ? a.finalPrice-b.finalPrice : sort === 'desc' ? b.finalPrice-a.finalPrice : productName(a).localeCompare(productName(b), 'es')) }].filter(g => g.items.length);
+  // Tienda deshabilitada temporalmente: se muestra un aviso de mantenimiento.
+  if (TIENDA_DESHABILITADA) {
+    return <div className="flash-shop">
+      <div className="flash-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', gap: '18px', minHeight: '65vh', padding: '80px 24px' }}>
+        <div style={{ fontSize: '64px' }}>🛠️</div>
+        <h1 style={{ fontSize: '34px', margin: 0 }}>Tienda temporalmente no disponible</h1>
+        <p style={{ color: '#9aa6bd', maxWidth: '520px', lineHeight: 1.6 }}>Estamos haciendo ajustes para mejorar tu experiencia. Muy pronto estará disponible de nuevo. ¡Gracias por tu paciencia!</p>
+        <button onClick={() => navigate('/')} style={{ marginTop: '8px', padding: '14px 32px', borderRadius: '999px', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: '16px', color: '#fff', backgroundImage: 'linear-gradient(135deg, #22d3ee 0%, #3b82f6 60%, #a855f7 100%)' }}>Volver al inicio</button>
+      </div>
+    </div>;
+  }
+
   return <div className="flash-shop">
     {notification && <div className="flash-toast" role="status">Producto agregado al carrito</div>}
     <div className="flash-container">
