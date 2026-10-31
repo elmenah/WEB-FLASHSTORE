@@ -9,7 +9,7 @@ import useScrollToTop from "../hooks/useScrollToTop";
 import { VBUCK_TO_CLP_RATE } from "../config/prices";
 
 // 🔧 Interruptor temporal de la tienda: pon en false para reactivarla.
-const TIENDA_DESHABILITADA = false;
+const TIENDA_DESHABILITADA = true;
 
 const Shop2 = () => {
   useScrollToTop();
