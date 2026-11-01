@@ -751,6 +751,30 @@ async function verifyAdmin(req, res) {
     return true;
 }
 
+// Marcar/desmarcar un item de pedido como entregado (service key: evita RLS).
+app.post('/api/pedidos/marcar-entregado', async (req, res) => {
+    if (!await verifyAdmin(req, res)) return;
+    try {
+        const { item_id, delivered_at, entregado } = req.body || {};
+        if (!item_id) return res.status(400).json({ error: 'item_id requerido' });
+        const nuevoEstado = entregado === false ? false : true;
+        const update = { entregado: nuevoEstado };
+        if (nuevoEstado) {
+            update.delivered_at = delivered_at || new Date().toISOString();
+        }
+        const { data, error } = await supabase
+            .from('pedido_items')
+            .update(update)
+            .eq('id', item_id)
+            .select('id');
+        if (error) return res.status(500).json({ error: error.message });
+        if (!data || data.length === 0) return res.status(404).json({ error: 'Item no encontrado' });
+        res.json({ success: true, id: data[0].id });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 app.get('/api/bot/stats', async (req, res) => {
     if (!await verifyAdmin(req, res)) return;
     try {

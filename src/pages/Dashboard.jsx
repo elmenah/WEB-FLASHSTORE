@@ -321,11 +321,12 @@ const Dashboard = () => {
       const deliveredAt = marcarFechaValue
         ? new Date(marcarFechaValue).toISOString()
         : new Date().toISOString();
-      const { error } = await supabase
-        .from('pedido_items')
-        .update({ entregado: true, delivered_at: deliveredAt })
-        .eq('id', marcarFechaItem.id);
-      if (error) { setBotMsg(`Error: ${error.message}`); return; }
+      // Se hace vía backend (service key) para evitar que RLS bloquee el update.
+      const data = await botFetch('/api/pedidos/marcar-entregado', {
+        method: 'POST',
+        body: JSON.stringify({ item_id: marcarFechaItem.id, delivered_at: deliveredAt }),
+      });
+      if (!data?.success) { setBotMsg(`Error: ${data?.error || 'no se pudo marcar como entregado'}`); return; }
       setBotMsg(`✓ Marcado como entregado: ${marcarFechaItem.nombre_producto}`);
       setMarcarFechaItem(null);
       await Promise.all([cargarPendientes(), cargarHistorialGifts()]);
